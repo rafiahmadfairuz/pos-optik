@@ -12,3 +12,6 @@ Route::get('/asuransi', function () {
 Route::get('/customer', function () {
     return view('Informasi.customer');
 });
+Route::get('/kasir', function () {
+    return view('Informasi.kasir');
+});
