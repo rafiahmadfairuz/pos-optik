@@ -1,5 +1,5 @@
 <x-app>
-    @section('Customer', 'Dashboard')
+    @section('title', 'Customer')
     <div class="page-header">
         <div class="page-title">
             <h4>Customer List</h4>
