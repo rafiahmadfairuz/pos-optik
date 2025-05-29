@@ -12,6 +12,9 @@ Route::get('/asuransi', function () {
 Route::get('/customer', function () {
     return view('Informasi.customer');
 });
+Route::get('/customer/detail', function () {
+    return view('Informasi.detailUser');
+});
 Route::get('/kasir', function () {
     return view('Informasi.kasir');
 });
@@ -32,4 +35,19 @@ Route::get('/accesories', function () {
 });
 Route::get('/orderan', function () {
     return view('Informasi.orderan');
+});
+Route::get('/admin', function () {
+    return view('admin');
+});
+Route::get('/report', function () {
+    return view('Dashboard.report');
+});
+Route::get('/orderan/detail', function () {
+    return view('Informasi.detailOrderan');
+});
+Route::get('/login', function () {
+    return view('Auth.login');
+});
+Route::get('/register', function () {
+    return view('Auth.register');
 });

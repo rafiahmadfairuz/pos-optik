@@ -8,12 +8,11 @@ use Illuminate\View\Component;
 
 class App extends Component
 {
-    /**
-     * Create a new component instance.
-     */
-    public function __construct()
+    public $struktur;
+
+    public function __construct($struktur = true)
     {
-        //
+        $this->struktur = $struktur;
     }
 
     /**
