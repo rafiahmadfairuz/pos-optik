@@ -51,18 +51,20 @@
                         <tbody id="transactionTable">
                             <tr data-status="paid">
                                 <td>2191</td>
-                                <td>
-                                    <strong>Brenna Langosh</strong><br>
-                                    <small class="text-muted">1-513-216-6602</small>
+                               <td>
+                                    <strong>Laorine Warren</strong><br>
+                                    <small class="text-muted">(775) 732-0014</small>
                                 </td>
                                 <td>2025-04-23 02:05</td>
                                 <td>3.283.124</td>
-                                <td>
-                                    <span class="badge text-bg-light text-dark">Ongoing</span>
-                                    <span class="badge text-bg-success">Paid</span>
-                                </td>
+                               <td>
+                                            <div class="d-flex gap-1">
+                                                <div class="px-2 rounded-3 bg-warning text-white">Ongoing</div>
+                                                <div class="px-2 rounded-3 bg-success-subtle text-success">Paid</div>
+                                            </div>
+                                        </td>
                                 <td class="text-center">
-                                    <a href="#" class="text-primary me-2"><i class="bi bi-eye"></i></a>
+                                    <a href="{{ route('transaction.detail') }}" class="text-primary me-2"><i class="bi bi-eye"></i></a>
                                 </td>
                             </tr>
                             <tr data-status="unpaid">
@@ -73,10 +75,12 @@
                                 </td>
                                 <td>2025-04-22 12:11</td>
                                 <td>2.101.400</td>
-                                <td>
-                                    <span class="badge text-bg-light text-dark">Complete</span>
-                                    <span class="badge text-bg-danger">Unpaid</span>
-                                </td>
+                               <td>
+                                            <div class="d-flex gap-1">
+                                                <div class="px-2 rounded-3 bg-success text-white me-1">Complete</div>
+                                                <div class="px-2 rounded-3 bg-success-subtle text-success">Paid</div>
+                                            </div>
+                                        </td>
                                 <td class="text-center">
                                     <a href="#" class="text-primary me-2"><i class="bi bi-eye"></i></a>
                                 </td>
@@ -90,9 +94,11 @@
                                 <td>2025-04-20 14:32</td>
                                 <td>1.800.000</td>
                                 <td>
-                                    <span class="badge text-bg-light text-dark">Ongoing</span>
-                                    <span class="badge text-bg-warning text-dark">Partially Paid</span>
-                                </td>
+                                            <div class="d-flex gap-1">
+                                                <div class="px-2 rounded-3 bg-warning text-white me-1">Ongoing</div>
+                                                <div class="px-2 rounded-3 bg-danger-subtle text-danger">Unpaid</div>
+                                            </div>
+                                        </td>
                                 <td class="text-center">
                                     <a href="#" class="text-primary me-2"><i class="bi bi-eye"></i></a>
                                 </td>
@@ -105,10 +111,13 @@
                                 </td>
                                 <td>2025-04-19 08:09</td>
                                 <td>2.500.000</td>
-                                <td>
-                                    <span class="badge text-bg-light text-dark">Complete</span>
-                                    <span class="badge text-bg-success">Paid</span>
-                                </td>
+                                                                      <td>
+                                            <div class="d-flex gap-1">
+
+                                                <div class="px-2 rounded-3 bg-success text-white me-1">Complete</div>
+                                                <div class="px-2 rounded-3 bg-success-subtle text-success">Paid</div>
+                                            </div>
+                                        </td>
                                 <td class="text-center">
                                     <a href="#" class="text-primary me-2"><i class="bi bi-eye"></i></a>
                                 </td>

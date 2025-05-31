@@ -33,7 +33,9 @@
                                 <td class="py-3 px-4">BPJS Level 1</td>
                                 <td class="py-3 px-4">Rp 150.000</td>
                                 <td class="py-3 px-4">
-                                    <a href="#" class="me-3 text-primary"><i class="bi bi-pencil-fill"></i></a>
+                                    <a href="#" class="me-3 text-primary" data-bs-toggle="modal" data-bs-target="#editInsuranceModal">
+    <i class="bi bi-pencil-fill"></i>
+</a>
                                     <a href="#" class="text-danger"><i class="bi bi-trash-fill"></i></a>
                                 </td>
                             </tr>
@@ -41,7 +43,9 @@
                                 <td class="py-3 px-4">BPJS Level 2</td>
                                 <td class="py-3 px-4">Rp 100.000</td>
                                 <td class="py-3 px-4">
-                                    <a href="#" class="me-3 text-primary"><i class="bi bi-pencil-fill"></i></a>
+                                   <a href="#" class="me-3 text-primary" data-bs-toggle="modal" data-bs-target="#editInsuranceModal">
+    <i class="bi bi-pencil-fill"></i>
+</a>
                                     <a href="#" class="text-danger"><i class="bi bi-trash-fill"></i></a>
                                 </td>
                             </tr>
@@ -90,4 +94,34 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Edit -->
+<div class="modal fade" id="editInsuranceModal" tabindex="-1" aria-labelledby="editInsuranceModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-3">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editInsuranceModalLabel">Edit Insurance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInsuranceForm">
+                    <div class="mb-3">
+                        <label for="editInsuranceName" class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editInsuranceName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editInsuranceNominal" class="form-label">Nominal <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editInsuranceNominal" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="editInsuranceForm" class="btn btn-primary px-4">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </x-app>

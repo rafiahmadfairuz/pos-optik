@@ -33,7 +33,7 @@
   <!-- Cards for branches -->
   <div class="row w-100 justify-content-center g-4">
     <!-- Cabang 1 -->
-    <div class="col-12 col-sm-6 col-lg-3">
+    <a href="{{url("")}}" class="col-12 col-sm-6 col-lg-3">
       <div class="card border-0 shadow-lg rounded-4 text-center p-4 branch-card" role="button">
         <div class="mb-3">
           <i class="bi bi-shop-window" style="font-size: 3rem; color: #0d6efd;"></i>
@@ -41,7 +41,7 @@
         <h5 class="fw-semibold">Cabang Jakarta</h5>
         <p class="text-muted">Lihat data dan laporan cabang Jakarta.</p>
       </div>
-    </div>
+    </a>
     <!-- Cabang 2 -->
     <div class="col-12 col-sm-6 col-lg-3">
       <div class="card border-0 shadow-lg rounded-4 text-center p-4 branch-card" role="button">

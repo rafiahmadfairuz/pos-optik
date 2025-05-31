@@ -32,11 +32,11 @@
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-dark">Login</button>
+                        <a href="{{url("admin")}}" type="submit" class="btn btn-dark">Login</a>
                     </div>
 
                     <div class="text-center mt-3">
-                        <small>Belum punya akun? <a href="">Daftar di sini</a></small>
+                        <small>Belum punya akun? <a href="{{url("register")}}">Daftar di sini</a></small>
                     </div>
                 </form>
             </div>

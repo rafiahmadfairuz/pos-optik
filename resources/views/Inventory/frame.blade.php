@@ -40,22 +40,13 @@
                                 <td class="py-3 px-4">Rp 2.500.000</td>
                                 <td class="py-3 px-4">10</td>
                                 <td class="py-3 px-4">
-                                    <a href="#" class="me-3 text-primary"><i class="bi bi-pencil-fill"></i></a>
+                                    <a href="#" class="me-3 text-primary" data-bs-toggle="modal" data-bs-target="#editFrameModal">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
                                     <a href="#" class="text-danger"><i class="bi bi-trash-fill"></i></a>
                                 </td>
                             </tr>
-                            <tr class="align-middle">
-                                <td class="py-3 px-4">Oakley</td>
-                                <td class="py-3 px-4">Sport</td>
-                                <td class="py-3 px-4">Hitam</td>
-                                <td class="py-3 px-4">Rp 3.000.000</td>
-                                <td class="py-3 px-4">5</td>
-                                <td class="py-3 px-4">
-                                    <a href="#" class="me-3 text-primary"><i class="bi bi-pencil-fill"></i></a>
-                                    <a href="#" class="text-danger"><i class="bi bi-trash-fill"></i></a>
-                                </td>
-                            </tr>
-                            <tr class="align-middle">
+                                  <tr class="align-middle">
                                 <td class="py-3 px-4">Vogue</td>
                                 <td class="py-3 px-4">Classic</td>
                                 <td class="py-3 px-4">Coklat</td>
@@ -77,6 +68,7 @@
                                     <a href="#" class="text-danger"><i class="bi bi-trash-fill"></i></a>
                                 </td>
                             </tr>
+                            <!-- Tambahkan data lain sesuai kebutuhan -->
                         </tbody>
                     </table>
                 </div>
@@ -119,6 +111,46 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Tutup</button>
                     <button type="submit" form="frameForm" class="btn btn-primary px-4">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Frame -->
+    <div class="modal fade" id="editFrameModal" tabindex="-1" aria-labelledby="editFrameModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content rounded-3">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editFrameModalLabel">Edit Data Frame</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editFrameForm">
+                        <div class="mb-3">
+                            <label for="editMerk" class="form-label">Merk <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="editMerk" placeholder="Masukkan merk frame" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editType" class="form-label">Type Frame <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="editType" placeholder="Masukkan type frame" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editWarna" class="form-label">Warna <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="editWarna" placeholder="Masukkan warna frame" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editHarga" class="form-label">Harga <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="editHarga" placeholder="Masukkan harga dalam Rupiah" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStok" class="form-label">Stok <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="editStok" placeholder="Masukkan jumlah stok" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" form="editFrameForm" class="btn btn-primary px-4">Update</button>
                 </div>
             </div>
         </div>

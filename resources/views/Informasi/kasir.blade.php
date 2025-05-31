@@ -14,68 +14,86 @@
     </style>
 
     <div class="container-fluid py-3">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Cashier</li>
-            </ol>
-        </nav>
-
-        <h3>Cashier</h3>
-
+         <h2 class="fw-bold "><i class="bi bi-cash-stack me-2"></i>Kasir</h2>
         <div class="row g-3">
-            <!-- Customer Info (30%) dan Choose Customer (70%) -->
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-header fw-bold text-decoration-underline">Customer Information</div>
-                    <div class="card-body">Please select customer first</div>
-                </div>
+           <div class="row g-3 align-items-stretch">
+    <!-- Customer Info (40%) -->
+    <div class="col-lg-5 col-md-12">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-header bg-white fw-semibold border-bottom">
+                <i class="bi bi-person-circle me-2"></i>Customer Information
             </div>
-            <div class="col-md-9">
-                <div class="card">
-                    <div class="card-header fw-bold text-decoration-underline">Choose Customer</div>
-                    <div class="card-body p-2">
-                        <input type="text" class="form-control mb-2" placeholder="Search...">
-                        <div class="table-responsive card-scroll">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>NIK</th>
-                                        <th>Name</th>
-                                        <th>Phone</th>
-                                        <th>Status</th>
-                                        <th>Latest Medical Record</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>54229828427649</td>
-                                        <td>Germaine Nitzsche</td>
-                                        <td>861-986-2792</td>
-                                        <td><span class="badge bg-secondary">Non_member</span></td>
-                                        <td>Apr 23, 2025</td>
-                                    </tr>
-                                    <tr>
-                                        <td>54229828427649</td>
-                                        <td>Germaine Nitzsche</td>
-                                        <td>861-986-2792</td>
-                                        <td><span class="badge bg-secondary">Non_member</span></td>
-                                        <td>Apr 23, 2025</td>
-                                    </tr>
-                                    <tr>
-                                        <td>54229828427649</td>
-                                        <td>Germaine Nitzsche</td>
-                                        <td>861-986-2792</td>
-                                        <td><span class="badge bg-secondary">Non_member</span></td>
-                                        <td>Apr 23, 2025</td>
-                                    </tr>
-                                    <!-- More rows -->
-                                </tbody>
-                            </table>
-                        </div>
+            <div class="card-body" style="min-height: 150px;">
+                <!-- STATE 1: Belum ada customer -->
+                <div class="text-center text-muted d-none" id="customer-empty">
+                    <i class="bi bi-info-circle display-6 d-block mb-2"></i>
+                    <small>Please select customer first</small>
+                </div>
+
+                <!-- STATE 2: Setelah customer dipilih -->
+                <div id="customer-info" class="">
+                    <div class="mb-2 text-truncate" title="Germaine Nitzsche">
+                        <i class="bi bi-person-fill me-2 text-primary"></i>
+                        <strong id="customer-name">Germaine Nitzsche</strong>
+                    </div>
+                    <div class="mb-2 text-truncate" title="861-986-2792">
+                        <i class="bi bi-telephone-fill me-2 text-success"></i>
+                        <span id="customer-phone">861-986-2792</span>
+                    </div>
+                    <div class="text-truncate" title="germaine@example.com">
+                        <i class="bi bi-envelope-fill me-2 text-warning"></i>
+                        <span id="customer-email">germaine@example.com</span>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Choose Customer (60%) -->
+    <div class="col-lg-7 col-md-12">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-semibold bg-white border-bottom">
+                <i class="bi bi-search me-2"></i>Choose Customer
+            </div>
+            <div class="card-body p-3">
+                <input type="text" class="form-control mb-3" placeholder="Search by name, NIK, or phone...">
+                <div class="table-responsive card-scroll">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>NIK</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Latest Medical Record</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>54229828427649</td>
+                                <td>Germaine Nitzsche</td>
+                                <td>861-986-2792</td>
+                                <td>Apr 23, 2025</td>
+                            </tr>
+                            <tr>
+                                <td>54229828427649</td>
+                                <td>Germaine Nitzsche</td>
+                                <td>861-986-2792</td>
+                                <td>Apr 23, 2025</td>
+                            </tr>
+                            <tr>
+                                <td>54229828427649</td>
+                                <td>Germaine Nitzsche</td>
+                                <td>861-986-2792</td>
+                                <td>Apr 23, 2025</td>
+                            </tr>
+                            <!-- More rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
             <!-- Shopping Cart (70%) dan Choose Product (30%) -->
             <div class="col-md-8">
@@ -103,49 +121,49 @@
                                     <tr>
                                         <td>10 Tablets Pack</td>
                                         <td>Rp. 75.000</td>
-                                        <td><span class="badge bg-warning text-dark">Low Stock</span></td>
+                                        <td>43</td>
                                         <td><a href="#">+</a></td>
                                     </tr>
                                     <tr>
                                         <td>10 Tablets Pack</td>
                                         <td>Rp. 75.000</td>
-                                        <td><span class="badge bg-warning text-dark">Low Stock</span></td>
+                                        <td>12</td>
                                         <td><a href="#">+</a></td>
                                     </tr>
                                     <tr>
                                         <td>10 Tablets Pack</td>
                                         <td>Rp. 75.000</td>
-                                        <td><span class="badge bg-warning text-dark">Low Stock</span></td>
+                                        <td>87</td>
                                         <td><a href="#">+</a></td>
                                     </tr>
                                     <tr>
                                         <td>10 Tablets Pack</td>
                                         <td>Rp. 75.000</td>
-                                        <td><span class="badge bg-warning text-dark">Low Stock</span></td>
+                                        <td>32</td>
                                         <td><a href="#">+</a></td>
                                     </tr>
                                     <tr>
                                         <td>10 Tablets Pack</td>
                                         <td>Rp. 75.000</td>
-                                        <td><span class="badge bg-warning text-dark">Low Stock</span></td>
+                                        <td>324</td>
                                         <td><a href="#">+</a></td>
                                     </tr>
                                     <tr>
                                         <td>10 Tablets Pack</td>
                                         <td>Rp. 75.000</td>
-                                        <td><span class="badge bg-warning text-dark">Low Stock</span></td>
+                                        <td>324</td>
                                         <td><a href="#">+</a></td>
                                     </tr>
                                     <tr>
                                         <td>10 Tablets Pack</td>
                                         <td>Rp. 75.000</td>
-                                        <td><span class="badge bg-warning text-dark">Low Stock</span></td>
+                                        <td>324</td>
                                         <td><a href="#">+</a></td>
                                     </tr>
                                     <tr>
                                         <td>10 Tablets Pack</td>
                                         <td>Rp. 75.000</td>
-                                        <td><span class="badge bg-warning text-dark">Low Stock</span></td>
+                                        <td>324</td>
                                         <td><a href="#">+</a></td>
                                     </tr>
                                     <!-- More products -->
@@ -331,14 +349,17 @@
         </div>
 
         <!-- Checkout Button -->
-        <div class="mt-4 text-center">
-            <div class="card mt-3 col-md-4 p-3 w-100">
-                <div class="d-flex justify-content-center gap-3">
-                    <button type="submit" class="btn btn-primary px-4 w-100">Save</button>
-                    <button type="button" class="btn btn-success px-4 w-100">Selesai</button>
-                </div>
-            </div>
-        </div>
+      <div class="text-end mt-4">
+    <div class="d-flex flex-wrap gap-2 justify-content-start">
+        <button type="submit" class="btn btn-secondary px-4">
+            <i class="bi bi-save me-1"></i> Save
+        </button>
+        <button type="button" class="btn btn-primary px-4">
+            <i class="bi bi-check-circle me-1"></i> Selesai
+        </button>
+    </div>
+</div>
+
 
     </div>
 </x-app>

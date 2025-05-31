@@ -13,7 +13,7 @@
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table datanew">
+                <table class="table ">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -38,9 +38,10 @@
                             <td>{{ $email }}</td>
                             <td>{{ $phone }}</td>
                             <td>
-                                <a class="me-2" href="javascript:void(0);">
-                                    <i class="bi bi-person mb-5 fs-5"></i>
-                                </a>
+                              <a class="me-2" href="{{ route('customer.detail') }}">
+    <i class="bi bi-person fs-4"></i>
+</a>
+
                                 <a class="me-3" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#editCustomerModal">
                                     <img src="assets/img/icons/edit.svg" alt="edit">
                                 </a>

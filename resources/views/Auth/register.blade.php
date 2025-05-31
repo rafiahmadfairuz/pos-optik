@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="text-center mt-3">
-                    <small>Sudah punya akun? <a href="">Login di sini</a></small>
+                    <small>Sudah punya akun? <a href="{{url("login")}}">Login di sini</a></small>
                 </div>
             </form>
         </div>

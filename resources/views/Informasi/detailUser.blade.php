@@ -99,12 +99,12 @@
                                     <span class="badge text-bg-warning text-dark">Partially Paid</span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="#" class="text-primary me-2"><i class="bi bi-eye"></i></a>
+                                    <a href="{{ route('transaction.detail') }}" class="text-primary me-2"><i class="bi bi-eye"></i></a>
                                 </td>
                             </tr>
                             <tr data-status="paid">
                                 <td>2181</td>
-                               
+
                                 <td>2025-04-19 08:09</td>
                                 <td>2.500.000</td>
                                 <td>

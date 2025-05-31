@@ -14,7 +14,8 @@ Route::get('/customer', function () {
 });
 Route::get('/customer/detail', function () {
     return view('Informasi.detailUser');
-});
+})->name('customer.detail');
+
 Route::get('/kasir', function () {
     return view('Informasi.kasir');
 });
@@ -44,7 +45,7 @@ Route::get('/report', function () {
 });
 Route::get('/orderan/detail', function () {
     return view('Informasi.detailOrderan');
-});
+})->name('transaction.detail');
 Route::get('/login', function () {
     return view('Auth.login');
 });
