@@ -73,14 +73,14 @@
                     </a>
                 </li>
 
-                {{-- <!-- COMPANY Section -->
+                <!-- COMPANY Section -->
                 <li class="menu-title fw-bold">COMPANY</li>
-                <li class="{{ Request::is('user-staff') ? 'active' : '' }}">
-                    <a href="{{ url('user-staff') }}">
+                <li class="{{ Request::is('staff') ? 'active' : '' }}">
+                    <a href="{{ url('staff') }}">
                         <img src="{{ asset('assets/img/icons/users1.svg') }}" alt="img">
                         <span>User & Staff</span>
                     </a>
-                </li> --}}
+                </li>
 
             </ul>
         </div>

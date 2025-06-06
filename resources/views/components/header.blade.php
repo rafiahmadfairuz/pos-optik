@@ -33,7 +33,9 @@
                         <span class="user-img"><img src="{{ asset('assets/img/profiles/avator1.jpg')}}" alt="">
                             <span class="status online"></span></span>
                         <div class="profilesets">
-                            <h6>John Doe</h6>
+                            {{-- <h6>{{ Auth::user()->name }}</h6>
+                            <h5>{{ Auth::user()->role }}</h5> --}}
+                            <h6>KOKO</h6>
                             <h5>Admin</h5>
                         </div>
                     </div>
