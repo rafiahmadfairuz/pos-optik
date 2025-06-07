@@ -19,7 +19,7 @@
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
                     <div class="card-body">
-                        <form id="accessoriesForm" action="{{ route('create.accessories') }}" method="POST">
+                        <form id="accessoriesForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="accessories_id" id="accessoriesId" value="">
                             <input type="hidden" name="cabang_id" id="cabang_id" />
@@ -151,102 +151,99 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const formContainer = document.getElementById('formContainer');
-            const btnAddAccessories = document.getElementById('btnAddAccessories');
-            const btnCancel = document.getElementById('btnCancel');
-            const accessoriesForm = document.getElementById('accessoriesForm');
-            const accessoriesId = document.getElementById('accessoriesId');
-            const accessoriesName = document.getElementById('accessoriesName');
-            const accessoriesJenis = document.getElementById('accessoriesjenis');
-            const accessoriesHarga = document.getElementById('accessoriesHarga');
-            const accessoriesStok = document.getElementById('accessoriesStok');
-            const deleteAccessoriesForm = document.getElementById('deleteAccessoriesForm');
-            document.getElementById('accessoriesForm').addEventListener('submit', function(e) {
-                const cabangId = localStorage.getItem('cabang_id');
-                if (!cabangId) {
-                    alert('Cabang ID tidak ditemukan di localStorage.');
-                    e.preventDefault();
-                    return;
-                }
-                document.getElementById('cabang_id').value = cabangId;
-            });
+ <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const formContainer = document.getElementById('formContainer');
+        const btnAddAccessories = document.getElementById('btnAddAccessories');
+        const btnCancel = document.getElementById('btnCancel');
+        const accessoriesForm = document.getElementById('accessoriesForm');
+        const accessoriesId = document.getElementById('accessoriesId');
+        const accessoriesName = document.getElementById('accessoriesName');
+        const accessoriesJenis = document.getElementById('accessoriesjenis');
+        const accessoriesHarga = document.getElementById('accessoriesHarga');
+        const accessoriesStok = document.getElementById('accessoriesStok');
+        const deleteAccessoriesForm = document.getElementById('deleteAccessoriesForm');
 
-            // Tampilkan form tambah
-            btnAddAccessories.addEventListener('click', () => {
-                accessoriesForm.action = "{{ route('create.accessories') }}";
-                accessoriesForm.querySelector('input[name="_method"]')?.remove(); // hapus _method jika ada
-                accessoriesId.value = '';
-                accessoriesName.value = '';
-                accessoriesJenis.value = '';
-                accessoriesHarga.value = '';
-                accessoriesStok.value = '';
+        accessoriesForm.addEventListener('submit', function (e) {
+            const cabangId = localStorage.getItem('cabang_id');
+            if (!cabangId) {
+                alert('Cabang ID tidak ditemukan di localStorage.');
+                e.preventDefault();
+                return;
+            }
+            document.getElementById('cabang_id').value = cabangId;
+        });
+
+        function setFormMethod(form, method) {
+            let methodInput = form.querySelector('input[name="_method"]');
+            if (!methodInput) {
+                methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                form.appendChild(methodInput);
+            }
+            methodInput.value = method;
+        }
+
+        btnAddAccessories.addEventListener('click', () => {
+            accessoriesForm.action = "{{ route('accessories.store') }}";
+            accessoriesForm.querySelector('input[name="_method"]')?.remove();
+            accessoriesId.value = '';
+            accessoriesForm.reset();
+            formContainer.classList.remove('d-none');
+        });
+
+        btnCancel.addEventListener('click', () => {
+            formContainer.classList.add('d-none');
+            accessoriesForm.reset();
+            accessoriesId.value = '';
+        });
+
+        document.querySelectorAll('.btn-edit-accessory').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tr = e.target.closest('tr');
+                if (!tr) return;
+
+                const id = tr.dataset.id;
+                const name = tr.dataset.nama;
+                const type = tr.dataset.jenis;
+                const price = tr.dataset.harga;
+                const stock = tr.dataset.stok;
+
+                accessoriesForm.action = `/accessories/${id}`;
+                setFormMethod(accessoriesForm, 'PUT');
+
+                accessoriesId.value = id;
+                accessoriesName.value = name;
+                accessoriesJenis.value = type;
+                accessoriesHarga.value = price;
+                accessoriesStok.value = stock;
+
                 formContainer.classList.remove('d-none');
-            });
-
-            // Cancel form
-            btnCancel.addEventListener('click', () => {
-                formContainer.classList.add('d-none');
-                accessoriesForm.reset();
-                accessoriesId.value = '';
-            });
-
-            // Tombol edit
-            document.querySelectorAll('.btn-edit-accessory').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const tr = this.closest('tr');
-                    if (!tr) return;
-
-                    const id = tr.dataset.id;
-                    const name = tr.dataset.nama;
-                    const type = tr.dataset.jenis;
-                    const price = tr.dataset.harga;
-                    const stock = tr.dataset.stok;
-
-                    accessoriesForm.action = `/accesories/${id}`;
-
-                    let methodInput = accessoriesForm.querySelector('input[name="_method"]');
-                    if (!methodInput) {
-                        methodInput = document.createElement('input');
-                        methodInput.type = 'hidden';
-                        methodInput.name = '_method';
-                        accessoriesForm.appendChild(methodInput);
-                    }
-                    methodInput.value = 'PUT';
-
-                    accessoriesId.value = id;
-                    accessoriesName.value = name;
-                    accessoriesJenis.value = type;
-                    accessoriesHarga.value = price;
-                    accessoriesStok.value = stock;
-                    formContainer.classList.remove('d-none');
-                    accessoriesName.focus();
-                });
-            });
-
-            // Tombol delete
-            document.querySelectorAll('.btn-delete-accessory').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const tr = this.closest('tr');
-                    const id = tr.dataset.id;
-
-                    deleteAccessoriesForm.action = `/accesories/${id}`;
-                    const methodInput = deleteAccessoriesForm.querySelector(
-                        'input[name="_method"]');
-                    if (methodInput) {
-                        methodInput.value = 'DELETE';
-                    }
-
-                    const deleteModal = new bootstrap.Modal(document.getElementById(
-                        'deleteAccessoriesModal'));
-                    deleteModal.show();
-                });
+                accessoriesName.focus();
             });
         });
-    </script>
+
+        document.querySelectorAll('.btn-delete-accessory').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tr = e.target.closest('tr');
+                if (!tr) return;
+
+                const id = tr.dataset.id;
+                deleteAccessoriesForm.action = `/accessories/${id}`;
+                setFormMethod(deleteAccessoriesForm, 'DELETE');
+
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteAccessoriesModal'));
+                deleteModal.show();
+            });
+        });
 
 
+
+        const hasFormError = {{ $errors->any() ? 'true' : 'false' }};
+        if (hasFormError) {
+            formContainer.classList.remove('d-none');
+        }
+    });
+</script>
 </x-app>

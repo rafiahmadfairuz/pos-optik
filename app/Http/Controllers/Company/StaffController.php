@@ -1,22 +1,38 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Company;
 
 use App\Models\Staff;
 use App\Models\Cabang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 
 class StaffController extends Controller
 {
-    public function showStaff()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
     {
         $staffs = Staff::where('role', '!=', 'admin')->get();
-        $cabang = Cabang::all();
-        return view("staffList", compact("staffs", "cabang"));
+        $cabangs = Cabang::all();
+        return view("Admin.staffList", compact("staffs", "cabangs"));
     }
-    public function createStaff(Request $request)
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
         try {
             $validated = $request->validate([
@@ -40,24 +56,43 @@ class StaffController extends Controller
 
             Staff::create($newDataStaff);
 
-            return redirect()->route('staff')->with('success', 'Staff berhasil ditambahkan.');
+            return back()->with('success', 'Staff berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->withErrors($e->validator)->withInput();
+            Log::error('Create staff failed (validation): ' . $e->getMessage());
+            return back()->with('error', 'Validasi gagal.')->withInput();
         } catch (\Exception $e) {
             Log::error('Create staff failed: ' . $e->getMessage());
             return back()->with('error', $e->getMessage())->withInput();
         }
     }
 
-    public function editStaff(Request $request, $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
     {
-        // Validasi data masukannya
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'password' => 'nullable|string|min:6',
             'role' => 'required|in:gudang,cabang',
-            'cabang' => 'nullable|exists:cabang,id',
+            'cabang' => 'nullable|exists:cabangs,id',
         ]);
 
         try {
@@ -66,32 +101,38 @@ class StaffController extends Controller
             $staff->name = $validated['name'];
             $staff->email = $validated['email'] ?? $staff->email;
             if (!empty($validated['password'])) {
-                $staff->password = bcrypt($validated['password']); // hash password jika diisi
+                $staff->password = bcrypt($validated['password']);
             }
             $staff->role = $validated['role'];
             $staff->cabang_id = $validated['cabang'] ?? null;
 
             $staff->save();
 
-            return redirect()->back()->with('success', 'Staff updated successfully!');
+            return back()->with('success', 'Staff berhasil diperbarui!');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->back()->withErrors('Staff not found.');
+            Log::error('Update staff failed - not found: ' . $e->getMessage());
+            return back()->with('error', 'Staff tidak ditemukan.')->withInput();
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors('Failed to update staff. Please try again.');
+            Log::error('Update staff failed: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui staff. Silahkan coba kembali.')->withInput();
         }
     }
 
-    public function deleteStaff($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
     {
         try {
             $staff = Staff::findOrFail($id);
             $staff->delete();
-
-            return redirect()->back()->with('success', 'Staff deleted successfully!');
+            return back()->with('success', 'Staff berhasil dihapus!');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return redirect()->back()->withErrors('Staff not found.');
+            Log::error('Delete staff failed - not found: ' . $e->getMessage());
+            return back()->with('error', 'Staff tidak ditemukan.')->withInput();
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors('Failed to delete staff. Please try again.');
+            Log::error('Delete staff failed: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus staff. Tolong coba kembali.')->withInput();
         }
     }
 }

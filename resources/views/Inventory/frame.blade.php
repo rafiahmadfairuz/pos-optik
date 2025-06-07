@@ -19,58 +19,74 @@
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
                     <div class="card-body">
-                        <form id="frameForm" action="{{ route('create.frame') }}" method="POST">
+                        <form id="frameForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="frame_id" id="frameId" value="">
                             <input type="hidden" name="cabang_id" id="cabang_id" />
 
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="merk" class="form-label">Merk <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('merk') is-invalid @enderror" id="merk" name="merk" value="{{ old('merk') }}" required>
+                                    <label for="merk" class="form-label">Merk <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('merk') is-invalid @enderror"
+                                        id="merk" name="merk" value="{{ old('merk') }}" required>
                                     @error('merk')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="tipe" class="form-label">Tipe</label>
-                                    <input type="text" class="form-control @error('tipe') is-invalid @enderror" id="tipe" name="tipe" value="{{ old('tipe') }}">
+                                    <input type="text" class="form-control @error('tipe') is-invalid @enderror"
+                                        id="tipe" name="tipe" value="{{ old('tipe') }}">
                                     @error('tipe')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="warna" class="form-label">Warna</label>
-                                    <input type="text" class="form-control @error('warna') is-invalid @enderror" id="warna" name="warna" value="{{ old('warna') }}">
+                                    <input type="text" class="form-control @error('warna') is-invalid @enderror"
+                                        id="warna" name="warna" value="{{ old('warna') }}">
                                     @error('warna')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
                                     <label for="harga" class="form-label">Harga</label>
-                                    <input type="number" class="form-control @error('harga') is-invalid @enderror" id="harga" name="harga" value="{{ old('harga') }}">
+                                    <input type="number" class="form-control @error('harga') is-invalid @enderror"
+                                        id="harga" name="harga" value="{{ old('harga') }}">
                                     @error('harga')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
                                     <label for="stok" class="form-label">Stok</label>
-                                    <input type="number" class="form-control @error('stok') is-invalid @enderror" id="stok" name="stok" value="{{ old('stok') }}">
+                                    <input type="number" class="form-control @error('stok') is-invalid @enderror"
+                                        id="stok" name="stok" value="{{ old('stok') }}">
                                     @error('stok')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
@@ -100,20 +116,20 @@
                         </thead>
                         <tbody>
                             @foreach ($frame as $item)
-                                <tr data-id="{{ $item->id }}"
-                                    data-merk="{{ $item->merk }}"
-                                    data-tipe="{{ $item->tipe }}"
-                                    data-warna="{{ $item->warna }}"
-                                    data-harga="{{ $item->harga }}"
-                                    data-stok="{{ $item->stok }}">
+                                <tr data-id="{{ $item->id }}" data-merk="{{ $item->merk }}"
+                                    data-tipe="{{ $item->tipe }}" data-warna="{{ $item->warna }}"
+                                    data-harga="{{ $item->harga }}" data-stok="{{ $item->stok }}">
                                     <td>{{ $item->merk }}</td>
                                     <td>{{ $item->tipe }}</td>
                                     <td>{{ $item->warna }}</td>
                                     <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                     <td>{{ $item->stok }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-edit-frame" title="Edit Frame"><img src="/assets/img/icons/edit.svg" alt="edit"></button>
-                                        <button class="btn btn-sm btn-delete-frame" data-bs-toggle="modal" data-bs-target="#deleteFrameModal"><img src="/assets/img/icons/delete.svg" alt="delete"></button>
+                                        <button class="btn btn-sm btn-edit-frame" title="Edit Frame"><img
+                                                src="/assets/img/icons/edit.svg" alt="edit"></button>
+                                        <button class="btn btn-sm btn-delete-frame" data-bs-toggle="modal"
+                                            data-bs-target="#deleteFrameModal"><img src="/assets/img/icons/delete.svg"
+                                                alt="delete"></button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -124,8 +140,8 @@
         </div>
     </div>
 
-    {{-- Modal delete --}}
-    <div class="modal fade" id="deleteFrameModal" tabindex="-1" aria-labelledby="deleteFrameModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteFrameModal" tabindex="-1" aria-labelledby="deleteFrameModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <form id="deleteFrameForm" method="POST" action="">
                 @csrf
@@ -133,13 +149,15 @@
                 <div class="modal-content rounded-4 shadow-sm border-0">
                     <div class="modal-header border-0 pb-0">
                         <h5 class="modal-title fw-semibold">Konfirmasi Hapus</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Tutup"></button>
                     </div>
                     <div class="modal-body fs-5 pt-2 pb-3 text-center">
                         Yakin ingin menghapus frame ini?
                     </div>
                     <div class="modal-footer border-0 justify-content-center gap-3 pt-0">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger rounded-pill px-4">Delete</button>
                     </div>
                 </div>
@@ -147,9 +165,8 @@
         </div>
     </div>
 
-    {{-- Script --}}
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const formContainer = document.getElementById('formContainer');
             const btnAdd = document.getElementById('btnAddFrame');
             const btnCancel = document.getElementById('btnCancel');
@@ -158,18 +175,32 @@
             const cabangInput = document.getElementById('cabang_id');
             const deleteForm = document.getElementById('deleteFrameForm');
 
+            function setFormMethod(form, method) {
+                let methodInput = form.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                methodInput.value = method;
+            }
+
             btnAdd.addEventListener('click', () => {
-                form.action = "{{ route('create.frame') }}";
+                form.action = "{{ route('frame.store') }}";
                 form.querySelector('input[name="_method"]')?.remove();
                 form.reset();
                 idInput.value = '';
                 formContainer.classList.remove('d-none');
+                form.merk.focus();
+                btnAdd.classList.add('d-none');
             });
 
             btnCancel.addEventListener('click', () => {
                 formContainer.classList.add('d-none');
                 form.reset();
                 idInput.value = '';
+                btnAdd.classList.remove('d-none');
             });
 
             document.querySelectorAll('.btn-edit-frame').forEach(btn => {
@@ -178,15 +209,7 @@
                     const id = tr.dataset.id;
 
                     form.action = `/frame/${id}`;
-                    if (!form.querySelector('input[name="_method"]')) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = '_method';
-                        input.value = 'PUT';
-                        form.appendChild(input);
-                    } else {
-                        form.querySelector('input[name="_method"]').value = 'PUT';
-                    }
+                    setFormMethod(form, 'PUT');
 
                     idInput.value = id;
                     form.merk.value = tr.dataset.merk;
@@ -197,6 +220,7 @@
 
                     formContainer.classList.remove('d-none');
                     form.merk.focus();
+                    btnAdd.classList.add('d-none');
                 });
             });
 
@@ -205,6 +229,8 @@
                     const tr = btn.closest('tr');
                     const id = tr.dataset.id;
                     deleteForm.action = `/frame/${id}`;
+                    setFormMethod(deleteForm, 'DELETE');
+                    deleteForm.method = 'POST';
                 });
             });
 
@@ -219,4 +245,5 @@
             });
         });
     </script>
+
 </x-app>

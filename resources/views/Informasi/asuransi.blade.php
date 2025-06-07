@@ -19,28 +19,36 @@
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
                     <div class="card-body">
-                        <form id="insuranceForm" action="{{ route('create.asuransi') }}" method="POST">
+                        <form id="insuranceForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="insurance_id" id="insuranceId" value="">
                             <input type="hidden" name="cabang_id" id="cabang_id" />
 
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="nama" class="form-label">Nama <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama" name="nama" value="{{ old('nama') }}" required>
+                                    <label for="nama" class="form-label">Nama <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('nama') is-invalid @enderror"
+                                        id="nama" name="nama" value="{{ old('nama') }}" required>
                                     @error('nama')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label for="nominal" class="form-label">Nominal <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control @error('nominal') is-invalid @enderror" id="nominal" name="nominal" value="{{ old('nominal') }}" required>
+                                    <label for="nominal" class="form-label">Nominal <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" class="form-control @error('nominal') is-invalid @enderror"
+                                        id="nominal" name="nominal" value="{{ old('nominal') }}" required>
                                     @error('nominal')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
@@ -67,14 +75,17 @@
                         </thead>
                         <tbody>
                             @foreach ($asuransi as $item)
-                                <tr data-id="{{ $item->id }}" data-nama="{{ $item->nama }}" data-nominal="{{ $item->nominal }}">
+                                <tr data-id="{{ $item->id }}" data-nama="{{ $item->nama }}"
+                                    data-nominal="{{ $item->nominal }}">
                                     <td>{{ $item->nama }}</td>
                                     <td>Rp {{ number_format($item->nominal, 0, ',', '.') }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-edit-insurance text-primary" title="Edit">
                                             <i class="bi bi-pencil-fill"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-delete-insurance text-danger" data-bs-toggle="modal" data-bs-target="#deleteInsuranceModal" title="Delete">
+                                        <button class="btn btn-sm btn-delete-insurance text-danger"
+                                            data-bs-toggle="modal" data-bs-target="#deleteInsuranceModal"
+                                            title="Delete">
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
                                     </td>
@@ -87,8 +98,8 @@
         </div>
     </div>
 
-    {{-- Modal delete --}}
-    <div class="modal fade" id="deleteInsuranceModal" tabindex="-1" aria-labelledby="deleteInsuranceModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteInsuranceModal" tabindex="-1" aria-labelledby="deleteInsuranceModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <form id="deleteInsuranceForm" method="POST" action="">
                 @csrf
@@ -102,7 +113,8 @@
                         Yakin ingin menghapus asuransi ini?
                     </div>
                     <div class="modal-footer border-0 justify-content-center gap-3 pt-0">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger rounded-pill px-4">Delete</button>
                     </div>
                 </div>
@@ -110,9 +122,8 @@
         </div>
     </div>
 
-    {{-- Script --}}
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             const formContainer = document.getElementById('formContainer');
             const btnAdd = document.getElementById('btnAddInsurance');
             const btnCancel = document.getElementById('btnCancel');
@@ -121,42 +132,46 @@
             const cabangInput = document.getElementById('cabang_id');
             const deleteForm = document.getElementById('deleteInsuranceForm');
 
+            function setFormMethod(form, method) {
+                let methodInput = form.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                methodInput.value = method;
+            }
+
             btnAdd.addEventListener('click', () => {
-                form.action = "{{ route('create.asuransi') }}";
+                form.action = "{{ route('asuransi.store') }}";
                 form.querySelector('input[name="_method"]')?.remove();
                 form.reset();
                 idInput.value = '';
                 formContainer.classList.remove('d-none');
+                form.nama.focus();
+                btnAdd.classList.add('d-none');
             });
 
             btnCancel.addEventListener('click', () => {
                 formContainer.classList.add('d-none');
                 form.reset();
                 idInput.value = '';
+                btnAdd.classList.remove('d-none');
             });
 
             document.querySelectorAll('.btn-edit-insurance').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tr = btn.closest('tr');
                     const id = tr.dataset.id;
-
                     form.action = `/asuransi/${id}`;
-                    if (!form.querySelector('input[name="_method"]')) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = '_method';
-                        input.value = 'PUT';
-                        form.appendChild(input);
-                    } else {
-                        form.querySelector('input[name="_method"]').value = 'PUT';
-                    }
-
+                    setFormMethod(form, 'PUT');
                     idInput.value = id;
                     form.nama.value = tr.dataset.nama;
                     form.nominal.value = tr.dataset.nominal;
-
                     formContainer.classList.remove('d-none');
-                    form.name.focus();
+                    form.nama.focus();
+                    btnAdd.classList.add('d-none');
                 });
             });
 
@@ -165,6 +180,8 @@
                     const tr = btn.closest('tr');
                     const id = tr.dataset.id;
                     deleteForm.action = `/asuransi/${id}`;
+                    setFormMethod(deleteForm, 'DELETE');
+                    deleteForm.method = 'POST';
                 });
             });
 
@@ -179,4 +196,6 @@
             });
         });
     </script>
+
+
 </x-app>

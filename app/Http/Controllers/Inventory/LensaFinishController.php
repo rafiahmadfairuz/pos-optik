@@ -1,20 +1,35 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Inventory;
 
 use App\Models\LensaFinish;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 
 class LensaFinishController extends Controller
 {
-    public function showLensaFinish()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
     {
         $lensaFinish = LensaFinish::all();
         return view('Inventory.lensaFinish', compact('lensaFinish'));
     }
 
-    public function createLensaFinish(Request $request)
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
         try {
             $validated = $request->validate([
@@ -27,7 +42,6 @@ class LensaFinishController extends Controller
                 'stok' => 'required|integer|min:0',
                 'harga' => 'required|numeric|min:0',
                 'cabang_id' => 'nullable|exists:cabangs,id',
-
             ]);
 
             LensaFinish::create($validated);
@@ -44,7 +58,26 @@ class LensaFinishController extends Controller
         }
     }
 
-    public function editLensaFinish(Request $request, $id)
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
     {
         $validated = $request->validate([
             'merk' => 'required|string|max:50',
@@ -56,7 +89,6 @@ class LensaFinishController extends Controller
             'stok' => 'required|integer|min:0',
             'harga' => 'required|numeric|min:0',
             'cabang_id' => 'nullable|exists:cabangs,id',
-
         ]);
 
         try {
@@ -82,7 +114,10 @@ class LensaFinishController extends Controller
         }
     }
 
-    public function deleteLensaFinish($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
     {
         try {
             $lensa = LensaFinish::findOrFail($id);

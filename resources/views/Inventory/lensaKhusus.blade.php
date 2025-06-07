@@ -19,7 +19,7 @@
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
                     <div class="card-body">
-                        <form id="lensaForm" action="{{ route('create.lensaKhusus') }}" method="POST">
+                        <form id="lensaForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="lensa_id" id="lensaId" value="">
                             <input type="hidden" name="cabang_id" id="cabang_id" />
@@ -196,7 +196,6 @@
         </div>
     </div>
 
-    {{-- Modal delete --}}
     <div class="modal fade" id="deleteLensaKhususForm" tabindex="-1" aria-labelledby="deleteLensaKhususForm"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md">
@@ -232,12 +231,20 @@
             const cabangInput = document.getElementById('cabang_id');
             const deleteForm = document.getElementById('deleteLensaKhususForm');
 
-            // Show form tambah data baru
-            btnAdd.addEventListener('click', () => {
-                form.action = "{{ route('create.lensaKhusus') }}";
-                const methodInput = form.querySelector('input[name="_method"]');
-                if (methodInput) methodInput.remove();
+            function setFormMethod(form, method) {
+                let methodInput = form.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                methodInput.value = method;
+            }
 
+            btnAdd.addEventListener('click', () => {
+                form.action = "{{ route('lensaKhusus.store') }}";
+                form.querySelector('input[name="_method"]')?.remove();
                 form.reset();
                 idInput.value = '';
                 formContainer.classList.remove('d-none');
@@ -245,7 +252,6 @@
                 btnAdd.classList.add('d-none');
             });
 
-            // Cancel tambah/edit
             btnCancel.addEventListener('click', () => {
                 formContainer.classList.add('d-none');
                 form.reset();
@@ -253,24 +259,12 @@
                 btnAdd.classList.remove('d-none');
             });
 
-            // Edit data
             document.querySelectorAll('.btn-edit-lensa-khusus').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tr = btn.closest('tr');
                     const id = tr.dataset.id;
-
-                    form.action = `/lensaKhusus/${id}`; // Ganti sesuai route update lensaKhusus
-                    let methodInput = form.querySelector('input[name="_method"]');
-                    if (!methodInput) {
-                        methodInput = document.createElement('input');
-                        methodInput.type = 'hidden';
-                        methodInput.name = '_method';
-                        methodInput.value = 'PUT';
-                        form.appendChild(methodInput);
-                    } else {
-                        methodInput.value = 'PUT';
-                    }
-
+                    form.action = `/lensaKhusus/${id}`;
+                    setFormMethod(form, 'PUT');
                     idInput.value = id;
                     form.merk.value = tr.dataset.merk;
                     form.desain.value = tr.dataset.desain;
@@ -280,23 +274,22 @@
                     form.add.value = tr.dataset.add;
                     form.estimasi_selesai_hari.value = tr.dataset.estimasi_selesai_hari;
                     form.status_pesanan.value = tr.dataset.status_pesanan;
-
                     formContainer.classList.remove('d-none');
                     form.merk.focus();
                     btnAdd.classList.add('d-none');
                 });
             });
 
-            // Hapus data
             document.querySelectorAll('.btn-delete-lensa-khusus').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tr = btn.closest('tr');
                     const id = tr.dataset.id;
-                    deleteForm.action = `/lensaKhusus/${id}`; // Ganti sesuai route delete
+                    deleteForm.action = `/lensaKhusus/${id}`;
+                    setFormMethod(deleteForm, 'DELETE');
+                    deleteForm.method = 'POST';
                 });
             });
 
-            // Submit form: inject cabang_id dari localStorage
             form.addEventListener('submit', (e) => {
                 const cabangId = localStorage.getItem('cabang_id');
                 if (!cabangId) {
@@ -308,5 +301,6 @@
             });
         });
     </script>
+
 
 </x-app>

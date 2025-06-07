@@ -13,10 +13,9 @@
         </div>
     </div>
 
-    {{-- Form Add Staff --}}
     <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
         <div class="card-body">
-            <form id="staffForm" action="{{ route('create.staff') }}" method="POST">
+            <form id="staffForm" action="" method="POST">
                 @csrf
                 <input type="hidden" name="staff_id" id="staffId" value="">
                 <div class="row g-3">
@@ -73,7 +72,7 @@
                         <select class="form-select @error('cabang') is-invalid @enderror" id="branchNumber"
                             name="cabang">
                             <option selected disabled>Pilih Cabang</option>
-                            @foreach ($cabang as $cab)
+                            @foreach ($cabangs as $cab)
                                 <option value="{{ $cab->id }}"
                                     {{ old('cabang') == $cab->nama ? 'selected' : '' }}>
                                     Cabang {{ $cab->nama }}
@@ -96,7 +95,6 @@
         </div>
     </div>
 
-    {{-- Staff Table --}}
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
@@ -159,120 +157,115 @@
         </div>
     </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const formContainer = document.getElementById('formContainer');
-        const btnAddStaff = document.getElementById('btnAddStaff');
-        const btnCancel = document.getElementById('btnCancel');
-        const staffForm = document.getElementById('staffForm');
-        const staffIdInput = document.getElementById('staffId');
-        const staffNameInput = document.getElementById('staffName');
-        const staffEmailInput = document.getElementById('staffEmail');
-        const staffPasswordInput = document.getElementById('staffPassword');
-        const staffRoleSelect = document.getElementById('staffRole');
-        const branchSelectContainer = document.getElementById('branchSelectContainer');
-        const branchSelect = document.getElementById('branchNumber');
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const formContainer = document.getElementById('formContainer');
+            const btnAddStaff = document.getElementById('btnAddStaff');
+            const btnCancel = document.getElementById('btnCancel');
+            const staffForm = document.getElementById('staffForm');
+            const staffIdInput = document.getElementById('staffId');
+            const staffNameInput = document.getElementById('staffName');
+            const staffEmailInput = document.getElementById('staffEmail');
+            const staffPasswordInput = document.getElementById('staffPassword');
+            const staffRoleSelect = document.getElementById('staffRole');
+            const branchSelectContainer = document.getElementById('branchSelectContainer');
+            const branchSelect = document.getElementById('branchNumber');
 
-        // Input _method untuk method spoofing
-        function setFormMethod(form, method) {
-            let methodInput = form.querySelector('input[name="_method"]');
-            if (!methodInput) {
-                methodInput = document.createElement('input');
-                methodInput.type = 'hidden';
-                methodInput.name = '_method';
-                form.appendChild(methodInput);
-            }
-            methodInput.value = method;
-        }
-
-        function toggleBranch() {
-            if (staffRoleSelect.value === 'cabang') {
-                branchSelectContainer.classList.remove('d-none');
-            } else {
-                branchSelectContainer.classList.add('d-none');
-                branchSelect.value = '';
-            }
-        }
-        staffRoleSelect.addEventListener('change', toggleBranch);
-        toggleBranch();
-
-        btnAddStaff.addEventListener('click', () => {
-            staffForm.action = "{{ route('create.staff') }}";  // pastikan route create.staff ada di web.php
-            setFormMethod(staffForm, 'POST'); // POST buat create
-            staffIdInput.value = '';
-            staffForm.reset();
-            toggleBranch();
-            formContainer.classList.remove('d-none');
-        });
-
-        btnCancel.addEventListener('click', () => {
-            formContainer.classList.add('d-none');
-            staffForm.reset();
-            staffIdInput.value = '';
-        });
-
-        document.querySelectorAll('.btn-edit').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tr = e.target.closest('tr');
-                if (!tr) return;
-
-                const id = tr.dataset.id;
-                const name = tr.dataset.name;
-                const email = tr.dataset.email;
-                const role = tr.dataset.role;
-                const cabang = tr.dataset.cabang;
-
-                staffForm.action = "{{ url('staff') }}/" + id;
-
-                setFormMethod(staffForm, 'PUT');
-
-                staffIdInput.value = id;
-                staffNameInput.value = name;
-                staffEmailInput.value = email;
-                staffPasswordInput.value = ''; 
-                staffRoleSelect.value = role;
-                toggleBranch();
-
-                if (role === 'cabang' && cabang) {
-                    branchSelect.value = cabang;
-                } else {
-                    branchSelect.value = '';
-                }
-
-                formContainer.classList.remove('d-none');
-                staffNameInput.focus();
-            });
-        });
-
-        // Delete button click handler
-        const deleteStaffForm = document.getElementById('deleteStaffForm');
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tr = e.target.closest('tr');
-                if (!tr) return;
-                const id = tr.dataset.id;
-
-                // pakai route name delete.staff dan method DELETE
-                deleteStaffForm.action = "{{ url('staff') }}/" + id;
-
-                // set method spoofing DELETE
-                let methodInput = deleteStaffForm.querySelector('input[name="_method"]');
+            function setFormMethod(form, method) {
+                let methodInput = form.querySelector('input[name="_method"]');
                 if (!methodInput) {
                     methodInput = document.createElement('input');
                     methodInput.type = 'hidden';
                     methodInput.name = '_method';
-                    deleteStaffForm.appendChild(methodInput);
+                    form.appendChild(methodInput);
                 }
-                methodInput.value = 'DELETE';
-                deleteStaffForm.method = 'POST'; // form tetap POST
+                methodInput.value = method;
+            }
+
+            function toggleBranch() {
+                if (staffRoleSelect.value === 'cabang') {
+                    branchSelectContainer.classList.remove('d-none');
+                } else {
+                    branchSelectContainer.classList.add('d-none');
+                    branchSelect.value = '';
+                }
+            }
+            staffRoleSelect.addEventListener('change', toggleBranch);
+            toggleBranch();
+
+            btnAddStaff.addEventListener('click', () => {
+                staffForm.action = "{{ route('staff.store') }}";
+                staffForm.querySelector('input[name="_method"]')?.remove();
+                staffIdInput.value = '';
+                staffForm.reset();
+                toggleBranch();
+                formContainer.classList.remove('d-none');
             });
+
+            btnCancel.addEventListener('click', () => {
+                formContainer.classList.add('d-none');
+                staffForm.reset();
+                staffIdInput.value = '';
+            });
+
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tr = e.target.closest('tr');
+                    if (!tr) return;
+
+                    const id = tr.dataset.id;
+                    const name = tr.dataset.name;
+                    const email = tr.dataset.email;
+                    const role = tr.dataset.role;
+                    const cabang = tr.dataset.cabang;
+
+                    staffForm.action = "{{ url('staff') }}/" + id;
+
+                    setFormMethod(staffForm, 'PUT');
+
+                    staffIdInput.value = id;
+                    staffNameInput.value = name;
+                    staffEmailInput.value = email;
+                    staffPasswordInput.value = '';
+                    staffRoleSelect.value = role;
+                    toggleBranch();
+
+                    if (role === 'cabang' && cabang) {
+                        branchSelect.value = cabang;
+                    } else {
+                        branchSelect.value = '';
+                    }
+
+                    formContainer.classList.remove('d-none');
+                    staffNameInput.focus();
+                });
+            });
+
+            const deleteStaffForm = document.getElementById('deleteStaffForm');
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tr = e.target.closest('tr');
+                    if (!tr) return;
+                    const id = tr.dataset.id;
+
+                    deleteStaffForm.action = "{{ url('staff') }}/" + id;
+
+                    let methodInput = deleteStaffForm.querySelector('input[name="_method"]');
+                    if (!methodInput) {
+                        methodInput = document.createElement('input');
+                        methodInput.type = 'hidden';
+                        methodInput.name = '_method';
+                        deleteStaffForm.appendChild(methodInput);
+                    }
+                    methodInput.value = 'DELETE';
+                    deleteStaffForm.method = 'POST';
+                });
+            });
+
+            const hasFormError = {{ $errors->any() ? 'true' : 'false' }};
+            if (hasFormError) {
+                formContainer.classList.remove('d-none');
+            }
         });
-
-        const hasFormError = {{ $errors->any() ? 'true' : 'false' }};
-        if (hasFormError) {
-            formContainer.classList.remove('d-none');
-        }
-    });
-</script>
-
+    </script>
 </x-app>

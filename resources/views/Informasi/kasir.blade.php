@@ -14,86 +14,145 @@
     </style>
 
     <div class="container-fluid py-3">
-         <h2 class="fw-bold "><i class="bi bi-cash-stack me-2"></i>Kasir</h2>
+
+
+        <h2 class="fw-bold "><i class="bi bi-cash-stack me-2"></i>Kasir</h2>
+        <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
+            <div class="card-body">
+                <form id="staffForm" action="{{ route("customer.store") }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="staff_id" id="staffId" value="">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="staffName" class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                id="staffName" name="name" value="{{ old('name') }}" required>
+                            @error('name')
+                                <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                    <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="staffEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                id="staffEmail" name="email" value="{{ old('email') }}">
+                            @error('email')
+                                <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                    <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                </div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="staffPhone" class="form-label">Phone</label>
+                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                                id="staffPhone" name="phone" value="{{ old('phone') }}">
+                            @error('phone')
+                                <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                    <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                </div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-end gap-2">
+                        <button type="button" id="btnCancel" class="btn btn-secondary px-4">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
         <div class="row g-3">
-           <div class="row g-3 align-items-stretch">
-    <!-- Customer Info (40%) -->
-    <div class="col-lg-5 col-md-12">
-        <div class="card shadow-sm h-100 border-0">
-            <div class="card-header bg-white fw-semibold border-bottom">
-                <i class="bi bi-person-circle me-2"></i>Customer Information
-            </div>
-            <div class="card-body" style="min-height: 150px;">
-                <!-- STATE 1: Belum ada customer -->
-                <div class="text-center text-muted d-none" id="customer-empty">
-                    <i class="bi bi-info-circle display-6 d-block mb-2"></i>
-                    <small>Please select customer first</small>
+            <div class="row g-3 align-items-stretch">
+                <!-- Customer Info (40%) -->
+                <div class="col-lg-5 col-md-12">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-header bg-white fw-semibold border-bottom">
+                            <i class="bi bi-person-circle me-2"></i>Customer Information
+                        </div>
+                        <div class="card-body" style="min-height: 150px;">
+                            <!-- STATE 1: Belum ada customer -->
+                            <div class="text-center text-muted" id="customer-empty">
+                                <i class="bi bi-info-circle display-6 d-block mb-2"></i>
+                                <small>Please select customer first</small>
+                            </div>
+
+                            <!-- STATE 2: Setelah customer dipilih -->
+                            <div id="customer-info" class="d-none">
+                                <div class="mb-2 text-truncate" title="Germaine Nitzsche">
+                                    <i class="bi bi-person-fill me-2 text-primary"></i>
+                                    <strong id="customer-name">Germaine Nitzsche</strong>
+                                </div>
+                                <div class="mb-2 text-truncate" title="861-986-2792">
+                                    <i class="bi bi-telephone-fill me-2 text-success"></i>
+                                    <span id="customer-phone">861-986-2792</span>
+                                </div>
+                                <div class="text-truncate" title="germaine@example.com">
+                                    <i class="bi bi-envelope-fill me-2 text-warning"></i>
+                                    <span id="customer-email">germaine@example.com</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- STATE 2: Setelah customer dipilih -->
-                <div id="customer-info" class="">
-                    <div class="mb-2 text-truncate" title="Germaine Nitzsche">
-                        <i class="bi bi-person-fill me-2 text-primary"></i>
-                        <strong id="customer-name">Germaine Nitzsche</strong>
-                    </div>
-                    <div class="mb-2 text-truncate" title="861-986-2792">
-                        <i class="bi bi-telephone-fill me-2 text-success"></i>
-                        <span id="customer-phone">861-986-2792</span>
-                    </div>
-                    <div class="text-truncate" title="germaine@example.com">
-                        <i class="bi bi-envelope-fill me-2 text-warning"></i>
-                        <span id="customer-email">germaine@example.com</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                <!-- Choose Customer (60%) -->
+                <div class="col-lg-7 col-md-12">
+                    <div class="card shadow-sm h-100">
+                        <div
+                            class="card-header fw-semibold d-flex justify-content-between align-items-center bg-white border-bottom">
+                            <div>
+                                <i class="bi bi-search me-2"></i>Choose Customer
+                            </div>
+                            <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddCustomer">
+                                Tambah Data
+                            </button>
+                        </div>
 
-    <!-- Choose Customer (60%) -->
-    <div class="col-lg-7 col-md-12">
-        <div class="card shadow-sm h-100">
-            <div class="card-header fw-semibold bg-white border-bottom">
-                <i class="bi bi-search me-2"></i>Choose Customer
-            </div>
-            <div class="card-body p-3">
-                <input type="text" class="form-control mb-3" placeholder="Search by name, NIK, or phone...">
-                <div class="table-responsive card-scroll">
-                    <table class="table table-sm align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>NIK</th>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Latest Medical Record</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>54229828427649</td>
-                                <td>Germaine Nitzsche</td>
-                                <td>861-986-2792</td>
-                                <td>Apr 23, 2025</td>
-                            </tr>
-                            <tr>
-                                <td>54229828427649</td>
-                                <td>Germaine Nitzsche</td>
-                                <td>861-986-2792</td>
-                                <td>Apr 23, 2025</td>
-                            </tr>
-                            <tr>
-                                <td>54229828427649</td>
-                                <td>Germaine Nitzsche</td>
-                                <td>861-986-2792</td>
-                                <td>Apr 23, 2025</td>
-                            </tr>
-                            <!-- More rows -->
-                        </tbody>
-                    </table>
+
+                        <div class="card-body p-3">
+                            <input type="text" class="form-control mb-3"
+                                placeholder="Search by name, NIK, or phone...">
+                            <div class="table-responsive card-scroll">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>NIK</th>
+                                            <th>Name</th>
+                                            <th>Phone</th>
+                                            <th>Latest Medical Record</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>54229828427649</td>
+                                            <td>Germaine Nitzsche</td>
+                                            <td>861-986-2792</td>
+                                            <td>Apr 23, 2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td>54229828427649</td>
+                                            <td>Germaine Nitzsche</td>
+                                            <td>861-986-2792</td>
+                                            <td>Apr 23, 2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td>54229828427649</td>
+                                            <td>Germaine Nitzsche</td>
+                                            <td>861-986-2792</td>
+                                            <td>Apr 23, 2025</td>
+                                        </tr>
+                                        <!-- More rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
             <!-- Shopping Cart (70%) dan Choose Product (30%) -->
             <div class="col-md-8">
@@ -106,7 +165,8 @@
                 <div class="card">
                     <div class="card-header fw-bold text-decoration-underline">Choose Product</div>
                     <div class="card-body p-2">
-                        <input type="text" class="form-control mb-2" placeholder="Search products by name or SKU...">
+                        <input type="text" class="form-control mb-2"
+                            placeholder="Search products by name or SKU...">
                         <div class="table-responsive card-scroll">
                             <table class="table table-sm">
                                 <thead>
@@ -211,21 +271,28 @@
                                                 <td>D</td>
                                                 <td><input type="text" name="right_d_sph" class="form-control"
                                                         value="-01.00"></td>
-                                                <td><input type="text" name="right_d_cyl" class="form-control"></td>
-                                                <td><input type="text" name="right_d_axis" class="form-control"></td>
-                                                <td><input type="text" name="right_d_va" class="form-control"></td>
+                                                <td><input type="text" name="right_d_cyl" class="form-control">
+                                                </td>
+                                                <td><input type="text" name="right_d_axis" class="form-control">
+                                                </td>
+                                                <td><input type="text" name="right_d_va" class="form-control">
+                                                </td>
                                                 <td><input type="text" name="left_d_sph" class="form-control"
                                                         value="+01.25"></td>
-                                                <td><input type="text" name="left_d_cyl" class="form-control"></td>
-                                                <td><input type="text" name="left_d_axis" class="form-control"></td>
+                                                <td><input type="text" name="left_d_cyl" class="form-control">
+                                                </td>
+                                                <td><input type="text" name="left_d_axis" class="form-control">
+                                                </td>
                                                 <td><input type="text" name="left_d_va" class="form-control"></td>
                                             </tr>
                                             <tr>
                                                 <td>N</td>
                                                 <td><input type="text" name="right_n_sph" class="form-control"
                                                         value="-01.00"></td>
-                                                <td><input type="text" name="right_n_cyl" class="form-control"></td>
-                                                <td><input type="text" name="right_n_axis" class="form-control"></td>
+                                                <td><input type="text" name="right_n_cyl" class="form-control">
+                                                </td>
+                                                <td><input type="text" name="right_n_axis" class="form-control">
+                                                </td>
                                                 <td><input type="text" name="right_n_va" class="form-control">
                                                 </td>
                                                 <td><input type="text" name="left_n_sph" class="form-control"
@@ -349,17 +416,38 @@
         </div>
 
         <!-- Checkout Button -->
-      <div class="text-end mt-4">
-    <div class="d-flex flex-wrap gap-2 justify-content-start">
-        <button type="submit" class="btn btn-secondary px-4">
-            <i class="bi bi-save me-1"></i> Save
-        </button>
-        <button type="button" class="btn btn-primary px-4">
-            <i class="bi bi-check-circle me-1"></i> Selesai
-        </button>
-    </div>
-</div>
+        <div class="text-end mt-4">
+            <div class="d-flex flex-wrap gap-2 justify-content-start">
+                <button type="submit" class="btn btn-secondary px-4">
+                    <i class="bi bi-save me-1"></i> Save
+                </button>
+                <button type="button" class="btn btn-primary px-4">
+                    <i class="bi bi-check-circle me-1"></i> Selesai
+                </button>
+            </div>
+        </div>
 
 
     </div>
+
+  <script>
+    const btnAddCustomer = document.getElementById('btnAddCustomer');
+    const btnCancel = document.getElementById('btnCancel');
+    const staffForm = document.getElementById('staffForm');
+    const formContainer = document.getElementById('formContainer');
+    const staffIdInput = document.getElementById('staffId');
+
+    btnAddCustomer.addEventListener('click', () => {
+        staffIdInput.value = '';
+        staffForm.reset();
+        formContainer.classList.remove('d-none');
+    });
+
+    btnCancel.addEventListener('click', () => {
+        formContainer.classList.add('d-none');
+        staffForm.reset();
+        staffIdInput.value = '';
+    });
+</script>
+
 </x-app>

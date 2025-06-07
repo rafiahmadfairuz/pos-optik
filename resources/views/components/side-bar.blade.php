@@ -68,12 +68,11 @@
                     </a>
                 </li>
                 <li class="{{ Request::is('accesories') ? 'active' : '' }}">
-                    <a href="{{ url('accesories') }}">
+                    <a href="{{ url('accessories') }}">
                         <i class="bi bi-bag-fill"></i><span> Accessories</span>
                     </a>
                 </li>
 
-                <!-- COMPANY Section -->
                 <li class="menu-title fw-bold">COMPANY</li>
                 <li class="{{ Request::is('staff') ? 'active' : '' }}">
                     <a href="{{ url('staff') }}">

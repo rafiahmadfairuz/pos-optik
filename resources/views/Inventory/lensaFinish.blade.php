@@ -19,87 +19,112 @@
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
                     <div class="card-body">
-                        <form id="lensaForm" action="{{ route('create.lensaFinish') }}" method="POST">
+                        <form id="lensaForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="lensa_id" id="lensaId" value="">
                             <input type="hidden" name="cabang_id" id="cabang_id" />
 
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="merk" class="form-label">Merk <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('merk') is-invalid @enderror" id="merk" name="merk" value="{{ old('merk') }}" required>
+                                    <label for="merk" class="form-label">Merk <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('merk') is-invalid @enderror"
+                                        id="merk" name="merk" value="{{ old('merk') }}" required>
                                     @error('merk')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="desain" class="form-label">Desain</label>
-                                    <input type="text" class="form-control @error('desain') is-invalid @enderror" id="desain" name="desain" value="{{ old('desain') }}">
+                                    <input type="text" class="form-control @error('desain') is-invalid @enderror"
+                                        id="desain" name="desain" value="{{ old('desain') }}">
                                     @error('desain')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="tipe" class="form-label">Tipe</label>
-                                    <input type="text" class="form-control @error('tipe') is-invalid @enderror" id="tipe" name="tipe" value="{{ old('tipe') }}">
+                                    <input type="text" class="form-control @error('tipe') is-invalid @enderror"
+                                        id="tipe" name="tipe" value="{{ old('tipe') }}">
                                     @error('tipe')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
                                     <label for="sph" class="form-label">SPH</label>
-                                    <input type="text" class="form-control @error('sph') is-invalid @enderror" id="sph" name="sph" value="{{ old('sph') }}">
+                                    <input type="text" class="form-control @error('sph') is-invalid @enderror"
+                                        id="sph" name="sph" value="{{ old('sph') }}">
                                     @error('sph')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
                                     <label for="cyl" class="form-label">CYL</label>
-                                    <input type="text" class="form-control @error('cyl') is-invalid @enderror" id="cyl" name="cyl" value="{{ old('cyl') }}">
+                                    <input type="text" class="form-control @error('cyl') is-invalid @enderror"
+                                        id="cyl" name="cyl" value="{{ old('cyl') }}">
                                     @error('cyl')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
                                     <label for="add" class="form-label">ADD</label>
-                                    <input type="text" class="form-control @error('add') is-invalid @enderror" id="add" name="add" value="{{ old('add') }}">
+                                    <input type="text" class="form-control @error('add') is-invalid @enderror"
+                                        id="add" name="add" value="{{ old('add') }}">
                                     @error('add')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
                                     <label for="stok" class="form-label">Stok</label>
-                                    <input type="number" class="form-control @error('stok') is-invalid @enderror" id="stok" name="stok" value="{{ old('stok') }}">
+                                    <input type="number" class="form-control @error('stok') is-invalid @enderror"
+                                        id="stok" name="stok" value="{{ old('stok') }}">
                                     @error('stok')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
                                 <div class="col-md-3">
                                     <label for="harga" class="form-label">Harga</label>
-                                    <input type="number" class="form-control @error('harga') is-invalid @enderror" id="harga" name="harga" value="{{ old('harga') }}">
+                                    <input type="number" class="form-control @error('harga') is-invalid @enderror"
+                                        id="harga" name="harga" value="{{ old('harga') }}">
                                     @error('harga')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
-                                            <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
@@ -132,14 +157,10 @@
                         </thead>
                         <tbody>
                             @foreach ($lensaFinish as $item)
-                                <tr data-id="{{ $item->id }}"
-                                    data-merk="{{ $item->merk }}"
-                                    data-desain="{{ $item->desain }}"
-                                    data-type="{{ $item->tipe }}"
-                                    data-sph="{{ $item->sph }}"
-                                    data-cyl="{{ $item->cyl }}"
-                                    data-add="{{ $item->add }}"
-                                    data-stok="{{ $item->stok }}"
+                                <tr data-id="{{ $item->id }}" data-merk="{{ $item->merk }}"
+                                    data-desain="{{ $item->desain }}" data-type="{{ $item->tipe }}"
+                                    data-sph="{{ $item->sph }}" data-cyl="{{ $item->cyl }}"
+                                    data-add="{{ $item->add }}" data-stok="{{ $item->stok }}"
                                     data-harga="{{ $item->harga }}">
                                     <td>{{ $item->merk }}</td>
                                     <td>{{ $item->desain }}</td>
@@ -150,8 +171,11 @@
                                     <td>{{ $item->stok }}</td>
                                     <td>{{ $item->harga }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-edit-lensa" title="Edit Lensa"><i class="bi bi-pencil-fill"></i></button>
-                                        <button class="btn btn-sm btn-delete-lensa text-danger" data-bs-toggle="modal" data-bs-target="#deleteLensaModal"><i class="bi bi-trash-fill"></i></button>
+                                        <button class="btn btn-sm btn-edit-lensa" title="Edit Lensa"><i
+                                                class="bi bi-pencil-fill"></i></button>
+                                        <button class="btn btn-sm btn-delete-lensa text-danger" data-bs-toggle="modal"
+                                            data-bs-target="#deleteLensaModal"><i
+                                                class="bi bi-trash-fill"></i></button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -162,8 +186,8 @@
         </div>
     </div>
 
-    {{-- Modal delete --}}
-    <div class="modal fade" id="deleteLensaModal" tabindex="-1" aria-labelledby="deleteLensaModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteLensaModal" tabindex="-1" aria-labelledby="deleteLensaModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <form id="deleteLensaForm" method="POST" action="">
                 @csrf
@@ -171,13 +195,15 @@
                 <div class="modal-content rounded-4 shadow-sm border-0">
                     <div class="modal-header border-0 pb-0">
                         <h5 class="modal-title fw-semibold">Konfirmasi Hapus</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Tutup"></button>
                     </div>
                     <div class="modal-body fs-5 pt-2 pb-3 text-center">
                         Yakin ingin menghapus data lensa ini?
                     </div>
                     <div class="modal-footer border-0 justify-content-center gap-3 pt-0">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger rounded-pill px-4">Delete</button>
                     </div>
                 </div>
@@ -185,86 +211,76 @@
         </div>
     </div>
 
-    {{-- Script --}}
-   <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const formContainer = document.getElementById('formContainer');
-    const btnAdd = document.getElementById('btnAddLensa');
-    const btnCancel = document.getElementById('btnCancel');
-    const form = document.getElementById('lensaForm');
-    const idInput = document.getElementById('lensaId');
-
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const formContainer = document.getElementById('formContainer');
+            const btnAdd = document.getElementById('btnAddLensa');
+            const btnCancel = document.getElementById('btnCancel');
+            const form = document.getElementById('lensaForm');
+            const idInput = document.getElementById('lensaId');
             const cabangInput = document.getElementById('cabang_id');
+            const deleteForm = document.getElementById('deleteLensaForm');
 
-    // Tombol delete dan form delete modal
-    const deleteForm = document.getElementById('deleteLensaForm');
-
-    // Show form tambah data baru
-    btnAdd.addEventListener('click', () => {
-        form.action = "{{ route('create.lensaFinish') }}";  // Ganti sesuai route create lensa kamu
-        // Hapus method override PUT kalau ada
-        const methodInput = form.querySelector('input[name="_method"]');
-        if (methodInput) methodInput.remove();
-
-        form.reset();
-        idInput.value = '';
-
-        formContainer.classList.remove('d-none');
-        form.merk.focus();
-        btnAdd.classList.add('d-none');  // Jika kamu mau sembunyikan tombol add saat form muncul
-    });
-
-    // Tombol cancel untuk sembunyikan form
-    btnCancel.addEventListener('click', () => {
-        formContainer.classList.add('d-none');
-        form.reset();
-        idInput.value = '';
-        btnAdd.classList.remove('d-none');
-    });
-
-    // Event listener untuk tombol edit, gunakan delegation jika tombol edit dinamis
-    document.querySelectorAll('.btn-edit-lensa').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tr = btn.closest('tr');
-            const id = tr.dataset.id;
-
-            form.action = `/lensaFinish/${id}`;  // Sesuaikan route update lensa kamu
-            let methodInput = form.querySelector('input[name="_method"]');
-            if (!methodInput) {
-                methodInput = document.createElement('input');
-                methodInput.type = 'hidden';
-                methodInput.name = '_method';
-                methodInput.value = 'PUT';
-                form.appendChild(methodInput);
-            } else {
-                methodInput.value = 'PUT';
+            function setFormMethod(form, method) {
+                let methodInput = form.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                methodInput.value = method;
             }
 
-            idInput.value = id;
-            form.merk.value = tr.dataset.merk;
-            form.desain.value = tr.dataset.desain;
-            form.tipe.value = tr.dataset.tipe;
-            form.sph.value = tr.dataset.sph;
-            form.cyl.value = tr.dataset.cyl;
-            form.add.value = tr.dataset.add;
-            form.stok.value = tr.dataset.stok;
-            form.harga.value = tr.dataset.harga;
+            btnAdd.addEventListener('click', () => {
+                form.action = "{{ route('lensaFinish.store') }}";
+                form.querySelector('input[name="_method"]')?.remove();
+                form.reset();
+                idInput.value = '';
+                formContainer.classList.remove('d-none');
+                form.merk.focus();
+                btnAdd.classList.add('d-none');
+            });
 
-            formContainer.classList.remove('d-none');
-            form.merk.focus();
-            btnAdd.classList.add('d-none');
-        });
-    });
+            btnCancel.addEventListener('click', () => {
+                formContainer.classList.add('d-none');
+                form.reset();
+                idInput.value = '';
+                btnAdd.classList.remove('d-none');
+            });
 
-    // Event listener untuk tombol delete, atur action form delete
-    document.querySelectorAll('.btn-delete-lensa').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tr = btn.closest('tr');
-            const id = tr.dataset.id;
-            deleteForm.action = `/lensaFinish/${id}`;  // Sesuaikan route delete lensa kamu
-        });
-    });
-        form.addEventListener('submit', (e) => {
+            document.querySelectorAll('.btn-edit-lensa').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tr = btn.closest('tr');
+                    const id = tr.dataset.id;
+                    form.action = `/lensaFinish/${id}`;
+                    setFormMethod(form, 'PUT');
+                    idInput.value = id;
+                    form.merk.value = tr.dataset.merk;
+                    form.desain.value = tr.dataset.desain;
+                    form.tipe.value = tr.dataset.tipe;
+                    form.sph.value = tr.dataset.sph;
+                    form.cyl.value = tr.dataset.cyl;
+                    form.add.value = tr.dataset.add;
+                    form.stok.value = tr.dataset.stok;
+                    form.harga.value = tr.dataset.harga;
+                    formContainer.classList.remove('d-none');
+                    form.merk.focus();
+                    btnAdd.classList.add('d-none');
+                });
+            });
+
+            document.querySelectorAll('.btn-delete-lensa').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tr = btn.closest('tr');
+                    const id = tr.dataset.id;
+                    deleteForm.action = `/lensaFinish/${id}`;
+                    setFormMethod(deleteForm, 'DELETE');
+                    deleteForm.method = 'POST';
+                });
+            });
+
+            form.addEventListener('submit', (e) => {
                 const cabangId = localStorage.getItem('cabang_id');
                 if (!cabangId) {
                     alert("Cabang ID tidak ditemukan.");
@@ -273,7 +289,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 cabangInput.value = cabangId;
             });
-});
-</script>
+        });
+    </script>
+
 
 </x-app>
