@@ -14,7 +14,7 @@ class SoftlensController extends Controller
      */
     public function index()
     {
-        $softlens = Softlen::all();
+        $softlens = Softlen::where('cabang_id', session('cabang_id'))->get();
         return view("Inventory.softlens", compact("softlens"));
     }
 
@@ -38,10 +38,12 @@ class SoftlensController extends Controller
                 'warna' => 'required|string|max:50',
                 'harga' => 'required|numeric|min:0',
                 'stok' => 'required|integer|min:0',
-                'cabang_id' => 'nullable|exists:cabangs,id',
             ]);
 
-            Softlen::create($validated);
+            Softlen::create([
+                ...$validated,
+                'cabang_id' => session('cabang_id'),
+            ]);
 
             return redirect()->route('softlens.index')->with('success', 'Softlens berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -82,7 +84,7 @@ class SoftlensController extends Controller
             'warna' => 'required|string|max:50',
             'harga' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
-            'cabang_id' => 'nullable|exists:cabangs,id',
+
         ]);
 
         try {
@@ -93,7 +95,7 @@ class SoftlensController extends Controller
             $softlens->warna = $validated['warna'];
             $softlens->harga = $validated['harga'];
             $softlens->stok = $validated['stok'];
-            $softlens->cabang_id = $validated['cabang_id'] ?? null;
+            $softlens->cabang_id =  session('cabang_id');
 
             $softlens->save();
 

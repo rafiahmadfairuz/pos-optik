@@ -24,13 +24,24 @@ class AuthController extends Controller
 
         if (Auth::attempt($userData)) {
             $request->session()->regenerate();
-            return redirect()->intended("/");
-        };
-
+            if (Auth::user()->role === 'cabang') {
+                session(['cabang_id' => Auth::user()->cabang_id]);
+                return redirect()->route('dashboard');
+            } else {
+                return redirect()->route('pilihCabang');
+            }
+        }
         return back()->withErrors([
             "email" => "Email Atau Password Salah"
         ])->withInput();
     }
 
+    public function logout(Request $request)
+    {
+        Auth::logout();
 
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login')->with('success', 'Berhasil logout.');
+    }
 }

@@ -22,7 +22,6 @@
                         <form id="insuranceForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="insurance_id" id="insuranceId" value="">
-                            <input type="hidden" name="cabang_id" id="cabang_id" />
 
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -129,7 +128,6 @@
             const btnCancel = document.getElementById('btnCancel');
             const form = document.getElementById('insuranceForm');
             const idInput = document.getElementById('insuranceId');
-            const cabangInput = document.getElementById('cabang_id');
             const deleteForm = document.getElementById('deleteInsuranceForm');
 
             function setFormMethod(form, method) {
@@ -185,15 +183,7 @@
                 });
             });
 
-            form.addEventListener('submit', (e) => {
-                const cabangId = localStorage.getItem('cabang_id');
-                if (!cabangId) {
-                    alert("Cabang ID tidak ditemukan.");
-                    e.preventDefault();
-                    return;
-                }
-                cabangInput.value = cabangId;
-            });
+
         });
     </script>
 

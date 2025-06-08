@@ -13,25 +13,28 @@ return new class extends Migration
     {
         Schema::create('reseps', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orderans')->onDelete('cascade');
+            $table->foreignId('orderan_id')->constrained()->onDelete('cascade');
 
-            $table->string('right_sph')->nullable();
-            $table->string('right_cyl')->nullable();
-            $table->string('right_axis')->nullable();
-            $table->string('right_vh')->nullable();
-            $table->string('right_d')->nullable();
-            $table->string('right_add')->nullable();
-            $table->string('right_pd')->nullable();
+            $table->string('right_sph_d')->nullable();
+            $table->string('right_cyl_d')->nullable();
+            $table->string('right_axis_d')->nullable();
+            $table->string('right_va_d')->nullable();
 
-            $table->string('left_sph')->nullable();
-            $table->string('left_cyl')->nullable();
-            $table->string('left_axis')->nullable();
-            $table->string('left_vh')->nullable();
-            $table->string('left_d')->nullable();
-            $table->string('left_add')->nullable();
-            $table->string('left_pd')->nullable();
+
+
+            $table->string('left_sph_d')->nullable();
+            $table->string('left_cyl_d')->nullable();
+            $table->string('left_axis_d')->nullable();
+            $table->string('left_va_d')->nullable();
+
+
+            $table->string('add_right')->nullable();
+            $table->string('add_left')->nullable();
+            $table->string('pd_right')->nullable();
+            $table->string('pd_left')->nullable();
 
             $table->text('notes')->nullable();
+
             $table->timestamps();
         });
     }

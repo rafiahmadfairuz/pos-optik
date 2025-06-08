@@ -14,7 +14,7 @@ class FrameController extends Controller
      */
     public function index()
     {
-        $frame = Frame::all();
+        $frame = Frame::where('cabang_id', session('cabang_id'))->get();
         return view('Inventory.frame', compact('frame'));
     }
 
@@ -38,10 +38,14 @@ class FrameController extends Controller
                 'warna' => 'required|string|max:50',
                 'harga' => 'required|numeric|min:0',
                 'stok' => 'required|integer|min:0',
-                'cabang_id' => 'nullable|exists:cabangs,id',
+
             ]);
 
-            Frame::create($validated);
+            Frame::create([
+                ...$validated,
+                'cabang_id' => session('cabang_id'),
+            ]);
+
 
             return redirect()->route('frame.index')->with('success', 'Frame berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -83,7 +87,6 @@ class FrameController extends Controller
                 'warna' => 'required|string|max:50',
                 'harga' => 'required|numeric|min:0',
                 'stok' => 'required|integer|min:0',
-                'cabang_id' => 'nullable|exists:cabangs,id',
             ]);
 
             $frame = Frame::findOrFail($id);
@@ -93,7 +96,7 @@ class FrameController extends Controller
             $frame->warna = $validated['warna'];
             $frame->harga = $validated['harga'];
             $frame->stok = $validated['stok'];
-            $frame->cabang_id = $validated['cabang_id'] ?? null;
+            $frame->cabang_id =  session('cabang_id');
 
             $frame->save();
 

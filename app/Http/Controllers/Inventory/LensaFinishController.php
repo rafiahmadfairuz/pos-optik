@@ -14,7 +14,7 @@ class LensaFinishController extends Controller
      */
     public function index()
     {
-        $lensaFinish = LensaFinish::all();
+        $lensaFinish = LensaFinish::where('cabang_id', session('cabang_id'))->get();
         return view('Inventory.lensaFinish', compact('lensaFinish'));
     }
 
@@ -41,12 +41,14 @@ class LensaFinishController extends Controller
                 'add' => 'nullable|numeric',
                 'stok' => 'required|integer|min:0',
                 'harga' => 'required|numeric|min:0',
-                'cabang_id' => 'nullable|exists:cabangs,id',
             ]);
 
-            LensaFinish::create($validated);
+            LensaFinish::create([
+                ...$validated,
+                'cabang_id' => session('cabang_id'),
+            ]);
 
-            return redirect()->route('lensaFinish')->with('success', 'Lensa berhasil ditambahkan.');
+            return redirect()->route('lensaFinish.index')->with('success', 'Lensa berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Create lensa failed: ' . $e->getMessage());
 
@@ -88,7 +90,7 @@ class LensaFinishController extends Controller
             'add' => 'nullable|numeric',
             'stok' => 'required|integer|min:0',
             'harga' => 'required|numeric|min:0',
-            'cabang_id' => 'nullable|exists:cabangs,id',
+
         ]);
 
         try {
@@ -102,7 +104,7 @@ class LensaFinishController extends Controller
             $lensa->add = $validated['add'] ?? null;
             $lensa->stok = $validated['stok'];
             $lensa->harga = $validated['harga'];
-            $lensa->cabang_id = $validated['cabang_id'] ?? null;
+            $lensa->cabang_id =  session('cabang_id');
 
             $lensa->save();
 

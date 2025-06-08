@@ -14,7 +14,7 @@ class AsuransiController extends Controller
      */
     public function index()
     {
-        $asuransi = Asuransi::all();
+        $asuransi = Asuransi::where('cabang_id', session('cabang_id'))->get();
         return view('Informasi.asuransi', compact('asuransi'));
     }
 
@@ -37,7 +37,10 @@ class AsuransiController extends Controller
                 'nominal' => 'required|numeric|min:0',
             ]);
 
-            Asuransi::create($validated);
+            Asuransi::create([
+                ...$validated,
+                'cabang_id' => session('cabang_id'),
+            ]);
 
             return redirect()->route('asuransi.index')->with('success', 'Data asuransi berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -77,7 +80,11 @@ class AsuransiController extends Controller
             ]);
 
             $asuransi = Asuransi::findOrFail($id);
-            $asuransi->update($validated);
+            $asuransi->update([
+                ...$validated,
+                'cabang_id' => session('cabang_id'),
+            ]);
+
 
             return back()->with('success', 'Data asuransi berhasil diperbarui!');
         } catch (\Illuminate\Validation\ValidationException $e) {

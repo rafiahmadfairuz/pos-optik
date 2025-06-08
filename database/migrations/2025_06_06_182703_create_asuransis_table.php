@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string("nama");
             $table->decimal('nominal', 15, 2);
+            $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();
         });
     }

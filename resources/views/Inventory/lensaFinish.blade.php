@@ -12,9 +12,14 @@
             <div class="card-body py-5 px-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Lensa Finish</h5>
-                    <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddLensa">
-                        Tambah Data
-                    </button>
+                    @auth
+                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                            <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddLensa">
+                                Tambah Data
+                            </button>
+                        @endif
+                    @endauth
+
                 </div>
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
@@ -22,7 +27,6 @@
                         <form id="lensaForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="lensa_id" id="lensaId" value="">
-                            <input type="hidden" name="cabang_id" id="cabang_id" />
 
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -152,7 +156,12 @@
                                 <th>ADD</th>
                                 <th>Stok</th>
                                 <th>Harga</th>
-                                <th>Aksi</th>
+                                @auth
+                                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                        <th>Aksi</th>
+                                    @endif
+                                @endauth
+
                             </tr>
                         </thead>
                         <tbody>
@@ -170,13 +179,18 @@
                                     <td>{{ $item->add }}</td>
                                     <td>{{ $item->stok }}</td>
                                     <td>{{ $item->harga }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-edit-lensa" title="Edit Lensa"><i
-                                                class="bi bi-pencil-fill"></i></button>
-                                        <button class="btn btn-sm btn-delete-lensa text-danger" data-bs-toggle="modal"
-                                            data-bs-target="#deleteLensaModal"><i
-                                                class="bi bi-trash-fill"></i></button>
-                                    </td>
+                                    @auth
+                                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                            <td>
+                                                <button class="btn btn-sm btn-edit-lensa" title="Edit Lensa"><i
+                                                        class="bi bi-pencil-fill"></i></button>
+                                                <button class="btn btn-sm btn-delete-lensa text-danger"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteLensaModal"><i
+                                                        class="bi bi-trash-fill"></i></button>
+                                            </td>
+                                        @endif
+                                    @endauth
+
                                 </tr>
                             @endforeach
                         </tbody>
@@ -280,15 +294,7 @@
                 });
             });
 
-            form.addEventListener('submit', (e) => {
-                const cabangId = localStorage.getItem('cabang_id');
-                if (!cabangId) {
-                    alert("Cabang ID tidak ditemukan.");
-                    e.preventDefault();
-                    return;
-                }
-                cabangInput.value = cabangId;
-            });
+
         });
     </script>
 

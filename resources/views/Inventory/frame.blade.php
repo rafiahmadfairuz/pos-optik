@@ -12,9 +12,14 @@
             <div class="card-body py-5 px-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Frame</h5>
-                    <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddFrame">
-                        Tambah Data
-                    </button>
+                    @auth
+                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                            <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddFrame">
+                                Tambah Data
+                            </button>
+                        @endif
+                    @endauth
+
                 </div>
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
@@ -22,7 +27,6 @@
                         <form id="frameForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="frame_id" id="frameId" value="">
-                            <input type="hidden" name="cabang_id" id="cabang_id" />
 
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -111,7 +115,11 @@
                                 <th>Warna</th>
                                 <th>Harga</th>
                                 <th>Stok</th>
-                                <th>Aksi</th>
+                                @auth
+                                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                        <th class="py-3 px-4 fw-bold">Aksi</th>
+                                    @endif
+                                @endauth
                             </tr>
                         </thead>
                         <tbody>
@@ -124,13 +132,18 @@
                                     <td>{{ $item->warna }}</td>
                                     <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                     <td>{{ $item->stok }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-edit-frame" title="Edit Frame"><img
-                                                src="/assets/img/icons/edit.svg" alt="edit"></button>
-                                        <button class="btn btn-sm btn-delete-frame" data-bs-toggle="modal"
-                                            data-bs-target="#deleteFrameModal"><img src="/assets/img/icons/delete.svg"
-                                                alt="delete"></button>
-                                    </td>
+                                    @auth
+                                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                            <td>
+                                                <button class="btn btn-sm btn-edit-frame" title="Edit Frame"><img
+                                                        src="/assets/img/icons/edit.svg" alt="edit"></button>
+                                                <button class="btn btn-sm btn-delete-frame" data-bs-toggle="modal"
+                                                    data-bs-target="#deleteFrameModal"><img
+                                                        src="/assets/img/icons/delete.svg" alt="delete"></button>
+                                            </td>
+                                        @endif
+                                    @endauth
+
                                 </tr>
                             @endforeach
                         </tbody>
@@ -234,15 +247,7 @@
                 });
             });
 
-            form.addEventListener('submit', (e) => {
-                const cabangId = localStorage.getItem('cabang_id');
-                if (!cabangId) {
-                    alert("Cabang ID tidak ditemukan.");
-                    e.preventDefault();
-                    return;
-                }
-                cabangInput.value = cabangId;
-            });
+
         });
     </script>
 

@@ -18,32 +18,37 @@
                     </a>
                 </li>
 
-                <!-- FRONT DESK Section -->
-                <li class="menu-title fw-bold">FRONT DESK</li>
-                <li class="{{ Request::is('kasir') ? 'active' : '' }}">
-                    <a href="{{ url('kasir') }}">
-                        <img src="{{ asset('assets/img/icons/sales1.svg') }}" alt="img">
-                        <span>Kasir</span>
-                    </a>
-                </li>
-                <li class="{{ Request::is('customer') ? 'active' : '' }}">
-                    <a href="{{ url('customer') }}">
-                        <img src="{{ asset('assets/img/icons/users1.svg') }}" alt="img">
-                        <span>Customer</span>
-                    </a>
-                </li>
-                <li class="{{ Request::is('orderan') ? 'active' : '' }}">
-                    <a href="{{ url('orderan') }}">
-                        <img src="{{ asset('assets/img/icons/transfer1.svg') }}" alt="img">
-                        <span>Orderan</span>
-                    </a>
-                </li>
-                <li class="{{ Request::is('asuransi') ? 'active' : '' }}">
-                    <a href="{{ url('asuransi') }}">
-                        <img src="{{ asset('assets/img/icons/purchase1.svg') }}" alt="img">
-                        <span>Asuransi</span>
-                    </a>
-                </li>
+                @auth
+                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                        <!-- FRONT DESK Section -->
+                        <li class="menu-title fw-bold">FRONT DESK</li>
+                        <li class="{{ Request::is('kasir') ? 'active' : '' }}">
+                            <a href="{{ url('kasir') }}">
+                                <img src="{{ asset('assets/img/icons/sales1.svg') }}" alt="img">
+                                <span>Kasir</span>
+                            </a>
+                        </li>
+                        <li class="{{ Request::is('customer') ? 'active' : '' }}">
+                            <a href="{{ url('customer') }}">
+                                <img src="{{ asset('assets/img/icons/users1.svg') }}" alt="img">
+                                <span>Customer</span>
+                            </a>
+                        </li>
+                        <li class="{{ Request::is('orderan') ? 'active' : '' }}">
+                            <a href="{{ url('orderan') }}">
+                                <img src="{{ asset('assets/img/icons/transfer1.svg') }}" alt="img">
+                                <span>Orderan</span>
+                            </a>
+                        </li>
+                        <li class="{{ Request::is('asuransi') ? 'active' : '' }}">
+                            <a href="{{ url('asuransi') }}">
+                                <img src="{{ asset('assets/img/icons/purchase1.svg') }}" alt="img">
+                                <span>Asuransi</span>
+                            </a>
+                        </li>
+                    @endif
+                @endauth
+
 
                 <!-- INVENTORY Section -->
                 <li class="menu-title fw-bold">INVENTORY</li>
@@ -73,13 +78,18 @@
                     </a>
                 </li>
 
-                <li class="menu-title fw-bold">COMPANY</li>
-                <li class="{{ Request::is('staff') ? 'active' : '' }}">
-                    <a href="{{ url('staff') }}">
-                        <img src="{{ asset('assets/img/icons/users1.svg') }}" alt="img">
-                        <span>User & Staff</span>
-                    </a>
-                </li>
+                @auth
+                    @if (Auth::user()->role === 'admin')
+                        <li class="menu-title fw-bold">COMPANY</li>
+                        <li class="{{ Request::is('staff') ? 'active' : '' }}">
+                            <a href="{{ url('staff') }}">
+                                <img src="{{ asset('assets/img/icons/users1.svg') }}" alt="img">
+                                <span>User & Staff</span>
+                            </a>
+                        </li>
+                    @endif
+                @endauth
+
 
             </ul>
         </div>

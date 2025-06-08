@@ -12,9 +12,14 @@
             <div class="card-body py-5 px-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Aksesoris</h5>
-                    <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddAccessories">
-                        Tambah Data
-                    </button>
+                    @auth
+                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                            <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddAccessories">
+                                Tambah Data
+                            </button>
+                        @endif
+                    @endauth
+
                 </div>
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
@@ -22,7 +27,6 @@
                         <form id="accessoriesForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="accessories_id" id="accessoriesId" value="">
-                            <input type="hidden" name="cabang_id" id="cabang_id" />
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="accessoriesName" class="form-label">Nama <span
@@ -94,8 +98,13 @@
                                 <th class="py-3 px-4 fw-bold">Nama</th>
                                 <th class="py-3 px-4 fw-bold">Jenis</th>
                                 <th class="py-3 px-4 fw-bold">Harga</th>
-                                <th class="py-3 px-4 fw-bold">Stok</th>
-                                <th class="py-3 px-4 fw-bold">Aksi</th>
+                                <th class="py-3 px-4 fw-bold text-center">Stok</th>
+                                @auth
+                                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                        <th class="py-3 px-4 fw-bold">Aksi</th>
+                                    @endif
+                                @endauth
+
                             </tr>
                         </thead>
                         <tbody>
@@ -106,16 +115,21 @@
                                     <td>{{ $acc->nama }}</td>
                                     <td>{{ $acc->jenis }}</td>
                                     <td>Rp {{ number_format($acc->harga, 0, ',', '.') }}</td>
-                                    <td>{{ $acc->stok }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-edit-accessory" title="Edit Aksesori">
-                                            <img src="assets/img/icons/edit.svg" alt="edit">
-                                        </button>
-                                        <button class="btn btn-sm btn-delete-accessory" title="Delete Aksesori"
-                                            data-bs-toggle="modal" data-bs-target="#deleteAccessoryModal">
-                                            <img src="assets/img/icons/delete.svg" alt="delete">
-                                        </button>
-                                    </td>
+                                    <td class="text-center">{{ $acc->stok }}</td>
+                                    @auth
+                                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                            <td>
+                                                <button class="btn btn-sm btn-edit-accessory" title="Edit Aksesori">
+                                                    <img src="assets/img/icons/edit.svg" alt="edit">
+                                                </button>
+                                                <button class="btn btn-sm btn-delete-accessory" title="Delete Aksesori"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteAccessoryModal">
+                                                    <img src="assets/img/icons/delete.svg" alt="delete">
+                                                </button>
+                                            </td>
+                                        @endif
+                                    @endauth
+
                                 </tr>
                             @endforeach
 
@@ -151,99 +165,92 @@
         </div>
     </div>
 
- <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const formContainer = document.getElementById('formContainer');
-        const btnAddAccessories = document.getElementById('btnAddAccessories');
-        const btnCancel = document.getElementById('btnCancel');
-        const accessoriesForm = document.getElementById('accessoriesForm');
-        const accessoriesId = document.getElementById('accessoriesId');
-        const accessoriesName = document.getElementById('accessoriesName');
-        const accessoriesJenis = document.getElementById('accessoriesjenis');
-        const accessoriesHarga = document.getElementById('accessoriesHarga');
-        const accessoriesStok = document.getElementById('accessoriesStok');
-        const deleteAccessoriesForm = document.getElementById('deleteAccessoriesForm');
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const formContainer = document.getElementById('formContainer');
+            const btnAddAccessories = document.getElementById('btnAddAccessories');
+            const btnCancel = document.getElementById('btnCancel');
+            const accessoriesForm = document.getElementById('accessoriesForm');
+            const accessoriesId = document.getElementById('accessoriesId');
+            const accessoriesName = document.getElementById('accessoriesName');
+            const accessoriesJenis = document.getElementById('accessoriesjenis');
+            const accessoriesHarga = document.getElementById('accessoriesHarga');
+            const accessoriesStok = document.getElementById('accessoriesStok');
+            const deleteAccessoriesForm = document.getElementById('deleteAccessoriesForm');
 
-        accessoriesForm.addEventListener('submit', function (e) {
-            const cabangId = localStorage.getItem('cabang_id');
-            if (!cabangId) {
-                alert('Cabang ID tidak ditemukan di localStorage.');
-                e.preventDefault();
-                return;
+
+
+            function setFormMethod(form, method) {
+                let methodInput = form.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                methodInput.value = method;
             }
-            document.getElementById('cabang_id').value = cabangId;
-        });
 
-        function setFormMethod(form, method) {
-            let methodInput = form.querySelector('input[name="_method"]');
-            if (!methodInput) {
-                methodInput = document.createElement('input');
-                methodInput.type = 'hidden';
-                methodInput.name = '_method';
-                form.appendChild(methodInput);
-            }
-            methodInput.value = method;
-        }
-
-        btnAddAccessories.addEventListener('click', () => {
-            accessoriesForm.action = "{{ route('accessories.store') }}";
-            accessoriesForm.querySelector('input[name="_method"]')?.remove();
-            accessoriesId.value = '';
-            accessoriesForm.reset();
-            formContainer.classList.remove('d-none');
-        });
-
-        btnCancel.addEventListener('click', () => {
-            formContainer.classList.add('d-none');
-            accessoriesForm.reset();
-            accessoriesId.value = '';
-        });
-
-        document.querySelectorAll('.btn-edit-accessory').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tr = e.target.closest('tr');
-                if (!tr) return;
-
-                const id = tr.dataset.id;
-                const name = tr.dataset.nama;
-                const type = tr.dataset.jenis;
-                const price = tr.dataset.harga;
-                const stock = tr.dataset.stok;
-
-                accessoriesForm.action = `/accessories/${id}`;
-                setFormMethod(accessoriesForm, 'PUT');
-
-                accessoriesId.value = id;
-                accessoriesName.value = name;
-                accessoriesJenis.value = type;
-                accessoriesHarga.value = price;
-                accessoriesStok.value = stock;
-
+            btnAddAccessories.addEventListener('click', () => {
+                accessoriesForm.action = "{{ route('accessories.store') }}";
+                accessoriesForm.querySelector('input[name="_method"]')?.remove();
+                accessoriesId.value = '';
+                accessoriesForm.reset();
                 formContainer.classList.remove('d-none');
-                accessoriesName.focus();
             });
-        });
 
-        document.querySelectorAll('.btn-delete-accessory').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tr = e.target.closest('tr');
-                if (!tr) return;
-
-                const id = tr.dataset.id;
-                deleteAccessoriesForm.action = `/accessories/${id}`;
-                setFormMethod(deleteAccessoriesForm, 'DELETE');
-
-                const deleteModal = new bootstrap.Modal(document.getElementById('deleteAccessoriesModal'));
-                deleteModal.show();
+            btnCancel.addEventListener('click', () => {
+                formContainer.classList.add('d-none');
+                accessoriesForm.reset();
+                accessoriesId.value = '';
             });
+
+            document.querySelectorAll('.btn-edit-accessory').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tr = e.target.closest('tr');
+                    if (!tr) return;
+
+                    const id = tr.dataset.id;
+                    const name = tr.dataset.nama;
+                    const type = tr.dataset.jenis;
+                    const price = tr.dataset.harga;
+                    const stock = tr.dataset.stok;
+
+                    accessoriesForm.action = `/accessories/${id}`;
+                    setFormMethod(accessoriesForm, 'PUT');
+
+                    accessoriesId.value = id;
+                    accessoriesName.value = name;
+                    accessoriesJenis.value = type;
+                    accessoriesHarga.value = price;
+                    accessoriesStok.value = stock;
+
+                    formContainer.classList.remove('d-none');
+                    accessoriesName.focus();
+                });
+            });
+
+            document.querySelectorAll('.btn-delete-accessory').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const tr = e.target.closest('tr');
+                    if (!tr) return;
+
+                    const id = tr.dataset.id;
+                    deleteAccessoriesForm.action = `/accessories/${id}`;
+                    setFormMethod(deleteAccessoriesForm, 'DELETE');
+
+                    const deleteModal = new bootstrap.Modal(document.getElementById(
+                        'deleteAccessoriesModal'));
+                    deleteModal.show();
+                });
+            });
+
+
+
+            const hasFormError = {{ $errors->any() ? 'true' : 'false' }};
+            if (hasFormError) {
+                formContainer.classList.remove('d-none');
+            }
         });
-
-
-
-        const hasFormError = {{ $errors->any() ? 'true' : 'false' }};
-        if (hasFormError) {
-            formContainer.classList.remove('d-none');
-        }
-    });
-</script>
+    </script>
 </x-app>

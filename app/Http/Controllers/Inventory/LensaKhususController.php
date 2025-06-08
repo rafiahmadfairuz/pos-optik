@@ -14,7 +14,7 @@ class LensaKhususController extends Controller
      */
     public function index()
     {
-        $lensaKhusus = LensaKhusus::all();
+        $lensaKhusus = LensaKhusus::where('cabang_id', session('cabang_id'))->get();
         return view('Inventory.lensaKhusus', compact('lensaKhusus'));
     }
 
@@ -41,10 +41,12 @@ class LensaKhususController extends Controller
                 'add' => 'nullable|numeric',
                 'estimasi_selesai_hari' => 'required|integer',
                 'status_pesanan' => 'required',
-                'cabang_id' => 'nullable|exists:cabangs,id',
             ]);
 
-            LensaKhusus::create($validated);
+            LensaKhusus::create([
+                ...$validated,
+                'cabang_id' => session('cabang_id'),
+            ]);
 
             return redirect()->route('lensaKhusus.index')->with('success', 'Lensa Khusus berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -88,7 +90,7 @@ class LensaKhususController extends Controller
                 'add' => 'nullable|numeric',
                 'estimasi_selesai_hari' => 'required|integer',
                 'status_pesanan' => 'required',
-                'cabang_id' => 'nullable|exists:cabangs,id',
+
             ]);
 
             $lensa = LensaKhusus::findOrFail($id);
@@ -101,7 +103,7 @@ class LensaKhususController extends Controller
             $lensa->add = $validated['add'] ?? null;
             $lensa->estimasi_selesai_hari = $validated['estimasi_selesai_hari'];
             $lensa->status_pesanan = $validated['status_pesanan'];
-            $lensa->cabang_id = $validated['cabang_id'] ?? null;
+            $lensa->cabang_id = session('cabang_id');
 
             $lensa->save();
 

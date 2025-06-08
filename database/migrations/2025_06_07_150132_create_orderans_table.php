@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('orderans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
             $table->date('order_date');
             $table->date('complete_date')->nullable();
             $table->decimal('total', 15, 2);

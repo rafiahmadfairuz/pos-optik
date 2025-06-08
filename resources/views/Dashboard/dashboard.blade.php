@@ -7,7 +7,8 @@
             <div class="col-lg-9 col-md-12">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h4 class="card-title mb-0">Diagram Penjualan Harian</h4>
+                        <h4 class="card-title mb-0">Diagram Penjualan Harian Cabang {{ session('cabang_id') }}</p>
+                        </h4>
                     </div>
                     <div class="card-body">
                         <canvas id="chartBar1" class="h-300"></canvas>
@@ -29,7 +30,7 @@
             <div class="col-lg-3 col-md-12 d-flex flex-column">
                 <div class="card flex-fill h-100">
                     <div class="card-header pb-0 d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0">Data Stok Produk</h4>
+                        <h4 class="card-title mb-0">Stok Produk Paling Sedikit Cabang {{ session("cabang_id") }}</h4>
                         <div class="dropdown">
                             <a href="javascript:void(0);" data-bs-toggle="dropdown" class="dropset">
                                 <i class="fa fa-ellipsis-v"></i>
@@ -47,114 +48,28 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Nama Produk</th>
+                                        <th>Kategori</th>
                                         <th>Stok</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Kacamata Pria Elegan</td>
-                                        <td>15</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Lensa Anti Radiasi</td>
-                                        <td>8</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Frame Titanium Wanita</td>
-                                        <td>12</td>
-                                    </tr>
-                                    <tr>
-                                        <td>4</td>
-                                        <td>Softlens Natural Look</td>
-                                        <td>20</td>
-                                    </tr>
-                                    <tr>
-                                        <td>5</td>
-                                        <td>Kacamata Hitam Fashion</td>
-                                        <td>10</td>
-                                    </tr>
-                                    <tr>
-                                        <td>6</td>
-                                        <td>Lensa Minus Tipis</td>
-                                        <td>30</td>
-                                    </tr>
-                                    <tr>
-                                        <td>7</td>
-                                        <td>Kacamata Anak Karakter</td>
-                                        <td>25</td>
-                                    </tr>
-                                    <tr>
-                                        <td>8</td>
-                                        <td>Frame Retro Bulat</td>
-                                        <td>17</td>
-                                    </tr>
-                                    <tr>
-                                        <td>9</td>
-                                        <td>Softlens Warna Abu</td>
-                                        <td>22</td>
-                                    </tr>
-                                    <tr>
-                                        <td>10</td>
-                                        <td>Kacamata Baca Anti UV</td>
-                                        <td>13</td>
-                                    </tr>
-                                    <tr>
-                                        <td>11</td>
-                                        <td>Lensa Photochromic</td>
-                                        <td>9</td>
-                                    </tr>
-                                    <tr>
-                                        <td>12</td>
-                                        <td>Frame Klasik Logam</td>
-                                        <td>6</td>
-                                    </tr>
-                                    <tr>
-                                        <td>13</td>
-                                        <td>Softlens Pink Natural</td>
-                                        <td>18</td>
-                                    </tr>
-                                    <tr>
-                                        <td>14</td>
-                                        <td>Frame Kacamata Kayu</td>
-                                        <td>4</td>
-                                    </tr>
-                                    <tr>
-                                        <td>15</td>
-                                        <td>Lensa Anti Silau</td>
-                                        <td>14</td>
-                                    </tr>
-                                    <tr>
-                                        <td>16</td>
-                                        <td>Kacamata Outdoor</td>
-                                        <td>11</td>
-                                    </tr>
-                                    <tr>
-                                        <td>17</td>
-                                        <td>Frame Anak Anti Patah</td>
-                                        <td>16</td>
-                                    </tr>
-                                    <tr>
-                                        <td>18</td>
-                                        <td>Kacamata Gaming</td>
-                                        <td>7</td>
-                                    </tr>
-                                    <tr>
-                                        <td>19</td>
-                                        <td>Lensa Silinder</td>
-                                        <td>19</td>
-                                    </tr>
-                                    <tr>
-                                        <td>20</td>
-                                        <td>Frame Minimalis</td>
-                                        <td>23</td>
-                                    </tr>
+                                    @forelse ($leastStockProducts as $index => $produk)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $produk->nama_produk }}</td>
+                                            <td>{{ ucfirst(str_replace('_', ' ', $produk->kategori)) }}</td>
+                                            <td>{{ $produk->stok }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center">Tidak ada data produk.</td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
                 </div>
             </div>
 

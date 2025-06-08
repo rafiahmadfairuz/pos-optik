@@ -14,7 +14,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = User::all();
+        $customers = User::where('cabang_id', session('cabang_id'))->get();
         return view("Informasi.customer", compact("customers"));
     }
 
@@ -38,9 +38,12 @@ class CustomerController extends Controller
                 'phone' => 'required|regex:/^[0-9+\-\s()]*$/|max:20',
             ]);
 
-            User::create($validated);
+            User::create([
+                ...$validated,
+                'cabang_id' => session('cabang_id'),
+            ]);
 
-            return redirect()->route('customer.index')->with('success', 'Customer berhasil ditambahkan.');
+            return redirect()->back()->with('success', 'Customer berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validasi tambah customer gagal: ' . $e->getMessage());
             return back()->with('error', 'Validasi gagal. Mohon periksa kembali input Anda.')->withInput();
@@ -49,6 +52,7 @@ class CustomerController extends Controller
             return back()->with('error', 'Gagal menambahkan Customer.')->withInput();
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -83,6 +87,7 @@ class CustomerController extends Controller
             $customer->name = $validated['name'];
             $customer->email = $validated['email'];
             $customer->phone = $validated['phone'] ?? null;
+            $customer->cabang_id = session('cabang_id');
 
             $customer->save();
 

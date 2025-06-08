@@ -14,7 +14,7 @@ class AccessoriesController extends Controller
      */
     public function index()
     {
-        $accessories = Accessories::all();
+        $accessories = Accessories::where('cabang_id', session('cabang_id'))->get();
         return view("Inventory.accesories", compact("accessories"));
     }
 
@@ -37,10 +37,12 @@ class AccessoriesController extends Controller
                 'jenis' => 'required|string|max:50',
                 'harga' => 'required|numeric|min:0',
                 'stok' => 'required|integer|min:0',
-                'cabang_id' => 'nullable|exists:cabangs,id',
             ]);
 
-            Accessories::create($validated);
+            Accessories::create([
+                ...$validated,
+                'cabang_id' => session('cabang_id'),
+            ]);
 
             return back()->with('success', 'Aksesori berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -78,7 +80,6 @@ class AccessoriesController extends Controller
             'jenis' => 'required|string|max:50',
             'harga' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
-            'cabang_id' => 'nullable|exists:cabangs,id',
         ]);
 
         try {
@@ -88,7 +89,8 @@ class AccessoriesController extends Controller
             $accessory->jenis = $validated['jenis'];
             $accessory->harga = $validated['harga'];
             $accessory->stok = $validated['stok'];
-            $accessory->cabang_id = $validated['cabang_id'] ?? null;
+            $accessory->cabang_id = session('cabang_id');
+
 
             $accessory->save();
 
