@@ -15,7 +15,6 @@ class CustomerSearch extends Component
     {
         $this->selectedCustomer = User::find($customerId);
 
-        Log::info('Customer selected:', ['customer' => $this->selectedCustomer]);
 
         $this->dispatch('customerSelected', customer: $this->selectedCustomer);
     }
@@ -43,8 +42,6 @@ class CustomerSearch extends Component
             })
             ->paginate(3);
 
-        Log::info('Search term:', ['search' => $this->search]);
-        Log::info('Found customers:', ['customers' => $customers]);
 
         return view('livewire.customer-search', compact('customers'));
     }

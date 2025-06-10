@@ -10,7 +10,7 @@
           <i class="bi bi-person-fill fs-4 text-primary me-3"></i>
           <div>
             <div class="text-muted small">Name</div>
-            <strong class="fs-5">{{ $customer['id'] }}</strong>
+            <strong class="fs-5">{{ $customer['name'] }}</strong>
           </div>
         </div>
         <div class="d-flex align-items-center mb-3 text-truncate" title="{{ $customer['phone'] }}">

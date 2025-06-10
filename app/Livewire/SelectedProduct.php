@@ -29,7 +29,6 @@ class SelectedProduct extends Component
             $this->cart[] = $product;
         }
 
-        // Kirim cart ke parent (TransactionDetail) via dispatch
         $this->dispatch('cartUpdated', $this->cart);
     }
 

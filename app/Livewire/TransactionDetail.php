@@ -21,7 +21,7 @@ class TransactionDetail extends Component
     public $payment_method, $payment_status, $asuransi;
 
     public $asuransiList = [];
-    public $optometristList = ["joko"];
+    public $optometristList = [];
     public $cabang_id;
 
     protected $listeners = ['setCabangId'];
@@ -37,7 +37,7 @@ class TransactionDetail extends Component
             'customer_paying' => 'required|numeric|min:0',
             'payment_method' => ['required', Rule::in(['cash', 'card'])],
             'payment_status' => ['required', Rule::in(['paid', 'unpaid'])],
-            'asuransi' => 'nullable|exists:asuransi,id',
+            'asuransi' => 'nullable|exists:asuransis,id',
 
             'right_sph_d' => 'nullable|string|max:10',
             'right_cyl_d' => 'nullable|string|max:10',
@@ -60,45 +60,48 @@ class TransactionDetail extends Component
         $this->cabang_id = $id;
     }
 
-    public function submitToParent()
+    public function submit()
     {
         $this->validate();
 
-        $this->dispatch('dataOrderOrder', [
-            'order_status' => $this->order_status,
-            'order_date' => $this->order_date,
-            'complete_date' => $this->complete_date,
-            'payment_type' => $this->payment_type,
-            'optometrist_id' => $this->optometrist_id,
-            'customer_paying' => $this->customer_paying,
-            'payment_method' => $this->payment_method,
-            'payment_status' => $this->payment_status,
-            'asuransi_id' => $this->asuransi,
-        ]);
+       
+        $transactionData = [
+            'order_data' => [
+                'order_status' => $this->order_status,
+                'order_date' => $this->order_date,
+                'complete_date' => $this->complete_date,
+                'payment_type' => $this->payment_type,
+                'optometrist_id' => $this->optometrist_id,
+                'customer_paying' => $this->customer_paying,
+                'payment_method' => $this->payment_method,
+                'payment_status' => $this->payment_status,
+                'asuransi_id' => $this->asuransi,
+            ],
+            'resep_data' => [
+                'right_sph_d' => $this->right_sph_d,
+                'right_cyl_d' => $this->right_cyl_d,
+                'right_axis_d' => $this->right_axis_d,
+                'right_va_d' => $this->right_va_d,
+                'left_sph_d' => $this->left_sph_d,
+                'left_cyl_d' => $this->left_cyl_d,
+                'left_axis_d' => $this->left_axis_d,
+                'left_va_d' => $this->left_va_d,
+                'add_right' => $this->add_right,
+                'add_left' => $this->add_left,
+                'pd_right' => $this->pd_right,
+                'pd_left' => $this->pd_left,
+                'notes' => $this->notes,
+            ]
+        ];
 
-        $this->dispatch('dataOrderResep', [
-            'right_sph_d' => $this->right_sph_d,
-            'right_cyl_d' => $this->right_cyl_d,
-            'right_axis_d' => $this->right_axis_d,
-            'right_va_d' => $this->right_va_d,
-            'left_sph_d' => $this->left_sph_d,
-            'left_cyl_d' => $this->left_cyl_d,
-            'left_axis_d' => $this->left_axis_d,
-            'left_va_d' => $this->left_va_d,
-            'add_right' => $this->add_right,
-            'add_left' => $this->add_left,
-            'pd_right' => $this->pd_right,
-            'pd_left' => $this->pd_left,
-            'notes' => $this->notes,
-        ]);
+        $this->dispatch('initiateTransactionSave', data: $transactionData);
+
     }
 
     public function render()
     {
         $this->asuransiList = Asuransi::where('cabang_id', session('cabang_id'))->get();
-        $this->optometristList = session("cabang_id")
-            ? Staff::where('cabang_id', $this->cabang_id)->get()
-            : [];
+        $this->optometristList = Staff::where('cabang_id', session('cabang_id'))->get();
 
         return view('livewire.transaction-detail');
     }

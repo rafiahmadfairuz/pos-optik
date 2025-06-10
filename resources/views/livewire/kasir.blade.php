@@ -1,5 +1,6 @@
-<x-app>
-    @section('title', 'Kasir')
+@extends('components.layouts.app')
+@section('title', 'Kasir')
+@section('content')
     <style>
         .card-scroll {
             max-height: 300px;
@@ -23,8 +24,8 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="customerName" class="form-label">Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                id="customerName" name="name" value="{{ old('name') }}" required>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="customerName"
+                                name="name" value="{{ old('name') }}" required>
                             @error('name')
                                 <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
                                     <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
@@ -73,7 +74,6 @@
             <livewire:transaction-detail />
             <livewire:bill-order />
         </div>
-            <livewire:orderan />
 
 
 
@@ -119,5 +119,4 @@
             formContainer.classList.remove('d-none');
         }
     </script>
-
-</x-app>
+@endsection

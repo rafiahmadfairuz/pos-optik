@@ -6,7 +6,6 @@ use App\Http\Controllers\Company\AdminController;
 use App\Http\Controllers\Company\StaffController;
 use App\Http\Controllers\FrontDesk\AsuransiController;
 use App\Http\Controllers\FrontDesk\CustomerController;
-use App\Http\Controllers\FrontDesk\KasirController;
 use App\Http\Controllers\Inventory\AccessoriesController;
 use App\Http\Controllers\Inventory\FrameController;
 use App\Http\Controllers\Inventory\LensaFinishController;
@@ -14,8 +13,7 @@ use App\Http\Controllers\Inventory\LensaKhususController;
 use App\Http\Controllers\Inventory\SoftlensController;
 use App\Http\Controllers\Navigation\DashboardController;
 use App\Http\Controllers\Navigation\ReportController;
-use App\Livewire\Orderan;
-use SebastianBergmann\CodeCoverage\Report\Xml\Report;
+use App\Livewire\Kasir;
 
 Route::get('/login', [AuthController::class, "showLogin"])->name('login');
 Route::post('/login', [AuthController::class, "processLogin"])->name("login.process");
@@ -31,7 +29,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource("/lensaKhusus", LensaKhususController::class)->except(['create', 'show', 'edit']);
         Route::resource("/softlens", SoftlensController::class)->except(['create', 'show', 'edit']);
         Route::resource('/accessories', AccessoriesController::class)->except(['create', 'show', 'edit']);
-        Route::get("/kasir", [KasirController::class, "index"]);
+        Route::get("/kasir", Kasir::class);
 
 
         Route::get('/customer/detail', function () {

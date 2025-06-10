@@ -115,7 +115,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4" id="asuransiDetail" >
+                    <div class="col-md-4" id="asuransiDetail">
                         <label class="form-label">Detail Asuransi</label>
                         <select wire:model="asuransi" class="form-select @error('asuransi') is-invalid @enderror">
                             <option value="">-- Pilih --</option>
@@ -126,7 +126,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Nama Optometrist {{ session("cabang_id") }}</label>
+                        <label class="form-label">Nama Optometrist</label>
                         <select wire:model="optometrist_name"
                             class="form-select @error('optometrist_name') is-invalid @enderror">
                             <option value="">-- Pilih --</option>
@@ -162,10 +162,15 @@
                         <input type="number" wire:model="customer_paying"
                             class="form-control @error('customer_paying') is-invalid @enderror">
                     </div>
-
-
-
                 </div>
+            </div>
+        </div>
+
+        <div class="text-end mt-4">
+            <div class="d-flex flex-wrap gap-2 justify-content-start">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check-circle me-1"></i> Selesai
+                </button>
             </div>
         </div>
 
