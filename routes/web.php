@@ -34,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get("/kasir", [KasirController::class, "index"]);
         Route::get('/orderan', [OrderanController::class, "index"])->name("orderan.index");
         Route::get('/orderan/{id}', [OrderanController::class, "orderanDetail"])->name('orderan.detail');
+        Route::put('/orderan/{id}', [OrderanController::class, "updateOrderan"])->name('orderan.update');
     });
 
     Route::resource('/staff', StaffController::class)->except(['create', 'show', 'edit'])->middleware("admin");

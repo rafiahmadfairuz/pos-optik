@@ -21,7 +21,7 @@
                     </div>
                     <div class="card-body">
                         <div class="chartjs-wrapper-demo">
-                            <canvas id="chartDonut" class="h-300"></canvas>
+                            <canvas id="chartPie" class="h-300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -30,16 +30,7 @@
             <div class="col-lg-3 col-md-12 d-flex flex-column">
                 <div class="card flex-fill h-100">
                     <div class="card-header pb-0 d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0">Stok Produk Paling Sedikit Cabang {{ session("cabang_id") }}</h4>
-                        <div class="dropdown">
-                            <a href="javascript:void(0);" data-bs-toggle="dropdown" class="dropset">
-                                <i class="fa fa-ellipsis-v"></i>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a href="productlist.html" class="dropdown-item">Daftar Produk</a></li>
-                                <li><a href="addproduct.html" class="dropdown-item">Tambah Produk</a></li>
-                            </ul>
-                        </div>
+                        <h4 class="card-title mb-0">Stok Produk Paling Sedikit Cabang {{ session('cabang_id') }}</h4>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive dataview" style="max-height: 638px; overflow-y: auto;">
@@ -77,7 +68,7 @@
             <div class="col-12 mt-4">
                 <div class="card mb-0">
                     <div class="card-body">
-                        <h4 class="card-title">Orderan Pending (Tanggal Terlama)</h4>
+                        <h4 class="card-title">Orderan Pending (Berdasarkan Tanggal Terlama)</h4>
                         <div class="table-responsive dataview">
                             <table class="table table-bordered table-hover align-middle">
                                 <thead class="table-light">
@@ -91,77 +82,37 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>INV-001</td>
-                                        <td><a href="#" class="text-decoration-none">John Doe</a></td>
-                                        <td>01-04-2024</td>
-                                        <td>Rp.1.500.000</td>
-                                        <td>
-                                            <div class="d-flex gap-1">
-                                                <div class="px-2 rounded-3 bg-warning text-white">Ongoing</div>
-                                                <div class="px-2 rounded-3 bg-success-subtle text-success">Paid</div>
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            <a href="#" class="btn-sm text-primary">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>INV-002</td>
-                                        <td><a href="#" class="text-decoration-none">Putri Maharani</a></td>
-                                        <td>02-04-2024</td>
-                                        <td>Rp.850.000</td>
-                                        <td>
-                                            <div class="d-flex gap-1">
-                                                <div class="px-2 rounded-3 bg-success text-white me-1">Complete</div>
-                                                <div class="px-2 rounded-3 bg-success-subtle text-success">Paid</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a href="#" class="btn-sm text-primary">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>INV-003</td>
-                                        <td><a href="#" class="text-decoration-none">Rafi Hidayat</a></td>
-                                        <td>04-04-2024</td>
-                                        <td>Rp.700.000</td>
-                                        <td>
-                                            <div class="d-flex gap-1">
-                                                <div class="px-2 rounded-3 bg-warning text-white me-1">Ongoing</div>
-                                                <div class="px-2 rounded-3 bg-danger-subtle text-danger">Unpaid</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a href="#" class="btn-sm text-primary">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>INV-004</td>
-                                        <td><a href="#" class="text-decoration-none">Faris Afrizal</a></td>
-                                        <td>05-04-2024</td>
-                                        <td>Rp.980.000</td>
-                                        <td>
-                                            <div class="d-flex gap-1">
-
-                                                <div class="px-2 rounded-3 bg-success text-white me-1">Complete</div>
-                                                <div class="px-2 rounded-3 bg-success-subtle text-success">Paid</div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a href="#" class="btn-sm text-primary">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                    @foreach ($pendingOrders as $order)
+                                        <tr>
+                                            <td>{{ $order->id }}</td>
+                                            <td>
+                                                <a href="#" class="text-decoration-none">
+                                                    {{ $order->user->name ?? 'Tidak Diketahui' }}
+                                                </a>
+                                            </td>
+                                            <td>{{ \Carbon\Carbon::parse($order->order_date)->format('d-m-Y') }}</td>
+                                            <td>Rp.{{ number_format($order->total, 0, ',', '.') }}</td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <div class="px-2 rounded-3 bg-warning text-white">
+                                                        {{ ucfirst($order->order_status) }}
+                                                    </div>
+                                                    <div
+                                                        class="px-2 rounded-3 {{ $order->payment_status === 'paid' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
+                                                        {{ ucfirst($order->payment_status) }}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('orderan.detail', $order->id) }}"
+                                                    class="btn-sm text-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
@@ -169,5 +120,100 @@
             </div>
         </div>
     </div>
+    <script>
+        const chartLabels = {!! json_encode($chartData->pluck('label')) !!};
+        const chartValues = {!! json_encode($chartData->pluck('total')) !!};
+
+        var ctx1 = document.getElementById("chartBar1").getContext("2d");
+
+        new Chart(ctx1, {
+            type: "bar",
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: "Penjualan (Rp)",
+                    data: chartValues,
+                    backgroundColor: "#664dc9",
+                    borderRadius: 4,
+                    barThickness: 20,
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: {
+                                size: 10
+                            },
+                            callback: function(value) {
+                                return "Rp " + value.toLocaleString("id-ID");
+                            },
+                        },
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 11
+                            },
+                        },
+                        grid: {
+                            display: false
+                        },
+                    },
+                },
+            },
+        });
+
+        var datapie = {
+            labels: @json($produkLabels),
+            datasets: [{
+                data: @json($produkValues),
+                backgroundColor: [
+                    "#664dc9",
+                    "#44c4fa",
+                    "#38cb89",
+                    "#3e80eb",
+                    "#ffab00",
+                    "#ef4b4b",
+                ],
+            }]
+        };
+
+        var optionpie = {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top', 
+                    labels: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        };
+
+
+        var ctx6 = document.getElementById("chartPie").getContext("2d");
+        new Chart(ctx6, {
+            type: "pie",
+            data: datapie,
+            options: optionpie
+        });
+    </script>
 
 </x-app>

@@ -32,8 +32,8 @@
 
                     <div class="col-md-6">
                         <label for="customerEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="customerEmail"
-                            name="email" value="{{ old('email') }}">
+                        <input type="email" class="form-control @error('email') is-invalid @enderror"
+                            id="customerEmail" name="email" value="{{ old('email') }}">
                         @error('email')
                             <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
                                 <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
@@ -43,8 +43,8 @@
 
                     <div class="col-md-6">
                         <label for="customerPhone" class="form-label">Phone</label>
-                        <input type="text" class="form-control @error('phone') is-invalid @enderror" id="customerPhone"
-                            name="phone" value="{{ old('phone') }}">
+                        <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                            id="customerPhone" name="phone" value="{{ old('phone') }}">
                         @error('phone')
                             <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
                                 <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
@@ -82,7 +82,8 @@
                                 <td>{{ $customer->phone }}</td>
                                 <td>
                                     <a class="me-2" href="{{ route('customer.show', $customer->id) }}">
-                                        <i class="bi bi-person fs-4"></i>
+                                        <i class="bi bi-person fs-4 align-middle"></i>
+
                                     </a>
                                     <button class="btn btn-sm btn-edit" title="Edit Customer">
                                         <img src="assets/img/icons/edit.svg" alt="edit">
@@ -109,8 +110,7 @@
                 <div class="modal-content rounded-4 shadow-sm border-0">
                     <div class="modal-header border-0 pb-0">
                         <h5 class="modal-title fw-semibold " id="deleteCustomerModalLabel">Confirm Delete</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body fs-5 pt-2 pb-3 text-center">
                         Are you sure you want to delete this customer?

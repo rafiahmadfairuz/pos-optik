@@ -122,7 +122,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label for="harga" class="form-label">Harga</label>
-                                    <input type="number" class="form-control @error('harga') is-invalid @enderror"
+                                    <input type="number" step="any" class="form-control @error('harga') is-invalid @enderror"
                                         id="harga" name="harga" value="{{ old('harga') }}">
                                     @error('harga')
                                         <div class="invalid-feedback d-flex align-items-center mt-1"

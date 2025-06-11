@@ -27,11 +27,16 @@ class TransactionDetail extends Component
     public $kembalian = 0;
     public $perluDibayar = 0;
 
+    public $forcePendingStatus = false;
+
+
     protected $listeners = [
         'customerDataSent' => 'handleCustomerData',
         'cartUpdated' => 'handleCartData',
         'totalUpdated' => 'handleTotal',
     ];
+
+
 
     public function updatedAsuransi($value)
     {
@@ -90,6 +95,21 @@ class TransactionDetail extends Component
     public function handleCartData($cart)
     {
         $this->cartData = $cart;
+
+        $stokKurang = false;
+        foreach ($cart as $item) {
+            if (isset($item['quantity']) && isset($item['stock']) && $item['quantity'] > $item['stock']) {
+                $stokKurang = true;
+                break;
+            }
+        }
+
+        if ($stokKurang) {
+            $this->forcePendingStatus = true;
+            $this->order_status = 'pending'; // paksa pending
+        } else {
+            $this->forcePendingStatus = false;
+        }
     }
 
     public function handleTotal($total)

@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Frame;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Relations\Relation; // ✅ Tambahkan ini!
+use Illuminate\Database\Eloquent\Relations\Relation; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
 
         Relation::morphMap([
-            'frame' => \App\Models\Frame::class,
+            'frame' => Frame::class,
             'lensa_finish' => \App\Models\LensaFinish::class,
             'lensa_khusus' => \App\Models\LensaKhusus::class,
             'softlens' => \App\Models\Softlen::class,

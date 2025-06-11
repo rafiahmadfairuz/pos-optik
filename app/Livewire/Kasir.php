@@ -96,25 +96,29 @@ class Kasir extends Component
                     $product = $modelClass::find($item['id']);
 
                     if ($product) {
-                        $product->stok -= $item['quantity'];
-                        $product->save();
-                        Log::info('Stok dikurangi', [
-                            'itemable_type'     => $item['type'],
-                            'itemable_id'       => $item['id'],
-                            'nama_model'        => $modelClass,
-                            'stok_sisa'         => $product->stok,
-                            'jumlah_dikurang'   => $item['quantity'],
-                        ]);
+                        if (strtolower($this->orderData['order_status']) !== 'pending') {
+                            $product->stok -= $item['quantity'];
+                            $product->save();
+
+                            Log::info('Stok dikurangi', [
+                                'itemable_type'     => $item['type'],
+                                'itemable_id'       => $item['id'],
+                                'nama_model'        => $modelClass,
+                                'stok_sisa'         => $product->stok,
+                                'jumlah_dikurang'   => $item['quantity'],
+                            ]);
+                        } else {
+                            Log::info('Stok tidak dikurangi karena order status pending', [
+                                'itemable_type' => $item['type'],
+                                'itemable_id'   => $item['id'],
+                            ]);
+                        }
                     } else {
                         Log::warning('Produk tidak ditemukan saat mau kurangi stok', [
                             'itemable_type' => $item['type'],
                             'itemable_id'   => $item['id'],
                         ]);
                     }
-                } else {
-                    Log::error('Model class tidak ditemukan di morphMap', [
-                        'type' => $item['type']
-                    ]);
                 }
             }
 
@@ -153,7 +157,6 @@ class Kasir extends Component
             session()->flash('error', 'Gagal menyimpan transaksi: ' . $e->getMessage());
             logger()->error('Gagal simpanTransaksi: ' . $e->getMessage());
             return redirect()->route('dashboard');
-
         }
     }
 

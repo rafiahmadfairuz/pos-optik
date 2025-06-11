@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Orderan;
 
 class CustomerController extends Controller
 {
@@ -59,7 +60,9 @@ class CustomerController extends Controller
      */
     public function show(string $id)
     {
-        return view('Informasi.detailUser');
+        $customer = User::find($id);
+        $orderan = Orderan::where("user_id", $id)->get();
+        return view('Informasi.detailUser', compact('customer', 'orderan'));
     }
 
     /**

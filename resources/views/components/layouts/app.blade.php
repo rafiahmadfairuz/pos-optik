@@ -52,7 +52,6 @@
     <script src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/js/dataTables.bootstrap4.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/chartjs/chart.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/chartjs/chart-data.js') }}"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/js/script.js') }}"></script>
 

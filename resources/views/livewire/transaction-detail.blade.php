@@ -211,15 +211,21 @@
                     <div class="col-md-4">
                         <label class="form-label">Order Status</label>
                         <select wire:model="order_status"
-                            class="form-select @error('order_status') is-invalid @enderror">
+                            class="form-select @error('order_status') is-invalid @enderror"
+                            @if ($forcePendingStatus) disabled @endif>
                             <option value="">-- Pilih Status --</option>
                             <option value="pending">Pending</option>
                             <option value="complete">Complete</option>
                         </select>
+                        @if ($forcePendingStatus)
+                            <small class="text-muted fst-italic">Status dikunci ke Pending karena ada barang yang
+                                kurang stok.</small>
+                        @endif
                         @error('order_status')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
+
 
 
                     <div class="col-md-4">
