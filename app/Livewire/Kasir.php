@@ -6,10 +6,11 @@ use App\Models\User;
 use App\Models\Resep;
 use Livewire\Component;
 use App\Models\OrderItems;
-use Livewire\Attributes\On;
 use App\Models\Orderan as TbOrder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Kasir extends Component
 {
@@ -17,52 +18,29 @@ class Kasir extends Component
     public $cartData = [];
     public $orderData = [];
     public $resepData = [];
-    public $total = [];
+    public $total = 0;
 
-    #[On('customerSelected')]
-    public function handleCustomerData($data)
-    {
-        $this->customerData = $data;
-        logger('Customer Data Diterima:', $this->customerData);
-    }
+    protected $listeners = [
+        'initiateTransactionSave' => 'simpanTransaksi',
+    ];
 
-    #[On('cartUpdated')]
-    public function handleCartData($cart)
-    {
-        $this->cartData = $cart;
-        logger('Cart Data Diterima:', $this->cartData);
-    }
-
-    #[On('dataOrderOrder')]
-    public function handleOrderData($data)
-    {
-        $this->orderData = $data;
-        logger('Order Data Diterima:', $this->orderData);
-    }
-
-    #[On('dataOrderResep')]
-    public function handleResepData($data)
-    {
-        $this->resepData = $data;
-        logger('Resep Data Diterima:', $this->resepData);
-    }
-
-    #[On('totalUpdated')]
-    public function handleTotal($total)
-    {
-        $this->total = $total;
-        logger('Total Data Diterima:', $this->total);
-    }
-
-    #[On('initiateTransactionSave')]
-    public function simpanTransaksi($dataFromTransactionDetail = [])
+    public function simpanTransaksi($data = [])
     {
         logger('simpanTransaksi jalan');
 
-        if (!empty($dataFromTransactionDetail)) {
-            $this->orderData = $dataFromTransactionDetail['order_data'] ?? $this->orderData;
-            $this->resepData = $dataFromTransactionDetail['resep_data'] ?? $this->resepData;
-        }
+        $this->customerData = $data['customer_data'];
+        $this->cartData = $data['cart_data'];
+        $this->total = $data['total'];
+        $this->orderData = $data['order_data'];
+        $this->resepData = $data['resep_data'];
+
+        logger('Data untuk Order: ', [
+            'orderData' => $this->orderData,
+            'resepData' => $this->resepData,
+            'customerData' => $this->customerData,
+            'cartData' => $this->cartData,
+            'totalData' => $this->total,
+        ]);
 
         try {
             if (empty($this->customerData) || !isset($this->customerData['id'])) {
@@ -80,29 +58,22 @@ class Kasir extends Component
 
             DB::beginTransaction();
 
-            logger('Data untuk Order: ', [
-                'orderData' => $this->orderData,
-                'resepData' => $this->resepData,
-                'customerData' => $this->customerData,
-                'cartData' => $this->cartData,
-                'totalData' => $this->total,
-            ]);
 
             $order = TbOrder::create([
+                'user_id'      => $this->customerData['id'],
+                'cabang_id'         => session("cabang_id"),
                 'order_date'        => $this->orderData['order_date'],
                 'complete_date'     => $this->orderData['complete_date'],
-                'total'             => $this->total,
-                'payment_status'    => $this->orderData['payment_status'],
-                'order_status'      => $this->orderData['order_status'],
+                'staff_id'          =>  $this->orderData['optometrist_id'],
                 'payment_type'      => $this->orderData['payment_type'],
-                'optometrist_name'  => $this->orderData['optometrist_id'],
-                'customer_paying'   => $this->orderData['customer_paying'],
+                'order_status'      => $this->orderData['order_status'],
                 'payment_method'    => $this->orderData['payment_method'],
+                'payment_status'    => $this->orderData['payment_status'],
+                'customer_paying'   => $this->orderData['customer_paying'],
                 'asuransi_id'       => $this->orderData['asuransi_id'],
-                'pelanggan_id'      => $this->customerData['id'],
+                'total'             => $this->total,
             ]);
 
-            logger('Order berhasil dibuat dengan ID: ' . $order->id);
 
             foreach ($this->cartData as $item) {
                 OrderItems::create([
@@ -113,9 +84,36 @@ class Kasir extends Component
                     'price'         => $item['price'],
                     'subtotal'      => $item['price'] * $item['quantity'],
                 ]);
+
+                $morphMap = Relation::morphMap();
+                $modelClass = $morphMap[$item['type']] ?? null;
+
+                if ($modelClass) {
+                    $product = $modelClass::find($item['id']);
+
+                    if ($product) {
+                        $product->stok -= $item['quantity'];
+                        $product->save();
+                        Log::info('Stok dikurangi', [
+                            'itemable_type' => $item['type'],
+                            'itemable_id'   => $item['id'],
+                            'nama_model'    => $modelClass,
+                            'stok_sisa'     => $product->stok,
+                            'jumlah_dikurang' => $item['quantity'],
+                        ]);
+                    } else {
+                        Log::warning('Produk tidak ditemukan saat mau kurangi stok', [
+                            'itemable_type' => $item['type'],
+                            'itemable_id'   => $item['id'],
+                        ]);
+                    }
+                } else {
+                    Log::error('Model class tidak ditemukan di morphMap', [
+                        'type' => $item['type']
+                    ]);
+                }
             }
 
-            logger('OrderItems berhasil ditambahkan');
 
             if (!empty($this->resepData) && array_filter($this->resepData)) {
                 Resep::create([
@@ -134,28 +132,24 @@ class Kasir extends Component
                     'pd_left'       => $this->resepData['pd_left'] ?? null,
                     'notes'         => $this->resepData['notes'] ?? null,
                 ]);
-                logger('Resep berhasil ditambahkan');
-            } else {
-                logger('Data resep kosong, tidak membuat entri Resep.');
             }
 
             DB::commit();
-
             $this->reset(['customerData', 'cartData', 'orderData', 'resepData', 'total']);
-
-            $this->dispatch('transactionSavedAndReset');
             session()->flash('success', 'Transaksi berhasil disimpan.');
+            logger('success Transaksi berhasil disimpan.');
         } catch (ValidationException $e) {
+            logger()->error('Validasi simpanTransaksi gagal: ', $e->errors());
             session()->flash('error', 'Validasi gagal: ' . $e->getMessage());
-            logger()->error('Validasi simpanTransaksi gagal: ' . json_encode($e->errors()));
-            $this->dispatch('notify', message: 'Validasi gagal: ' . $e->getMessage(), type: 'error');
         } catch (\Exception $e) {
             DB::rollBack();
             session()->flash('error', 'Gagal menyimpan transaksi: ' . $e->getMessage());
             logger()->error('Gagal simpanTransaksi: ' . $e->getMessage());
-            $this->dispatch('notify', message: 'Gagal menyimpan transaksi: ' . $e->getMessage(), type: 'error');
         }
     }
+
+
+
 
     public function render()
     {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Company\AdminController;
 use App\Http\Controllers\Company\StaffController;
 use App\Http\Controllers\FrontDesk\AsuransiController;
 use App\Http\Controllers\FrontDesk\CustomerController;
+use App\Http\Controllers\FrontDesk\KasirController;
 use App\Http\Controllers\Inventory\AccessoriesController;
 use App\Http\Controllers\Inventory\FrameController;
 use App\Http\Controllers\Inventory\LensaFinishController;
@@ -29,7 +30,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource("/lensaKhusus", LensaKhususController::class)->except(['create', 'show', 'edit']);
         Route::resource("/softlens", SoftlensController::class)->except(['create', 'show', 'edit']);
         Route::resource('/accessories', AccessoriesController::class)->except(['create', 'show', 'edit']);
-        Route::get("/kasir", Kasir::class);
+        Route::get("/kasir", [KasirController::class, "index"]);
 
 
         Route::get('/customer/detail', function () {

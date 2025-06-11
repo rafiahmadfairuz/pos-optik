@@ -25,24 +25,25 @@
             font-family: "Nunito", sans-serif;
         }
     </style>
+@livewireStyles
 </head>
 
 <body>
-        <div class="main-wrapper">
-            <x-side-bar></x-side-bar>
-            <div class="page-wrapper">
-                <div class="content">
-                     @yield('content')
-                </div>
+    <div class="main-wrapper">
+        <x-side-bar></x-side-bar>
+        <div class="page-wrapper">
+            <div class="content">
+                @yield('content')
             </div>
         </div>
+    </div>
 
     @if (session('success'))
-        <x-modal-status id="successModal" type="success" title="Sukses" :message="session('success')" />
+    <x-modal-status id="successModal" type="success" title="Sukses" :message="session('success')" />
     @endif
 
     @if (session('error'))
-        <x-modal-status id="errorModal" type="error" title="Gagal" :message="session('error')" />
+    <x-modal-status id="errorModal" type="error" title="Gagal" :message="session('error')" />
     @endif
 
     <script src="{{ asset('assets/js/jquery-3.6.0.min.js') }}"></script>
@@ -58,14 +59,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             @if (session('success'))
-                new bootstrap.Modal(document.getElementById('successModal')).show();
+            new bootstrap.Modal(document.getElementById('successModal')).show();
             @endif
 
             @if (session('error'))
-                new bootstrap.Modal(document.getElementById('errorModal')).show();
+            new bootstrap.Modal(document.getElementById('errorModal')).show();
             @endif
         });
-    </script>
+        </script>
+@livewireScripts
+
 </body>
 
 </html>

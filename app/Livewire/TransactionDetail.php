@@ -9,22 +9,44 @@ use Illuminate\Validation\Rule;
 
 class TransactionDetail extends Component
 {
-    // Prescription fields
     public $right_sph_d, $right_cyl_d, $right_axis_d, $right_va_d;
     public $left_sph_d, $left_cyl_d, $left_axis_d, $left_va_d;
     public $add_right, $add_left;
     public $pd_right, $pd_left, $notes;
 
-    // Orderan fields
     public $order_status, $order_date, $complete_date;
     public $payment_type, $optometrist_id, $customer_paying;
     public $payment_method, $payment_status, $asuransi;
 
     public $asuransiList = [];
     public $optometristList = [];
-    public $cabang_id;
 
-    protected $listeners = ['setCabangId'];
+    public $customerData = [];
+    public $cartData = [];
+    public $total = 0;
+
+    protected $listeners = [
+        'customerDataSent' => 'handleCustomerData',
+        'cartUpdated' => 'handleCartData',
+        'totalUpdated' => 'handleTotal',
+    ];
+
+    public function updatedAsuransi($value)
+    {
+        if ($this->payment_type === 'asuransi' && $value) {
+            $asuransi = \App\Models\Asuransi::find($this->asuransi);
+            $harga = $asuransi?->nominal ?? 0;
+            $this->dispatch('asuransiDipilih', $harga);
+        }
+    }
+
+    public function updatedCustomerPaying($value)
+    {
+        logger($value);
+        $this->dispatch('customerPaying', $value);
+    }
+
+
 
     public function rules()
     {
@@ -55,16 +77,31 @@ class TransactionDetail extends Component
         ];
     }
 
-    public function setCabangId($id)
+
+
+
+    public function handleCustomerData($customer)
     {
-        $this->cabang_id = $id;
+        $this->customerData = $customer;
+    }
+
+    public function handleCartData($cart)
+    {
+        $this->cartData = $cart;
+    }
+
+    public function handleTotal($total)
+    {
+        $this->total = $total;
     }
 
     public function submit()
     {
         $this->validate();
+        $bayar = str_replace(['.', ','], ['', '.'], $this->customer_paying);
+        $bayar = floatval($bayar);
 
-       
+
         $transactionData = [
             'order_data' => [
                 'order_status' => $this->order_status,
@@ -72,7 +109,7 @@ class TransactionDetail extends Component
                 'complete_date' => $this->complete_date,
                 'payment_type' => $this->payment_type,
                 'optometrist_id' => $this->optometrist_id,
-                'customer_paying' => $this->customer_paying,
+                'customer_paying' => $bayar,
                 'payment_method' => $this->payment_method,
                 'payment_status' => $this->payment_status,
                 'asuransi_id' => $this->asuransi,
@@ -91,11 +128,13 @@ class TransactionDetail extends Component
                 'pd_right' => $this->pd_right,
                 'pd_left' => $this->pd_left,
                 'notes' => $this->notes,
-            ]
+            ],
+            'customer_data' => $this->customerData,
+            'cart_data' => $this->cartData,
+            'total' => $this->total,
         ];
 
-        $this->dispatch('initiateTransactionSave', data: $transactionData);
-
+        $this->dispatch('initiateTransactionSave',  $transactionData);
     }
 
     public function render()

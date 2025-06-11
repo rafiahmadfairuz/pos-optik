@@ -4,7 +4,7 @@
     <div class="container-fluid py-4">
         <div class="page-header">
             <div class="page-title">
-                <h1 class="fw-bold">List Orderan</h1>
+                <h1 class="fw-bold">List Orderan Cabang {{ session("cabang_id") }}</h1>
             </div>
         </div>
         <div class="card shadow-sm">
@@ -19,18 +19,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link border-0" href="#" data-status="paid">
-                            Paid <span class="text-muted">1779</span>
+                        <a class="nav-link border-0" href="#" data-status="selesai">
+                            Selesai <span class="text-muted">1779</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link border-0" href="#" data-status="partially">
-                            Partially Paid <span class="text-muted">216</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link border-0" href="#" data-status="unpaid">
-                            Unpaid <span class="text-muted">212</span>
+                        <a class="nav-link border-0" href="#" data-status="belum Selesai">
+                            Belum Selesai <span class="text-muted">212</span>
                         </a>
                     </li>
                 </ul>

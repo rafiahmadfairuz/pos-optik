@@ -17,75 +17,67 @@ class ProductSearch extends Component
     public $search = '';
     public $perPage = 5;
     public $page = 1;
-    public $searchInput = ''; // untuk menampung input sementara (defer)
-
-    // Query tiap tipe produk, sama seperti sebelumnya
+    public $searchInput = '';
     protected function queryFrames()
     {
-        return Frame::where('merk', 'like', "%{$this->search}%")->get()
+        return Frame::where('merk', 'like', "%{$this->search}%")
+            ->where('cabang_id', session('cabang_id'))
+            ->get()
             ->map(function ($item) {
                 return [
-                    'id' => $item->id,
-                    'name' => $item->merk,
+                    'id'    => $item->id,
+                    'name'  => $item->merk,
                     'price' => $item->harga,
                     'stock' => $item->stok,
-                    'type' => 'frame',
+                    'type'  => 'frame',
                 ];
             });
     }
 
     protected function queryLensaFinish()
     {
-        return LensaFinish::where('merk', 'like', "%{$this->search}%")->get()
+        return LensaFinish::where('merk', 'like', "%{$this->search}%")
+            ->where('cabang_id', session('cabang_id'))
+            ->get()
             ->map(function ($item) {
                 return [
-                    'id' => $item->id,
-                    'name' => $item->merk,
+                    'id'    => $item->id,
+                    'name'  => $item->merk,
                     'price' => $item->harga,
                     'stock' => $item->stok,
-                    'type' => 'lensa_finish',
-                ];
-            });
-    }
-
-    protected function queryLensaKhusus()
-    {
-        return LensaKhusus::where('merk', 'like', "%{$this->search}%")->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->merk,
-                    'price' => null,
-                    'stock' => null,
-                    'type' => 'lensa_khusus',
+                    'type'  => 'lensa_finish',
                 ];
             });
     }
 
     protected function querySoftlens()
     {
-        return Softlen::where('merk', 'like', "%{$this->search}%")->get()
+        return Softlen::where('merk', 'like', "%{$this->search}%")
+            ->where('cabang_id', session('cabang_id'))
+            ->get()
             ->map(function ($item) {
                 return [
-                    'id' => $item->id,
-                    'name' => $item->merk,
+                    'id'    => $item->id,
+                    'name'  => $item->merk,
                     'price' => $item->harga,
                     'stock' => $item->stok,
-                    'type' => 'softlens',
+                    'type'  => 'softlens',
                 ];
             });
     }
 
     protected function queryAccessories()
     {
-        return Accessories::where('nama', 'like', "%{$this->search}%")->get()
+        return Accessories::where('nama', 'like', "%{$this->search}%")
+            ->where('cabang_id', session('cabang_id'))
+            ->get()
             ->map(function ($item) {
                 return [
-                    'id' => $item->id,
-                    'name' => $item->nama,
+                    'id'    => $item->id,
+                    'name'  => $item->nama,
                     'price' => $item->harga,
                     'stock' => $item->stok,
-                    'type' => 'accessory',
+                    'type'  => 'accessory',
                 ];
             });
     }
@@ -94,7 +86,6 @@ class ProductSearch extends Component
     {
         return $this->queryFrames()
             ->concat($this->queryLensaFinish())
-            ->concat($this->queryLensaKhusus())
             ->concat($this->querySoftlens())
             ->concat($this->queryAccessories());
     }
@@ -120,20 +111,17 @@ class ProductSearch extends Component
         ]);
     }
 
-    // Saat user mengetik search, input sementara akan diupdate, tapi query hanya jalan saat runSearch dipanggil
     public function updatingSearchInput()
     {
         $this->page = 1;
     }
 
-    // Saat tombol search ditekan, baru update variabel search yang dipakai query
     public function runSearch()
     {
         $this->search = $this->searchInput;
         $this->page = 1;
     }
 
-    // Reset search dan halaman
     public function resetSearch()
     {
         $this->searchInput = '';

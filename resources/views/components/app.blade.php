@@ -41,13 +41,13 @@
         </div>
     @endif
 
-    @if (session('success'))
-        <x-modal-status id="successModal" type="success" title="Sukses" :message="session('success')" />
-    @endif
+        @if (session('success'))
+            <x-modal-status id="successModal" type="success" title="Sukses" :message="session('success')" />
+        @endif
 
-    @if (session('error'))
-        <x-modal-status id="errorModal" type="error" title="Gagal" :message="session('error')" />
-    @endif
+        @if (session('error'))
+            <x-modal-status id="errorModal" type="error" title="Gagal" :message="session('error')" />
+        @endif
 
     <script src="{{ asset('assets/js/jquery-3.6.0.min.js') }}"></script>
     <script src="{{ asset('assets/js/feather.min.js') }}"></script>

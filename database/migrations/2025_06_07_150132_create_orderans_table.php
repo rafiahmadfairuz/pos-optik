@@ -17,14 +17,15 @@ return new class extends Migration
             $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
             $table->date('order_date');
             $table->date('complete_date')->nullable();
-            $table->decimal('total', 15, 2);
-            $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
-            $table->enum('order_status', ['pending', 'complete'])->default('pending');
+            $table->foreignId('staff_id')->constrained('staff')->onDelete('cascade');
             $table->enum('payment_type', ['DP', 'pelunasan', 'asuransi']);
-            $table->string('optometrist_name');
-            $table->string('customer_paying');
+            $table->enum('order_status', ['pending', 'complete'])->default('pending');
             $table->enum('payment_method', ['cash', 'card']);
-            $table->unsignedBigInteger('asuransi_id')->nullable();
+            $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
+            $table->string('customer_paying');
+            $table->string('kembalian')->nullable();
+            $table->foreignId('asuransi_id')->nullable()->constrained('asuransis')->onDelete('cascade');
+            $table->decimal('total', 15, 2);
             $table->timestamps();
         });
     }

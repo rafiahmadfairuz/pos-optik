@@ -8,10 +8,8 @@ class SelectedProduct extends Component
 {
     public $cart = [];
 
-    // Menerima event productSelected dari komponen produk
     protected $listeners = ['productSelected' => 'addToCart'];
 
-    // Tambahkan produk ke cart
     public function addToCart($product)
     {
         $exists = false;
@@ -32,7 +30,6 @@ class SelectedProduct extends Component
         $this->dispatch('cartUpdated', $this->cart);
     }
 
-    // Kurangi jumlah produk dalam cart
     public function decreaseQuantity($index)
     {
         if (!isset($this->cart[$index])) return;
@@ -44,20 +41,16 @@ class SelectedProduct extends Component
             $this->cart = array_values($this->cart);
         }
 
-        // Kirim cart terbaru ke parent
         $this->dispatch('cartUpdated', $this->cart);
     }
 
-    // Kosongkan semua isi cart
     public function clearCart()
     {
         $this->cart = [];
 
-        // Emit cart kosong ke parent
         $this->dispatch('cartUpdated', $this->cart);
     }
 
-    // Render tampilan
     public function render()
     {
         return view('livewire.selected-product', [
