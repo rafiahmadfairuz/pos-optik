@@ -42,11 +42,6 @@
             </div>
         </div>
     </div>
-       {{-- <div class="page-header">
-            <div class="page-title">
-                <h1 class="fw-bold">List Orderan Joko</h1>
-            </div>
-        </div> --}}
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="fw-bold mb-4">Orderan </h5>
@@ -99,7 +94,7 @@
                                     <span class="badge text-bg-warning text-dark">Partially Paid</span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('transaction.detail') }}" class="text-primary me-2"><i class="bi bi-eye"></i></a>
+                                    {{-- <a href="{{ route('orderan.detail') }}" class="text-primary me-2"><i class="bi bi-eye"></i></a> --}}
                                 </td>
                             </tr>
                             <tr data-status="paid">

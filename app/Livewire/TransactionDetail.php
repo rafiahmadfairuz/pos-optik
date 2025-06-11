@@ -24,6 +24,8 @@ class TransactionDetail extends Component
     public $customerData = [];
     public $cartData = [];
     public $total = 0;
+    public $kembalian = 0;
+    public $perluDibayar = 0;
 
     protected $listeners = [
         'customerDataSent' => 'handleCustomerData',
@@ -43,7 +45,7 @@ class TransactionDetail extends Component
     public function updatedCustomerPaying($value)
     {
         logger($value);
-        $this->dispatch('customerPaying', $value);
+        $this->dispatch('customerPayingUpdated', $value);
     }
 
 
@@ -92,14 +94,21 @@ class TransactionDetail extends Component
 
     public function handleTotal($total)
     {
-        $this->total = $total;
+        $this->total = $total['total'];
+        $this->kembalian = $total['kembalian'];
+        $this->perluDibayar = $total['perlu_dibayar'];
     }
 
     public function submit()
     {
+        $cleanInput = str_replace('.', '', $this->customer_paying); // hilangkan pemisah ribuan
+        $cleanInput = str_replace(',', '.', $cleanInput); // ubah desimal jadi titik
+        $bayar = floatval($cleanInput); // ubah ke angka
+
+        $this->customer_paying = $bayar; // overwrite dengan versi numeric
+
         $this->validate();
-        $bayar = str_replace(['.', ','], ['', '.'], $this->customer_paying);
-        $bayar = floatval($bayar);
+
 
 
         $transactionData = [
@@ -132,6 +141,8 @@ class TransactionDetail extends Component
             'customer_data' => $this->customerData,
             'cart_data' => $this->cartData,
             'total' => $this->total,
+            'kembalian' => $this->kembalian,
+            'perluDibayar' => $this->perluDibayar,
         ];
 
         $this->dispatch('initiateTransactionSave',  $transactionData);

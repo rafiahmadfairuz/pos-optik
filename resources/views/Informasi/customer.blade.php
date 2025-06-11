@@ -81,7 +81,7 @@
                                 <td>{{ $customer->email }}</td>
                                 <td>{{ $customer->phone }}</td>
                                 <td>
-                                    <a class="me-2" href="{{ route('customer.detail', $customer->id) }}">
+                                    <a class="me-2" href="{{ route('customer.show', $customer->id) }}">
                                         <i class="bi bi-person fs-4"></i>
                                     </a>
                                     <button class="btn btn-sm btn-edit" title="Edit Customer">

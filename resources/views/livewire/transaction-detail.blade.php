@@ -12,8 +12,8 @@
                                 <thead>
                                     <tr>
                                         <th></th>
-                                        <th colspan="4">Right Side</th>
                                         <th colspan="4">Left Side</th>
+                                        <th colspan="4">Right Side</th>
                                     </tr>
                                     <tr>
                                         <th></th>
@@ -30,34 +30,7 @@
                                 <tbody>
                                     <tr>
                                         <td>D</td>
-                                        <td>
-                                            <input type="text" wire:model.lazy="right_sph_d"
-                                                class="form-control @error('right_sph_d') is-invalid @enderror">
-                                            @error('right_sph_d')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </td>
-                                        <td>
-                                            <input type="text" wire:model.lazy="right_cyl_d"
-                                                class="form-control @error('right_cyl_d') is-invalid @enderror">
-                                            @error('right_cyl_d')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </td>
-                                        <td>
-                                            <input type="text" wire:model.lazy="right_axis_d"
-                                                class="form-control @error('right_axis_d') is-invalid @enderror">
-                                            @error('right_axis_d')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </td>
-                                        <td>
-                                            <input type="text" wire:model.lazy="right_va_d"
-                                                class="form-control @error('right_va_d') is-invalid @enderror">
-                                            @error('right_va_d')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </td>
+                                        <!-- LEFT SIDE -->
                                         <td>
                                             <input type="text" wire:model.lazy="left_sph_d"
                                                 class="form-control @error('left_sph_d') is-invalid @enderror">
@@ -86,16 +59,39 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <td>ADD</td>
-                                        <td colspan="4">
-                                            <input type="text" wire:model.lazy="add_right"
-                                                class="form-control @error('add_right') is-invalid @enderror">
-                                            @error('add_right')
+                                        <!-- RIGHT SIDE -->
+                                        <td>
+                                            <input type="text" wire:model.lazy="right_sph_d"
+                                                class="form-control @error('right_sph_d') is-invalid @enderror">
+                                            @error('right_sph_d')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+                                        <td>
+                                            <input type="text" wire:model.lazy="right_cyl_d"
+                                                class="form-control @error('right_cyl_d') is-invalid @enderror">
+                                            @error('right_cyl_d')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input type="text" wire:model.lazy="right_axis_d"
+                                                class="form-control @error('right_axis_d') is-invalid @enderror">
+                                            @error('right_axis_d')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </td>
+                                        <td>
+                                            <input type="text" wire:model.lazy="right_va_d"
+                                                class="form-control @error('right_va_d') is-invalid @enderror">
+                                            @error('right_va_d')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>ADD</td>
+                                        <!-- LEFT THEN RIGHT -->
                                         <td colspan="4">
                                             <input type="text" wire:model.lazy="add_left"
                                                 class="form-control @error('add_left') is-invalid @enderror">
@@ -103,20 +99,28 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <td>PD</td>
                                         <td colspan="4">
-                                            <input type="text" wire:model.lazy="pd_right"
-                                                class="form-control @error('pd_right') is-invalid @enderror">
-                                            @error('pd_right')
+                                            <input type="text" wire:model.lazy="add_right"
+                                                class="form-control @error('add_right') is-invalid @enderror">
+                                            @error('add_right')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <td>PD</td>
+                                        <!-- LEFT THEN RIGHT -->
                                         <td colspan="4">
                                             <input type="text" wire:model.lazy="pd_left"
                                                 class="form-control @error('pd_left') is-invalid @enderror">
                                             @error('pd_left')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </td>
+                                        <td colspan="4">
+                                            <input type="text" wire:model.lazy="pd_right"
+                                                class="form-control @error('pd_right') is-invalid @enderror">
+                                            @error('pd_right')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
@@ -187,18 +191,22 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-4" id="asuransiDetail">
-                        <label class="form-label">Detail Asuransi</label>
-                        <select wire:model.lazy="asuransi" class="form-select @error('asuransi') is-invalid @enderror">
-                            <option value="">-- Pilih --</option>
-                            @foreach ($asuransiList as $asuransiItem)
-                                <option value="{{ $asuransiItem->id }}">{{ $asuransiItem->nama }}</option>
-                            @endforeach
-                        </select>
-                        @error('asuransi')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
+                    @if ($payment_type == 'asuransi')
+                        <div class="col-md-4">
+                            <label class="form-label">Detail Asuransi</label>
+                            <select wire:model.lazy="asuransi"
+                                class="form-select @error('asuransi') is-invalid @enderror">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($asuransiList as $asuransiItem)
+                                    <option value="{{ $asuransiItem->id }}">{{ $asuransiItem->nama }}</option>
+                                @endforeach
+                            </select>
+                            @error('asuransi')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                    @endif
+
 
                     <div class="col-md-4">
                         <label class="form-label">Order Status</label>
@@ -278,14 +286,29 @@
         const asuransiDetail = document.getElementById('asuransiDetail');
 
         function toggleAsuransiDetail() {
-            if (paymentSelect.value == 'asuransi') {
-                asuransiDetail.style.display = 'block';
+            // Cek elemen ada
+            if (!paymentSelect || !asuransiDetail) return;
+
+            // Ambil nilai dan bersihkan dari spasi
+            const selectedValue = paymentSelect.value?.trim();
+
+            // Validasi super ketat
+            const isAsuransiSelected = selectedValue === 'asuransi';
+
+            // Tampilkan/hilangkan berdasarkan kondisi
+            if (isAsuransiSelected) {
+                asuransiDetail.classList.remove('d-none');
             } else {
-                asuransiDetail.style.display = 'none';
+                asuransiDetail.classList.add('d-none');
             }
         }
 
+        // Jalankan saat pertama kali load
         toggleAsuransiDetail();
         paymentSelect.addEventListener('change', toggleAsuransiDetail);
+
+        // Tambahan: tangani render ulang oleh Livewire
+        document.addEventListener('livewire:load', toggleAsuransiDetail);
+        document.addEventListener('livewire:updated', toggleAsuransiDetail);
     });
 </script>

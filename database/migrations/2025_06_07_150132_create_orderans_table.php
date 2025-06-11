@@ -23,6 +23,7 @@ return new class extends Migration
             $table->enum('payment_method', ['cash', 'card']);
             $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
             $table->string('customer_paying');
+            $table->string('perlu_dibayar');
             $table->string('kembalian')->nullable();
             $table->foreignId('asuransi_id')->nullable()->constrained('asuransis')->onDelete('cascade');
             $table->decimal('total', 15, 2);

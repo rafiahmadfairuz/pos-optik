@@ -59,7 +59,7 @@ class CustomerController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return view('Informasi.detailUser');
     }
 
     /**
