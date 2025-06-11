@@ -10,7 +10,9 @@
 
         <p>Total Final: <strong>Rp. {{ number_format($finalTotal, 0, ',', '.') }}</strong></p>
 
-        <p>Dibayar Customer: <strong>Rp. {{ number_format($customerPaying, 0, ',', '.') }}</strong></p>
+        <p>Dibayar Customer: <strong>Rp.
+                {{ number_format((int) preg_replace('/[^\d]/', '', $customerPaying), 0, ',', '.') }}</strong></p>
+
 
         <p>Kembalian: <strong>Rp. {{ number_format($kembalian, 0, ',', '.') }}</strong></p>
     </div>

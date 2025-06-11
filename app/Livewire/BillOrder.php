@@ -31,8 +31,9 @@ class BillOrder extends Component
 
     public function updateCustomerPaying($nominal)
     {
-        $this->customerPaying = $nominal;
+        $this->customerPaying = (string) $nominal;
     }
+
 
     public function getTotalProperty()
     {
