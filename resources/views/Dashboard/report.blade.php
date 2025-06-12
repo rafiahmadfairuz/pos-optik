@@ -1,18 +1,40 @@
 <x-app>
-    @section('title', 'Laporan Penjualan & Klaim Asuransi')
+    @section('title', 'Laporan Penjualan')
 
     <div class="container-fluid py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold"><i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan Penjualan</h2>
-            <div>
-                <button class="btn btn-outline-success me-2">
-                    <i class="bi bi-download me-1"></i> Export Excel
-                </button>
-                <button class="btn btn-outline-secondary">
+       <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+    <h2 class="fw-bold mb-0">
+        <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan Penjualan
+    </h2>
+
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 w-100 justify-content-md-end">
+        <!-- Form Filter -->
+        <form method="GET" action="{{ route('report.index') }}" class="row gx-2 gy-2 align-items-end">
+            <div class="col-auto">
+                <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+            </div>
+            <div class="col-auto">
+                <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+            </div>
+            <div class="col-auto d-flex gap-2">
+                <button type="submit" class="btn btn-outline-secondary">
                     <i class="bi bi-funnel me-1"></i> Filter Data
                 </button>
+                <a href="{{ route('report.index') }}" class="btn btn-outline-danger">Reset</a>
             </div>
-        </div>
+        </form>
+
+        <!-- Form Export -->
+        <form method="GET" action="{{ route('report.export') }}" class="d-flex">
+            <input type="hidden" name="date_from" value="{{ request('date_from') }}">
+            <input type="hidden" name="date_to" value="{{ request('date_to') }}">
+            <button type="submit" class="btn btn-outline-success">
+                <i class="bi bi-download me-1"></i> Export Excel
+            </button>
+        </form>
+    </div>
+</div>
+
 
         <div class="row">
             <!-- 1. Penjualan Per Bulan -->

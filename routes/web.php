@@ -42,6 +42,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get("/pilihCabang", [AdminController::class, "pilihCabang"])->name("pilihCabang");
     Route::get('/pilihCabang/{id}', [AdminController::class, 'setCabang'])->name('setCabang');
 
+   Route::get('/report', [ReportController::class, 'index'])->name('report.index');
+   Route::get('/report/export', [ReportController::class, 'exportExcel'])->name('report.export');
+
+
     Route::get('/ditolak', function () {
         return view("ditolak");
     })->name('ditolak');

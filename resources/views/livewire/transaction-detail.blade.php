@@ -292,16 +292,12 @@
         const asuransiDetail = document.getElementById('asuransiDetail');
 
         function toggleAsuransiDetail() {
-            // Cek elemen ada
             if (!paymentSelect || !asuransiDetail) return;
 
-            // Ambil nilai dan bersihkan dari spasi
             const selectedValue = paymentSelect.value?.trim();
 
-            // Validasi super ketat
             const isAsuransiSelected = selectedValue === 'asuransi';
 
-            // Tampilkan/hilangkan berdasarkan kondisi
             if (isAsuransiSelected) {
                 asuransiDetail.classList.remove('d-none');
             } else {
