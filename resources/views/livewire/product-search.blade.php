@@ -19,7 +19,10 @@
                     <thead>
                         <tr>
                             <th>Nama Produk</th>
-                            <th>Harga</th>
+                            <th>Harga Jual</th>
+                            @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                <th>Laba</th>
+                            @endif
                             <th>Stok</th>
                             <th>Tipe</th>
                             <th>Action</th>
@@ -30,6 +33,9 @@
                             <tr>
                                 <td>{{ $product['name'] }}</td>
                                 <td>Rp. {{ number_format($product['price'], 0, ',', '.') }}</td>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    <td>Rp. {{ number_format($product['laba'], 0, ',', '.') }}</td>
+                                @endif
                                 <td>{{ $product['stock'] }}</td>
                                 <td>{{ ucfirst(str_replace('_', ' ', $product['type'])) }}</td>
                                 <td>
@@ -39,12 +45,12 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center">No products found.</td>
+                                <td colspan="6" class="text-center">No products found.</td>
                             </tr>
                         @endforelse
-
                     </tbody>
                 </table>
+
             </div>
 
             <!-- pagination tetap sama -->

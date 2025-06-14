@@ -28,6 +28,7 @@ class ProductSearch extends Component
                     'id'    => $item->id,
                     'name'  => $item->merk,
                     'price' => $item->harga,
+                    'laba' => $item->laba,
                     'stock' => $item->stok,
                     'type'  => 'frame',
                 ];
@@ -44,6 +45,7 @@ class ProductSearch extends Component
                     'id'    => $item->id,
                     'name'  => $item->merk,
                     'price' => $item->harga,
+                    'laba' => $item->laba,
                     'stock' => $item->stok,
                     'type'  => 'lensa_finish',
                 ];
@@ -60,6 +62,8 @@ class ProductSearch extends Component
                     'id'    => $item->id,
                     'name'  => $item->merk,
                     'price' => $item->harga,
+                    'laba' => $item->laba,
+
                     'stock' => $item->stok,
                     'type'  => 'softlens',
                 ];
@@ -76,6 +80,8 @@ class ProductSearch extends Component
                     'id'    => $item->id,
                     'name'  => $item->nama,
                     'price' => $item->harga,
+                    'laba' => $item->laba,
+
                     'stock' => $item->stok,
                     'type'  => 'accessory',
                 ];

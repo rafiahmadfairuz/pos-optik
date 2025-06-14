@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('nama', 100);
             $table->string('jenis', 50);
             $table->decimal('harga', 15, 2);
+            $table->decimal('harga_beli', 15, 2);
+            $table->decimal('laba', 15, 2);
             $table->unsignedInteger('stok');
             $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();

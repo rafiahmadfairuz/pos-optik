@@ -6,6 +6,7 @@ use App\Models\Frame;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class FrameController extends Controller
 {
@@ -36,16 +37,17 @@ class FrameController extends Controller
                 'merk' => 'required|string|max:50',
                 'tipe' => 'required|string|max:50',
                 'warna' => 'required|string|max:50',
+                'harga_beli' => 'required|numeric|min:0',
                 'harga' => 'required|numeric|min:0',
                 'stok' => 'required|integer|min:0',
-
             ]);
+
+            $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
             Frame::create([
                 ...$validated,
                 'cabang_id' => session('cabang_id'),
             ]);
-
 
             return redirect()->route('frame.index')->with('success', 'Frame berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -58,6 +60,7 @@ class FrameController extends Controller
             return back()->with('error', 'Gagal menambahkan frame. ' . $e->getMessage())->withInput();
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -81,13 +84,19 @@ class FrameController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            $validated = $request->validate([
+            $rules = [
                 'merk' => 'required|string|max:50',
                 'tipe' => 'required|string|max:50',
                 'warna' => 'required|string|max:50',
                 'harga' => 'required|numeric|min:0',
                 'stok' => 'required|integer|min:0',
-            ]);
+            ];
+
+            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+                $rules['harga_beli'] = 'required|numeric|min:0';
+            }
+
+            $validated = $request->validate($rules);
 
             $frame = Frame::findOrFail($id);
 
@@ -96,25 +105,31 @@ class FrameController extends Controller
             $frame->warna = $validated['warna'];
             $frame->harga = $validated['harga'];
             $frame->stok = $validated['stok'];
-            $frame->cabang_id =  session('cabang_id');
+            $frame->cabang_id = session('cabang_id');
+
+            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+                $frame->harga_beli = $validated['harga_beli'];
+                $frame->laba = $validated['harga'] - $validated['harga_beli'];
+            } else {
+                // jika bukan admin/gudang, ambil harga_beli dari data lama
+                $frame->laba = $validated['harga'] - $frame->harga_beli;
+            }
 
             $frame->save();
 
             return back()->with('success', 'Frame berhasil diperbarui!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Update frame validation failed: ' . $e->getMessage());
-
             return back()->with('error', 'Validasi gagal: ' . $e->getMessage())->withInput();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error('Update frame failed - not found: ' . $e->getMessage());
-
             return back()->with('error', 'Frame tidak ditemukan.')->withInput();
         } catch (\Exception $e) {
             Log::error('Update frame failed: ' . $e->getMessage());
-
             return back()->with('error', 'Gagal memperbarui frame.')->withInput();
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

@@ -6,6 +6,7 @@ use App\Models\LensaFinish;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class LensaFinishController extends Controller
 {
@@ -40,8 +41,12 @@ class LensaFinishController extends Controller
                 'cyl' => 'required|numeric',
                 'add' => 'nullable|numeric',
                 'stok' => 'required|integer|min:0',
+                'harga_beli' => 'required|numeric|min:0',
                 'harga' => 'required|numeric|min:0',
             ]);
+
+            // Hitung laba otomatis
+            $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
             LensaFinish::create([
                 ...$validated,
@@ -59,6 +64,7 @@ class LensaFinishController extends Controller
             return back()->with('error', 'Gagal menambahkan lensa. ' . $e->getMessage())->withInput();
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -81,7 +87,7 @@ class LensaFinishController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
+        $rules = [
             'merk' => 'required|string|max:50',
             'desain' => 'required|string|max:50',
             'tipe' => 'required|string|max:50',
@@ -90,8 +96,13 @@ class LensaFinishController extends Controller
             'add' => 'nullable|numeric',
             'stok' => 'required|integer|min:0',
             'harga' => 'required|numeric|min:0',
+        ];
 
-        ]);
+        if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+            $rules['harga_beli'] = 'required|numeric|min:0';
+        }
+
+        $validated = $request->validate($rules);
 
         try {
             $lensa = LensaFinish::findOrFail($id);
@@ -104,7 +115,15 @@ class LensaFinishController extends Controller
             $lensa->add = $validated['add'] ?? null;
             $lensa->stok = $validated['stok'];
             $lensa->harga = $validated['harga'];
-            $lensa->cabang_id =  session('cabang_id');
+            $lensa->cabang_id = session('cabang_id');
+
+            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+                $lensa->harga_beli = $validated['harga_beli'];
+                $lensa->laba = $validated['harga'] - $validated['harga_beli'];
+            } else {
+                // Gunakan harga_beli yang sudah ada
+                $lensa->laba = $validated['harga'] - $lensa->harga_beli;
+            }
 
             $lensa->save();
 
@@ -115,6 +134,7 @@ class LensaFinishController extends Controller
             return redirect()->back()->withErrors('Gagal memperbarui lensa.');
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

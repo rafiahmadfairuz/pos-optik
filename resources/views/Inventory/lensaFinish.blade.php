@@ -13,7 +13,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Lensa Finish</h5>
                     @auth
-                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                        @if (in_array(Auth::user()->role, ['admin', 'gudang']))
                             <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddLensa">
                                 Tambah Data
                             </button>
@@ -120,10 +120,26 @@
                                         </div>
                                     @enderror
                                 </div>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    <div class="col-md-3">
+                                        <label for="harga" class="form-label">Harga Beli</label>
+                                        <input type="number" step="any"
+                                            class="form-control @error('harga_beli') is-invalid @enderror"
+                                            id="harga_beli" name="harga_beli" value="{{ old('harga_beli') }}">
+                                        @error('harga_beli')
+                                            <div class="invalid-feedback d-flex align-items-center mt-1"
+                                                style="display: block;">
+                                                <i
+                                                    class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                            </div>
+                                        @enderror
+                                    </div>
+                                @endif
                                 <div class="col-md-3">
-                                    <label for="harga" class="form-label">Harga</label>
-                                    <input type="number" step="any" class="form-control @error('harga') is-invalid @enderror"
-                                        id="harga" name="harga" value="{{ old('harga') }}">
+                                    <label for="harga" class="form-label">Harga Jual</label>
+                                    <input type="number" step="any"
+                                        class="form-control @error('harga') is-invalid @enderror" id="harga"
+                                        name="harga" value="{{ old('harga') }}">
                                     @error('harga')
                                         <div class="invalid-feedback d-flex align-items-center mt-1"
                                             style="display: block;">
@@ -155,13 +171,16 @@
                                 <th>CYL</th>
                                 <th>ADD</th>
                                 <th>Stok</th>
-                                <th>Harga</th>
-                                @auth
-                                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
-                                        <th>Aksi</th>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    <th>Harga Beli</th>
+                                @endif
+                                <th>Harga Jual</th>
+                                   @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                        <th>Laba</th>
                                     @endif
+                                @auth
+                                    <th>Aksi</th>
                                 @endauth
-
                             </tr>
                         </thead>
                         <tbody>
@@ -170,7 +189,8 @@
                                     data-desain="{{ $item->desain }}" data-type="{{ $item->tipe }}"
                                     data-sph="{{ $item->sph }}" data-cyl="{{ $item->cyl }}"
                                     data-add="{{ $item->add }}" data-stok="{{ $item->stok }}"
-                                    data-harga="{{ $item->harga }}">
+                                    data-harga="{{ $item->harga }}"
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang'])) data-harga_beli="{{ $item->harga_beli }}" @endif>
                                     <td>{{ $item->merk }}</td>
                                     <td>{{ $item->desain }}</td>
                                     <td>{{ $item->tipe }}</td>
@@ -178,24 +198,30 @@
                                     <td>{{ $item->cyl }}</td>
                                     <td>{{ $item->add }}</td>
                                     <td>{{ $item->stok }}</td>
-                                    <td>{{ $item->harga }}</td>
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                        <td>Rp {{ number_format($item->harga_beli, 0, ',', '.') }}</td>
+                                    @endif
+                                    <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                     @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                        <td>Rp {{ number_format($item->laba, 0, ',', '.') }}</td>
+                                    @endif
                                     @auth
-                                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
-                                            <td>
-                                                <button class="btn btn-sm btn-edit-lensa" title="Edit Lensa"><i
-                                                        class="bi bi-pencil-fill"></i></button>
-                                                <button class="btn btn-sm btn-delete-lensa text-danger"
-                                                    data-bs-toggle="modal" data-bs-target="#deleteLensaModal"><i
-                                                        class="bi bi-trash-fill"></i></button>
-                                            </td>
-                                        @endif
+                                        <td>
+                                            <button class="btn btn-sm btn-edit-lensa" title="Edit Lensa">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-delete-lensa text-danger" data-bs-toggle="modal"
+                                                data-bs-target="#deleteLensaModal">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </td>
                                     @endauth
-
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
@@ -246,15 +272,18 @@
                 methodInput.value = method;
             }
 
-            btnAdd.addEventListener('click', () => {
-                form.action = "{{ route('lensaFinish.store') }}";
-                form.querySelector('input[name="_method"]')?.remove();
-                form.reset();
-                idInput.value = '';
-                formContainer.classList.remove('d-none');
-                form.merk.focus();
-                btnAdd.classList.add('d-none');
-            });
+            if (btnAdd) {
+
+                btnAdd.addEventListener('click', () => {
+                    form.action = "{{ route('lensaFinish.store') }}";
+                    form.querySelector('input[name="_method"]')?.remove();
+                    form.reset();
+                    idInput.value = '';
+                    formContainer.classList.remove('d-none');
+                    form.merk.focus();
+                    btnAdd.classList.add('d-none');
+                });
+            }
 
             btnCancel.addEventListener('click', () => {
                 formContainer.classList.add('d-none');
@@ -277,6 +306,8 @@
                     form.cyl.value = tr.dataset.cyl;
                     form.add.value = tr.dataset.add;
                     form.stok.value = tr.dataset.stok;
+                    form.harga_beli.value = tr.dataset.harga_beli;
+
                     form.harga.value = tr.dataset.harga;
                     formContainer.classList.remove('d-none');
                     form.merk.focus();

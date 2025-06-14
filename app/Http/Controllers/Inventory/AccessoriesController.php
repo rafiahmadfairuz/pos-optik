@@ -6,6 +6,7 @@ use App\Models\Accessories;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class AccessoriesController extends Controller
 {
@@ -35,9 +36,12 @@ class AccessoriesController extends Controller
             $validated = $request->validate([
                 'nama' => 'required|string|max:100',
                 'jenis' => 'required|string|max:50',
+                'harga_beli' => 'required|numeric|min:0',
                 'harga' => 'required|numeric|min:0',
                 'stok' => 'required|integer|min:0',
             ]);
+
+            $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
             Accessories::create([
                 ...$validated,
@@ -53,6 +57,7 @@ class AccessoriesController extends Controller
             return back()->with('error', $e->getMessage())->withInput();
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -75,14 +80,20 @@ class AccessoriesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:100',
-            'jenis' => 'required|string|max:50',
-            'harga' => 'required|numeric|min:0',
-            'stok' => 'required|integer|min:0',
-        ]);
-
         try {
+            $rules = [
+                'nama' => 'required|string|max:100',
+                'jenis' => 'required|string|max:50',
+                'harga' => 'required|numeric|min:0',
+                'stok' => 'required|integer|min:0',
+            ];
+
+            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+                $rules['harga_beli'] = 'required|numeric|min:0';
+            }
+
+            $validated = $request->validate($rules);
+
             $accessory = Accessories::findOrFail($id);
 
             $accessory->nama = $validated['nama'];
@@ -91,10 +102,20 @@ class AccessoriesController extends Controller
             $accessory->stok = $validated['stok'];
             $accessory->cabang_id = session('cabang_id');
 
+            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+                $accessory->harga_beli = $validated['harga_beli'];
+                $accessory->laba = $validated['harga'] - $validated['harga_beli'];
+            } else {
+                // pakai harga_beli lama
+                $accessory->laba = $validated['harga'] - $accessory->harga_beli;
+            }
 
             $accessory->save();
 
             return back()->with('success', 'Aksesori berhasil diperbarui!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Update accessory validation failed: ' . $e->getMessage());
+            return back()->with('error', 'Validasi gagal: ' . $e->getMessage())->withInput();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error('Update accessory failed - not found: ' . $e->getMessage());
             return back()->with('error', 'Aksesori tidak ditemukan.')->withInput();
@@ -103,6 +124,7 @@ class AccessoriesController extends Controller
             return back()->with('error', 'Gagal memperbarui aksesori.')->withInput();
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

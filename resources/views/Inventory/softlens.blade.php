@@ -13,7 +13,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Softlens</h5>
                     @auth
-                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                        @if (in_array(Auth::user()->role, ['admin', 'gudang']))
                             <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddSoftlens">
                                 Tambah Data
                             </button>
@@ -68,11 +68,28 @@
                                         </div>
                                     @enderror
                                 </div>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    <div class="col-md-3">
+                                        <label for="harga" class="form-label">Harga Beli</label>
+                                        <input type="number" step="any"
+                                            class="form-control @error('harga_beli') is-invalid @enderror"
+                                            id="harga_beli" name="harga_beli" value="{{ old('harga_beli') }}">
+                                        @error('harga_beli')
+                                            <div class="invalid-feedback d-flex align-items-center mt-1"
+                                                style="display: block;">
+                                                <i
+                                                    class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                            </div>
+                                        @enderror
+                                    </div>
+                                @endif
+
 
                                 <div class="col-md-3">
-                                    <label for="harga" class="form-label">Harga</label>
-                                    <input type="number" step="any" class="form-control @error('harga') is-invalid @enderror"
-                                        id="harga" name="harga" value="{{ old('harga') }}">
+                                    <label for="harga" class="form-label">Harga Jual</label>
+                                    <input type="number" step="any"
+                                        class="form-control @error('harga') is-invalid @enderror" id="harga"
+                                        name="harga" value="{{ old('harga') }}">
                                     @error('harga')
                                         <div class="invalid-feedback d-flex align-items-center mt-1"
                                             style="display: block;">
@@ -81,6 +98,7 @@
                                         </div>
                                     @enderror
                                 </div>
+
 
                                 <div class="col-md-3">
                                     <label for="stok" class="form-label">Stok</label>
@@ -113,43 +131,58 @@
                                 <th>Merk</th>
                                 <th>Tipe</th>
                                 <th>Warna</th>
-                                <th>Harga</th>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    <th>Harga Beli</th>
+                                @endif
+                                <th>Harga Jual</th>
                                 <th>Stok</th>
+                                   @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                        <th>Laba</th>
+                                    @endif
                                 @auth
                                     @if (in_array(Auth::user()->role, ['admin', 'cabang']))
                                         <th>Aksi</th>
                                     @endif
                                 @endauth
-
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($softlens as $item)
                                 <tr data-id="{{ $item->id }}" data-merk="{{ $item->merk }}"
                                     data-tipe="{{ $item->tipe }}" data-warna="{{ $item->warna }}"
-                                    data-harga="{{ $item->harga }}" data-stok="{{ $item->stok }}">
+                                    data-harga="{{ $item->harga }}"
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang'])) data-harga_beli="{{ $item->harga_beli }}" @endif
+                                    data-stok="{{ $item->stok }}">
                                     <td>{{ $item->merk }}</td>
                                     <td>{{ $item->tipe }}</td>
                                     <td>{{ $item->warna }}</td>
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                        <td>Rp {{ number_format($item->harga_beli, 0, ',', '.') }}</td>
+                                    @endif
                                     <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                     <td>{{ $item->stok }}</td>
+                                     @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                        <td>Rp {{ number_format($item->laba, 0, ',', '.') }}</td>
+                                    @endif
                                     @auth
                                         @if (in_array(Auth::user()->role, ['admin', 'cabang']))
                                             <td>
-                                                <button class="btn btn-sm btn-edit-softlens" title="Edit Softlens"><img
-                                                        src="/assets/img/icons/edit.svg" alt="edit"></button>
+                                                <button class="btn btn-sm btn-edit-softlens" title="Edit Softlens">
+                                                    <img src="/assets/img/icons/edit.svg" alt="edit">
+                                                </button>
                                                 <button class="btn btn-sm btn-delete-softlens" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteSoftlensModal"><img
-                                                        src="/assets/img/icons/delete.svg" alt="delete"></button>
+                                                    data-bs-target="#deleteSoftlensModal">
+                                                    <img src="/assets/img/icons/delete.svg" alt="delete">
+                                                </button>
                                             </td>
                                         @endif
                                     @endauth
-
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
@@ -200,13 +233,15 @@
                 methodInput.value = method;
             }
 
-            btnAdd.addEventListener('click', () => {
-                form.action = "{{ route('softlens.store') }}";
-                form.querySelector('input[name="_method"]')?.remove();
-                form.reset();
-                idInput.value = '';
-                formContainer.classList.remove('d-none');
-            });
+            if (btnAdd) {
+                btnAdd.addEventListener('click', () => {
+                    form.action = "{{ route('softlens.store') }}";
+                    form.querySelector('input[name="_method"]')?.remove();
+                    form.reset();
+                    idInput.value = '';
+                    formContainer.classList.remove('d-none');
+                });
+            }
 
             btnCancel.addEventListener('click', () => {
                 formContainer.classList.add('d-none');
@@ -226,6 +261,7 @@
                     form.merk.value = tr.dataset.merk;
                     form.tipe.value = tr.dataset.tipe;
                     form.warna.value = tr.dataset.warna;
+                    form.harga_beli.value = tr.dataset.harga_beli;
                     form.harga.value = tr.dataset.harga;
                     form.stok.value = tr.dataset.stok;
 

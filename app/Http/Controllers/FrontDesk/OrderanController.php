@@ -66,7 +66,7 @@ class OrderanController extends Controller
             'resep_pd_right' => 'nullable|string|max:255',
             'resep_notes' => 'nullable|string',
             'order_date' => 'required|date',
-            'complete_date' => 'nullable|date',
+            'complete_date' => 'required|date',
             'staff_id' => 'required|exists:staff,id',
             'payment_type' => ['required', Rule::in(['DP', 'pelunasan', 'asuransi'])],
             'asuransi_id' => [

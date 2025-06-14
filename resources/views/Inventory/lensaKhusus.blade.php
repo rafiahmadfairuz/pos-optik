@@ -13,7 +13,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Lensa Khusus</h5>
                     @auth
-                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                        @if (in_array(Auth::user()->role, ['admin', 'gudang']))
                             <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddLensa">
                                 Tambah Data
                             </button>
@@ -162,9 +162,7 @@
                                 <th>Estimasi Selesai</th>
                                 <th>Status Pesanan</th>
                                 @auth
-                                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
                                         <th>Aksi</th>
-                                    @endif
                                 @endauth
 
                             </tr>
@@ -186,7 +184,6 @@
                                     <td>{{ $item->estimasi_selesai_hari }} Hari</td>
                                     <td>{{ $item->status_pesanan }}</td>
                                     @auth
-                                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
                                             <td>
                                                 <button class="btn btn-sm btn-edit-lensa-khusus"
                                                     title="Edit Lensa Khusus">
@@ -197,7 +194,6 @@
                                                     <i class="bi bi-trash-fill"></i>
                                                 </button>
                                             </td>
-                                        @endif
                                     @endauth
 
                                 </tr>
@@ -257,15 +253,17 @@
                 methodInput.value = method;
             }
 
-            btnAdd.addEventListener('click', () => {
-                form.action = "{{ route('lensaKhusus.store') }}";
-                form.querySelector('input[name="_method"]')?.remove();
-                form.reset();
-                idInput.value = '';
-                formContainer.classList.remove('d-none');
-                form.merk.focus();
-                btnAdd.classList.add('d-none');
-            });
+            if(btnAdd){
+                btnAdd.addEventListener('click', () => {
+                    form.action = "{{ route('lensaKhusus.store') }}";
+                    form.querySelector('input[name="_method"]')?.remove();
+                    form.reset();
+                    idInput.value = '';
+                    formContainer.classList.remove('d-none');
+                    form.merk.focus();
+                    btnAdd.classList.add('d-none');
+                });
+            }
 
             btnCancel.addEventListener('click', () => {
                 formContainer.classList.add('d-none');

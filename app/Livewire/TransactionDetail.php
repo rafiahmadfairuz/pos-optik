@@ -60,7 +60,7 @@ class TransactionDetail extends Component
         return [
             'order_status' => ['required', Rule::in(['pending', 'complete'])],
             'order_date' => 'required|date',
-            'complete_date' => 'nullable|date|after_or_equal:order_date',
+            'complete_date' => 'required|date|after_or_equal:order_date',
             'payment_type' => ['required', Rule::in(['DP', 'pelunasan', 'asuransi'])],
             'optometrist_id' => 'required|exists:staff,id',
             'customer_paying' => 'required|numeric|min:0',

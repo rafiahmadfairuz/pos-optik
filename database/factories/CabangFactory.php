@@ -2,23 +2,22 @@
 
 namespace Database\Factories;
 
+use App\Models\Cabang;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Cabang>
- */
 class CabangFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Cabang::class;
+
     public function definition(): array
     {
+        $name = $this->faker->unique()->company();
+
         return [
-            "nama" => "Cabang",
-            'alamat' => fake()->address(),
+            'nama' => $name,
+            'slug' => Str::slug($name),
+            'alamat' => $this->faker->address(), 
         ];
     }
 }

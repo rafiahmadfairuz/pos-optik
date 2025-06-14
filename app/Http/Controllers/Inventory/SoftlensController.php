@@ -6,6 +6,7 @@ use App\Models\Softlen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class SoftlensController extends Controller
 {
@@ -36,9 +37,13 @@ class SoftlensController extends Controller
                 'merk' => 'required|string|max:50',
                 'tipe' => 'required|string|max:50',
                 'warna' => 'required|string|max:50',
+                'harga_beli' => 'required|numeric|min:0',
                 'harga' => 'required|numeric|min:0',
                 'stok' => 'required|integer|min:0',
             ]);
+
+            // Hitung laba otomatis
+            $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
             Softlen::create([
                 ...$validated,
@@ -78,14 +83,19 @@ class SoftlensController extends Controller
      */
     public function update(Request $request, string $id)
     {
-       $validated = $request->validate([
+        $rules = [
             'merk' => 'required|string|max:50',
             'tipe' => 'required|string|max:50',
             'warna' => 'required|string|max:50',
             'harga' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
+        ];
 
-        ]);
+        if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+            $rules['harga_beli'] = 'required|numeric|min:0';
+        }
+
+        $validated = $request->validate($rules);
 
         try {
             $softlens = Softlen::findOrFail($id);
@@ -95,7 +105,15 @@ class SoftlensController extends Controller
             $softlens->warna = $validated['warna'];
             $softlens->harga = $validated['harga'];
             $softlens->stok = $validated['stok'];
-            $softlens->cabang_id =  session('cabang_id');
+            $softlens->cabang_id = session('cabang_id');
+
+            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+                $softlens->harga_beli = $validated['harga_beli'];
+                $softlens->laba = $validated['harga'] - $validated['harga_beli'];
+            } else {
+                // Gunakan harga_beli dari database jika tidak boleh mengedit
+                $softlens->laba = $validated['harga'] - $softlens->harga_beli;
+            }
 
             $softlens->save();
 
@@ -108,6 +126,8 @@ class SoftlensController extends Controller
             return back()->with('error', 'Gagal memperbarui softlens.');
         }
     }
+
+
 
     /**
      * Remove the specified resource from storage.

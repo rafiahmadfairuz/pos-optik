@@ -2,23 +2,19 @@
 
 namespace Database\Factories;
 
+use App\Models\Asuransi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
- */
 class AsuransiFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Asuransi::class;
+
     public function definition(): array
     {
         return [
-            "nama" => "Asuransi Level 1",
-            "nominal" => "100000"
+            'nama' => $this->faker->company . ' Asuransi',
+            'nominal' => $this->faker->numberBetween(1000, 20000),
+            'cabang_id' => \App\Models\Cabang::factory(),
         ];
     }
 }

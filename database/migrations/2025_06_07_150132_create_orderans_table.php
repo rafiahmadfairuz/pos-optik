@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('kembalian')->nullable();
             $table->foreignId('asuransi_id')->nullable()->constrained('asuransis')->onDelete('cascade');
             $table->decimal('total', 15, 2);
+            $table->decimal('laba_total', 15, 2)->default(0);
             $table->timestamps();
         });
     }

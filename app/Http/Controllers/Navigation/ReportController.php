@@ -100,7 +100,7 @@ class ReportController extends Controller
         'date_to' => $request->input('date_to'),
     ];
 
-    return Excel::download(new OrderansExport($filters), 'laporan_penjualan.xlsx');
+    return Excel::download(new OrderansExport($filters), 'Laporan Penjualan.xlsx');
 }
 
 }

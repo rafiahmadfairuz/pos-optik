@@ -62,6 +62,13 @@ class Kasir extends Component
 
             DB::beginTransaction();
 
+            // Hitung total laba dari cart
+            $totalLaba = 0;
+            foreach ($this->cartData as $item) {
+                $itemLaba = $item['laba'] ?? 0;
+                $totalLaba += $itemLaba * $item['quantity'];
+            }
+
             $order = TbOrder::create([
                 'user_id'          => $this->customerData['id'],
                 'cabang_id'        => session("cabang_id"),
@@ -76,7 +83,8 @@ class Kasir extends Component
                 'asuransi_id'      => $this->orderData['asuransi_id'],
                 'total'            => $this->total,
                 'perlu_dibayar'    => $this->perluDibayar,
-                'kembalian'        => $this->kembalian
+                'kembalian'        => $this->kembalian,
+                'laba_total'       => $totalLaba,
             ]);
 
             foreach ($this->cartData as $item) {
@@ -87,6 +95,7 @@ class Kasir extends Component
                     'quantity'      => $item['quantity'],
                     'price'         => $item['price'],
                     'subtotal'      => $item['price'] * $item['quantity'],
+                    'laba'          => $item['laba'] ?? 0,
                 ]);
 
                 $morphMap = Relation::morphMap();

@@ -13,7 +13,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Aksesoris</h5>
                     @auth
-                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                        @if (in_array(Auth::user()->role, ['admin', 'gudang']))
                             <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddAccessories">
                                 Tambah Data
                             </button>
@@ -54,11 +54,27 @@
                                         </div>
                                     @enderror
                                 </div>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    <div class="col-md-3">
+                                        <label for="harga" class="form-label">Harga Beli</label>
+                                        <input type="number" step="any"
+                                            class="form-control @error('harga_beli') is-invalid @enderror"
+                                            id="accessoriesHargaBeli" name="harga_beli" value="{{ old('harga_beli') }}">
+                                        @error('harga_beli')
+                                            <div class="invalid-feedback d-flex align-items-center mt-1"
+                                                style="display: block;">
+                                                <i
+                                                    class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                            </div>
+                                        @enderror
+                                    </div>
+                                @endif
 
                                 <div class="col-md-6">
-                                    <label for="accessoriesHarga" class="form-label">Harga</label>
-                                    <input type="number" step="any" class="form-control @error('harga') is-invalid @enderror"
-                                        id="accessoriesHarga" name="harga" value="{{ old('harga') }}">
+                                    <label for="accessoriesHarga" class="form-label">Harga Jual</label>
+                                    <input type="number" step="any"
+                                        class="form-control @error('harga') is-invalid @enderror" id="accessoriesHarga"
+                                        name="harga" value="{{ old('harga') }}">
                                     @error('harga')
                                         <div class="invalid-feedback d-flex align-items-center mt-1"
                                             style="display: block;">
@@ -97,45 +113,51 @@
                             <tr class="align-middle">
                                 <th class="py-3 px-4 fw-bold">Nama</th>
                                 <th class="py-3 px-4 fw-bold">Jenis</th>
-                                <th class="py-3 px-4 fw-bold">Harga</th>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    <th class="py-3 px-4 fw-bold">Harga Beli</th>
+                                @endif
+                                <th class="py-3 px-4 fw-bold">Harga Jual</th>
                                 <th class="py-3 px-4 fw-bold text-center">Stok</th>
+                                @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                    <th>Laba</th>
+                                @endif
                                 @auth
-                                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
-                                        <th class="py-3 px-4 fw-bold">Aksi</th>
-                                    @endif
+                                    <th class="py-3 px-4 fw-bold">Aksi</th>
                                 @endauth
-
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($accessories as $acc)
                                 <tr data-id="{{ $acc->id }}" data-nama="{{ $acc->nama }}"
                                     data-jenis="{{ $acc->jenis }}" data-harga="{{ $acc->harga }}"
-                                    data-stok="{{ $acc->stok }}">
+                                    data-harga_beli="{{ $acc->harga_beli }}" data-stok="{{ $acc->stok }}">
                                     <td>{{ $acc->nama }}</td>
                                     <td>{{ $acc->jenis }}</td>
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                        <td>Rp {{ number_format($acc->harga_beli, 0, ',', '.') }}</td>
+                                    @endif
                                     <td>Rp {{ number_format($acc->harga, 0, ',', '.') }}</td>
                                     <td class="text-center">{{ $acc->stok }}</td>
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                        <td>Rp {{ number_format($acc->laba, 0, ',', '.') }}</td>
+                                    @endif
                                     @auth
-                                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
-                                            <td>
-                                                <button class="btn btn-sm btn-edit-accessory" title="Edit Aksesori">
-                                                    <img src="assets/img/icons/edit.svg" alt="edit">
-                                                </button>
-                                                <button class="btn btn-sm btn-delete-accessory" title="Delete Aksesori"
-                                                    data-bs-toggle="modal" data-bs-target="#deleteAccessoryModal">
-                                                    <img src="assets/img/icons/delete.svg" alt="delete">
-                                                </button>
-                                            </td>
-                                        @endif
+                                        <td>
+                                            <button class="btn btn-sm btn-edit-accessory" title="Edit Aksesori">
+                                                <img src="assets/img/icons/edit.svg" alt="edit">
+                                            </button>
+                                            <button class="btn btn-sm btn-delete-accessory" title="Delete Aksesori"
+                                                data-bs-toggle="modal" data-bs-target="#deleteAccessoryModal">
+                                                <img src="assets/img/icons/delete.svg" alt="delete">
+                                            </button>
+                                        </td>
                                     @endauth
-
                                 </tr>
                             @endforeach
-
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
@@ -172,13 +194,13 @@
             const btnCancel = document.getElementById('btnCancel');
             const accessoriesForm = document.getElementById('accessoriesForm');
             const accessoriesId = document.getElementById('accessoriesId');
+            const deleteAccessoriesForm = document.getElementById('deleteAccessoriesForm');
+
             const accessoriesName = document.getElementById('accessoriesName');
             const accessoriesJenis = document.getElementById('accessoriesjenis');
             const accessoriesHarga = document.getElementById('accessoriesHarga');
             const accessoriesStok = document.getElementById('accessoriesStok');
-            const deleteAccessoriesForm = document.getElementById('deleteAccessoriesForm');
-
-
+            const accessoriesHargaBeli = document.getElementById('accessoriesHargaBeli');
 
             function setFormMethod(form, method) {
                 let methodInput = form.querySelector('input[name="_method"]');
@@ -191,53 +213,53 @@
                 methodInput.value = method;
             }
 
-            btnAddAccessories.addEventListener('click', () => {
-                accessoriesForm.action = "{{ route('accessories.store') }}";
-                accessoriesForm.querySelector('input[name="_method"]')?.remove();
-                accessoriesId.value = '';
-                accessoriesForm.reset();
-                formContainer.classList.remove('d-none');
-            });
+            if (btnAddAccessories) {
+                btnAddAccessories.addEventListener('click', () => {
+                    accessoriesForm.action = "{{ route('accessories.store') }}";
+                    accessoriesForm.querySelector('input[name="_method"]')?.remove();
+                    accessoriesForm.reset();
+                    accessoriesId.value = '';
+                    formContainer.classList.remove('d-none');
+                    accessoriesName.focus();
+                    btnAddAccessories.classList.add('d-none');
+                });
+            }
 
             btnCancel.addEventListener('click', () => {
                 formContainer.classList.add('d-none');
                 accessoriesForm.reset();
                 accessoriesId.value = '';
+                btnAddAccessories.classList.remove('d-none');
             });
 
             document.querySelectorAll('.btn-edit-accessory').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const tr = e.target.closest('tr');
-                    if (!tr) return;
-
+                btn.addEventListener('click', () => {
+                    const tr = btn.closest('tr');
                     const id = tr.dataset.id;
-                    const name = tr.dataset.nama;
-                    const type = tr.dataset.jenis;
-                    const price = tr.dataset.harga;
-                    const stock = tr.dataset.stok;
 
                     accessoriesForm.action = `/accessories/${id}`;
                     setFormMethod(accessoriesForm, 'PUT');
 
                     accessoriesId.value = id;
-                    accessoriesName.value = name;
-                    accessoriesJenis.value = type;
-                    accessoriesHarga.value = price;
-                    accessoriesStok.value = stock;
+                    accessoriesName.value = tr.dataset.nama;
+                    accessoriesJenis.value = tr.dataset.jenis;
+                    if (accessoriesHargaBeli) accessoriesHargaBeli.value = tr.dataset.harga_beli;
+                    accessoriesHarga.value = tr.dataset.harga;
+                    accessoriesStok.value = tr.dataset.stok;
 
                     formContainer.classList.remove('d-none');
                     accessoriesName.focus();
+                    btnAddAccessories.classList.add('d-none');
                 });
             });
 
             document.querySelectorAll('.btn-delete-accessory').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const tr = e.target.closest('tr');
-                    if (!tr) return;
-
+                btn.addEventListener('click', () => {
+                    const tr = btn.closest('tr');
                     const id = tr.dataset.id;
                     deleteAccessoriesForm.action = `/accessories/${id}`;
                     setFormMethod(deleteAccessoriesForm, 'DELETE');
+                    deleteAccessoriesForm.method = 'POST';
 
                     const deleteModal = new bootstrap.Modal(document.getElementById(
                         'deleteAccessoriesModal'));
@@ -245,12 +267,12 @@
                 });
             });
 
-
-
             const hasFormError = {{ $errors->any() ? 'true' : 'false' }};
             if (hasFormError) {
                 formContainer.classList.remove('d-none');
+                btnAddAccessories.classList.add('d-none');
             }
         });
     </script>
+
 </x-app>

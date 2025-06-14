@@ -65,59 +65,64 @@
             </div>
 
 
-            <div class="col-12 mt-4">
-                <div class="card mb-0">
-                    <div class="card-body">
-                        <h4 class="card-title">Orderan Pending (Berdasarkan Tanggal Terlama)</h4>
-                        <div class="table-responsive dataview">
-                            <table class="table table-bordered table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Pelanggan</th>
-                                        <th>Tanggal Transaksi</th>
-                                        <th>Total</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($pendingOrders as $order)
-                                        <tr>
-                                            <td>{{ $order->id }}</td>
-                                            <td>
-                                                <a href="#" class="text-decoration-none">
-                                                    {{ $order->user->name ?? 'Tidak Diketahui' }}
-                                                </a>
-                                            </td>
-                                            <td>{{ \Carbon\Carbon::parse($order->order_date)->format('d-m-Y') }}</td>
-                                            <td>Rp.{{ number_format($order->total, 0, ',', '.') }}</td>
-                                            <td>
-                                                <div class="d-flex gap-1">
-                                                    <div class="px-2 rounded-3 bg-warning text-white">
-                                                        {{ ucfirst($order->order_status) }}
-                                                    </div>
-                                                    <div
-                                                        class="px-2 rounded-3 {{ $order->payment_status === 'paid' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
-                                                        {{ ucfirst($order->payment_status) }}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('orderan.detail', $order->id) }}"
-                                                    class="btn-sm text-primary">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-
-                            </table>
+            @auth
+                @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                    <div class="col-12 mt-4">
+                        <div class="card mb-0">
+                            <div class="card-body">
+                                <h4 class="card-title">Orderan Pending (Berdasarkan Tanggal Terlama)</h4>
+                                <div class="table-responsive dataview">
+                                    <table class="table table-bordered table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Pelanggan</th>
+                                                <th>Tanggal Transaksi</th>
+                                                <th>Total</th>
+                                                <th>Status</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($pendingOrders as $order)
+                                                <tr>
+                                                    <td>{{ $order->id }}</td>
+                                                    <td>
+                                                        <a href="#" class="text-decoration-none">
+                                                            {{ $order->user->name ?? 'Tidak Diketahui' }}
+                                                        </a>
+                                                    </td>
+                                                    <td>{{ \Carbon\Carbon::parse($order->order_date)->format('d-m-Y') }}
+                                                    </td>
+                                                    <td>Rp.{{ number_format($order->total, 0, ',', '.') }}</td>
+                                                    <td>
+                                                        <div class="d-flex gap-1">
+                                                            <div class="px-2 rounded-3 bg-warning text-white">
+                                                                {{ ucfirst($order->order_status) }}
+                                                            </div>
+                                                            <div
+                                                                class="px-2 rounded-3 {{ $order->payment_status === 'paid' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
+                                                                {{ ucfirst($order->payment_status) }}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{ route('orderan.detail', $order->id) }}"
+                                                            class="btn-sm text-primary">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                @endif
+            @endauth
+
         </div>
     </div>
     <script>
@@ -193,7 +198,7 @@
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top', 
+                    position: 'top',
                     labels: {
                         font: {
                             size: 12
