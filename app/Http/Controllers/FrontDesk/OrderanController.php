@@ -49,7 +49,11 @@ class OrderanController extends Controller
         }
 
         $customerPayingCleaned = (float) str_replace(['.', ','], '', $request->input('customer_paying'));
-        $request->merge(['customer_paying_cleaned' => $customerPayingCleaned]);
+        $diskonCleaned = (float) str_replace(['.', ','], '', $request->input('diskon')); // ✅ Tambahan
+        $request->merge([
+            'customer_paying_cleaned' => $customerPayingCleaned,
+            'diskon_cleaned' => $diskonCleaned, // ✅ Tambahan
+        ]);
 
         $validatedData = $request->validate([
             'resep_left_sph_d' => 'nullable|string|max:255',
@@ -68,7 +72,7 @@ class OrderanController extends Controller
             'order_date' => 'required|date',
             'complete_date' => 'required|date',
             'staff_id' => 'required|exists:staff,id',
-            'payment_type' => ['required', Rule::in(['DP', 'pelunasan', 'asuransi'])],
+            'payment_type' => ['required', Rule::in(['pelunasan', 'asuransi'])],
             'asuransi_id' => [
                 'nullable',
                 Rule::requiredIf($request->input('payment_type') == 'asuransi'),
@@ -76,8 +80,13 @@ class OrderanController extends Controller
             ],
             'order_status' => ['required', Rule::in(['pending', 'complete'])],
             'payment_method' => ['required', Rule::in(['cash', 'card'])],
-            'payment_status' => ['required', Rule::in(['unpaid', 'paid'])],
+            'payment_status' => ['required', Rule::in(['DP', 'unpaid', 'paid'])],
             'customer_paying_cleaned' => 'required|numeric|min:0',
+            'diskon_cleaned' => 'nullable|numeric|min:0', // ✅ Tambahan
+            // Resep tambahan
+            'alamat' => 'nullable|string|max:255', // ✅ Tambahan
+            'gender' => 'nullable|in:male,female,other', // ✅ Tambahan
+            'umur' => 'nullable|numeric|min:0|max:150', // ✅ Tambahan
         ]);
 
         DB::beginTransaction();
@@ -94,8 +103,13 @@ class OrderanController extends Controller
                 }
             }
 
-            $perluDibayar = $calculatedTotal - $asuransiNominal;
-            $kembalian = $validatedData['customer_paying_cleaned'] - $perluDibayar;
+            $diskon = $validatedData['diskon_cleaned'] ?? 0; // ✅ Tambahan
+            $perluDibayar = $calculatedTotal - $asuransiNominal - $diskon; // ✅ Update formula
+
+            // ✅ Tambahan akumulasi pembayaran
+            $customerPayingAkhir = $order->customer_paying + $validatedData['customer_paying_cleaned'];
+            $kurangBayar = max($perluDibayar - $customerPayingAkhir, 0); // ✅ Perbaikan
+            $kembalian = max($customerPayingAkhir - $perluDibayar, 0); // ✅ Perbaikan
 
             if ($requestedOrderStatus == 'complete' && $originalOrderStatus != 'complete') {
                 foreach ($order->items as $item) {
@@ -105,8 +119,6 @@ class OrderanController extends Controller
                         throw new \Exception("Produk terkait dengan item order (ID: {$item->id}) tidak ditemukan.");
                     }
 
-
-
                     if ($product->stok < $item->quantity) {
                         throw new \Exception("Stok {$product->merk} ({$item->quantity} diminta, {$product->stok} tersedia) tidak mencukupi untuk item order ID {$item->id}.");
                     }
@@ -114,6 +126,7 @@ class OrderanController extends Controller
                     $product->stok -= $item->quantity;
                     $product->save();
                 }
+
                 $order->complete_date = now();
                 if ($order->payment_status == 'unpaid') {
                     $order->payment_status = 'paid';
@@ -129,44 +142,37 @@ class OrderanController extends Controller
                 'order_status' => $validatedData['order_status'],
                 'payment_method' => $validatedData['payment_method'],
                 'payment_status' => $validatedData['payment_status'],
-                'customer_paying' => $validatedData['customer_paying_cleaned'],
+                'customer_paying' => $customerPayingAkhir, // ✅ Akumulasi
+                'diskon' => $diskon, // ✅ Tambahan
+                'kurang_bayar' => $kurangBayar, // ✅ Tambahan
                 'total' => $calculatedTotal,
                 'perlu_dibayar' => $perluDibayar,
                 'kembalian' => $kembalian,
             ]);
 
+            $resepData = [
+                'right_sph_d' => $validatedData['resep_right_sph_d'],
+                'right_cyl_d' => $validatedData['resep_right_cyl_d'],
+                'right_axis_d' => $validatedData['resep_right_axis_d'],
+                'right_va_d' => $validatedData['resep_right_va_d'],
+                'left_sph_d' => $validatedData['resep_left_sph_d'],
+                'left_cyl_d' => $validatedData['resep_left_cyl_d'],
+                'left_axis_d' => $validatedData['resep_left_axis_d'],
+                'left_va_d' => $validatedData['resep_left_va_d'],
+                'add_right' => $validatedData['resep_add_right'],
+                'add_left' => $validatedData['resep_add_left'],
+                'pd_right' => $validatedData['resep_pd_right'],
+                'pd_left' => $validatedData['resep_pd_left'],
+                'notes' => $validatedData['resep_notes'],
+                'alamat' => $validatedData['alamat'], // ✅ Tambahan
+                'gender' => $validatedData['gender'], // ✅ Tambahan
+                'umur' => $validatedData['umur'],     // ✅ Tambahan
+            ];
+
             if ($order->resep) {
-                $order->resep->update([
-                    'right_sph_d' => $validatedData['resep_right_sph_d'],
-                    'right_cyl_d' => $validatedData['resep_right_cyl_d'],
-                    'right_axis_d' => $validatedData['resep_right_axis_d'],
-                    'right_va_d' => $validatedData['resep_right_va_d'],
-                    'left_sph_d' => $validatedData['resep_left_sph_d'],
-                    'left_cyl_d' => $validatedData['resep_left_cyl_d'],
-                    'left_axis_d' => $validatedData['resep_left_axis_d'],
-                    'left_va_d' => $validatedData['resep_left_va_d'],
-                    'add_right' => $validatedData['resep_add_right'],
-                    'add_left' => $validatedData['resep_add_left'],
-                    'pd_right' => $validatedData['resep_pd_right'],
-                    'pd_left' => $validatedData['resep_pd_left'],
-                    'notes' => $validatedData['resep_notes'],
-                ]);
+                $order->resep->update($resepData);
             } else {
-                $order->resep()->create([
-                    'right_sph_d' => $validatedData['resep_right_sph_d'],
-                    'right_cyl_d' => $validatedData['resep_right_cyl_d'],
-                    'right_axis_d' => $validatedData['resep_right_axis_d'],
-                    'right_va_d' => $validatedData['resep_right_va_d'],
-                    'left_sph_d' => $validatedData['resep_left_sph_d'],
-                    'left_cyl_d' => $validatedData['resep_left_cyl_d'],
-                    'left_axis_d' => $validatedData['resep_left_axis_d'],
-                    'left_va_d' => $validatedData['resep_left_va_d'],
-                    'add_right' => $validatedData['resep_add_right'],
-                    'add_left' => $validatedData['resep_add_left'],
-                    'pd_right' => $validatedData['resep_pd_right'],
-                    'pd_left' => $validatedData['resep_pd_left'],
-                    'notes' => $validatedData['resep_notes'],
-                ]);
+                $order->resep()->create($resepData);
             }
 
             DB::commit();

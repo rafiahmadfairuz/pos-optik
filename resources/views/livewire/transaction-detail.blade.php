@@ -129,6 +129,41 @@
                             </table>
                         </div>
                     </div>
+                        {{-- Umur --}}
+                        <div class="col-md-6 mb-3">
+                            <label for="umur" class="form-label">Umur</label>
+                            <input type="number" wire:model.lazy="umur" id="umur"
+                                class="form-control @error('umur') is-invalid @enderror">
+                            @error('umur')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Gender --}}
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select wire:model.lazy="gender" id="gender"
+                                class="form-select @error('gender') is-invalid @enderror">
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="male">Laki-laki</option>
+                                <option value="female">Perempuan</option>
+                                <option value="other">Lainnya</option>
+                            </select>
+                            @error('gender')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Alamat --}}
+                        <div class="col-12 mb-3">
+                            <label for="alamat" class="form-label">Alamat</label>
+                            <textarea wire:model.lazy="alamat" id="alamat" class="form-control @error('alamat') is-invalid @enderror"
+                                rows="3"></textarea>
+                            @error('alamat')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
 
                     <div class="col-md-12">
                         <label class="form-label">Extra Notes</label>
@@ -183,7 +218,6 @@
                             class="form-select @error('payment_type') is-invalid @enderror">
                             <option value="" default>-- Pilih --</option>
                             <option value="pelunasan">Pelunasan</option>
-                            <option value="DP">DP</option>
                             <option value="asuransi">Asuransi</option>
                         </select>
                         @error('payment_type')
@@ -247,9 +281,20 @@
                             class="form-select @error('payment_status') is-invalid @enderror">
                             <option value="">-- Pilih --</option>
                             <option value="paid">Paid</option>
+                            <option value="DP">DP</option>
                             <option value="unpaid">Unpaid</option>
                         </select>
                         @error('payment_status')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Diskon</label>
+                        <input type="text" wire:model.lazy="diskon" oninput="formatRupiah(this)"
+                            class="form-control
+                            @error('diskon') is-invalid @enderror">
+                        @error('diskon')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>

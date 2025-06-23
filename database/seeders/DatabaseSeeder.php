@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Supplier;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\FrameSeeder;
@@ -13,6 +14,9 @@ use Database\Seeders\AccessoriesSeeder;
 use Database\Seeders\LensaFinishSeeder;
 use Database\Seeders\LensaKhususSeeder;
 use Database\Seeders\OrderItemSeeder;
+use Database\Seeders\PembelianSeeder;
+use Database\Seeders\SupplierSeeder;
+use Database\Seeders\TransferSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -31,6 +35,9 @@ class DatabaseSeeder extends Seeder
             OrderanSeeder::class,
             OrderItemSeeder::class,
             ResepSeeder::class,
+            SupplierSeeder::class,
+            PembelianSeeder::class,
+            TransferSeeder::class
         ]);
     }
 }

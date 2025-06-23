@@ -1,4 +1,4 @@
-<div class="col-md-5">
+<div class="col-md-12">
     <div class="card">
         <div class="card-header fw-bold text-decoration-underline">Choose Product</div>
         <div class="card-body p-2">

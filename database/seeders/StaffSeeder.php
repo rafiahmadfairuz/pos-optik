@@ -26,7 +26,7 @@ class StaffSeeder extends Seeder
             'name' => 'Petugas Gudang',
             'email' => 'gudang@gmail.com',
             'password' => Hash::make('1234'),
-            'role' => 'gudang',
+            'role' => 'gudang_utama',
             'cabang_id' => null,
         ]);
 
@@ -35,6 +35,14 @@ class StaffSeeder extends Seeder
         foreach ($cabangs as $cabang) {
             Staff::factory(5)->create([
                 'role' => 'cabang',
+                'cabang_id' => $cabang->id,
+            ]);
+
+            Staff::create([
+                'name' => 'Petugas Gudang Cabang ' . $cabang->nama,
+                'email' => 'gudang_' . $cabang->id . '@gmail.com',
+                'password' => Hash::make('1234'),
+                'role' => 'gudang_cabang',
                 'cabang_id' => $cabang->id,
             ]);
         }

@@ -14,7 +14,6 @@ class OrderItems extends Model
         return $this->belongsTo(Orderan::class, 'order_id');
     }
 
-    // Tambahan: jika itemable polymorphic, bisa tambahkan:
     public function itemable()
     {
         return $this->morphTo();

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Cabang;
 use App\Models\LensaFinish;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -13,6 +14,16 @@ class LensaFinishSeeder extends Seeder
      */
     public function run(): void
     {
-         LensaFinish::factory(30)->create();
+        $cabangs = Cabang::all();
+
+        foreach ($cabangs as $cabang) {
+            LensaFinish::factory(2)->create(['cabang_id' => $cabang->id]);
+        }
+
+        LensaFinish::factory(2)->create([
+            'cabang_id' => $cabangs->random()->id
+        ]);
+
+        LensaFinish::factory(30)->create(['cabang_id' => null]);
     }
 }

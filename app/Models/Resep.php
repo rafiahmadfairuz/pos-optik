@@ -10,8 +10,7 @@ class Resep extends Model
     use HasFactory;
     protected $guarded = ["id"];
     public function orderan()
-{
-    return $this->belongsTo(Orderan::class, 'orderan_id');
-}
-
+    {
+        return $this->belongsTo(Orderan::class, 'orderan_id');
+    }
 }

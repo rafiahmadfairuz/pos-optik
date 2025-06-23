@@ -175,7 +175,7 @@
                                     <th>Harga Beli</th>
                                 @endif
                                 <th>Harga Jual</th>
-                                   @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                   @if (in_array(Auth::user()->role, ['admin', 'gudang']))
                                         <th>Laba</th>
                                     @endif
                                 @auth

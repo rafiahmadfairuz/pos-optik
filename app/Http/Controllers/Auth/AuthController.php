@@ -21,20 +21,38 @@ class AuthController extends Controller
             'password' => 'required|string|min:4',
         ]);
 
-
         if (Auth::attempt($userData)) {
             $request->session()->regenerate();
-            if (Auth::user()->role === 'cabang') {
-                session(['cabang_id' => Auth::user()->cabang_id]);
-                return redirect()->route('dashboard');
-            } else {
-                return redirect()->route('pilihCabang');
+            $user = Auth::user();
+
+            switch ($user->role) {
+                case 'admin':
+                    return redirect()->route('pilihCabang');
+
+                case 'gudang_cabang':
+                    session(['cabang_id' => $user->cabang_id]);
+                    return redirect()->route('dashboard');
+
+                case 'cabang':
+                    session(['cabang_id' => $user->cabang_id]);
+                    return redirect()->route('dashboard');
+
+                case 'gudang_utama':
+                    return redirect()->route('transfer.barang');
+
+                default:
+                    Auth::logout();
+                    return back()->withErrors([
+                        "email" => "Role pengguna tidak dikenali"
+                    ]);
             }
         }
+
         return back()->withErrors([
-            "email" => "Email Atau Password Salah"
+            "email" => "Email atau password salah"
         ])->withInput();
     }
+
 
     public function logout(Request $request)
     {

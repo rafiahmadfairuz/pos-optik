@@ -20,13 +20,10 @@ return new class extends Migration
             $table->string('right_axis_d')->nullable();
             $table->string('right_va_d')->nullable();
 
-
-
             $table->string('left_sph_d')->nullable();
             $table->string('left_cyl_d')->nullable();
             $table->string('left_axis_d')->nullable();
             $table->string('left_va_d')->nullable();
-
 
             $table->string('add_right')->nullable();
             $table->string('add_left')->nullable();
@@ -34,6 +31,10 @@ return new class extends Migration
             $table->string('pd_left')->nullable();
 
             $table->text('notes')->nullable();
+
+            $table->unsignedInteger('umur')->nullable(); 
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            $table->text('alamat')->nullable();
 
             $table->timestamps();
         });

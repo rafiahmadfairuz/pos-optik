@@ -15,9 +15,17 @@ class SoftlensController extends Controller
      */
     public function index()
     {
-        $softlens = Softlen::where('cabang_id', session('cabang_id'))->get();
+        $user = Auth::user();
+
+        if ($user->role === 'gudang_utama') {
+            $softlens = Softlen::whereNull('cabang_id')->get();
+        } else {
+            $softlens = Softlen::where('cabang_id', session('cabang_id'))->get();
+        }
+
         return view("Inventory.softlens", compact("softlens"));
     }
+
 
     /**
      * Show the form for creating a new resource.

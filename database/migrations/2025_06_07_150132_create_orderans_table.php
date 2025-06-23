@@ -21,9 +21,11 @@ return new class extends Migration
             $table->enum('payment_type', ['DP', 'pelunasan', 'asuransi']);
             $table->enum('order_status', ['pending', 'complete'])->default('pending');
             $table->enum('payment_method', ['cash', 'card']);
-            $table->enum('payment_status', ['unpaid', 'paid'])->default('unpaid');
+            $table->enum('payment_status', ['unpaid', 'DP', 'paid'])->default('unpaid');
             $table->string('customer_paying');
+            $table->string('diskon');
             $table->string('perlu_dibayar');
+            $table->string('kurang_bayar');
             $table->string('kembalian')->nullable();
             $table->foreignId('asuransi_id')->nullable()->constrained('asuransis')->onDelete('cascade');
             $table->decimal('total', 15, 2);

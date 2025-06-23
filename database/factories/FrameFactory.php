@@ -1,5 +1,7 @@
 <?php
+
 namespace Database\Factories;
+
 use App\Models\Frame;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,7 +23,7 @@ class FrameFactory extends Factory
             'harga' => $hargaJual,
             'laba' => $laba,
             'stok' => rand(1, 50),
-            'cabang_id' => \App\Models\Cabang::inRandomOrder()->first()->id,
+            'cabang_id' => null,
         ];
     }
 }

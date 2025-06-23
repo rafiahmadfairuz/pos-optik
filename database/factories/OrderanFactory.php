@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Orderan;
+use App\Models\Asuransi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class OrderanFactory extends Factory
@@ -12,8 +13,27 @@ class OrderanFactory extends Factory
     public function definition(): array
     {
         $orderDate = $this->faker->dateTimeBetween('-1 months', 'now');
-        $paying = $this->faker->randomFloat(2, 100000, 2000000);
-        $due = $this->faker->randomFloat(2, 100000, 2000000);
+        $total = $this->faker->randomFloat(2, 100000, 3000000);
+
+        // Buat atau ambil asuransi
+        $asuransi = Asuransi::inRandomOrder()->first() ?? \App\Models\Asuransi::factory()->create();
+        $asuransi_id = $asuransi->id;
+        $asuransi_nominal = $asuransi->nominal ?? 0;
+
+        // Diskon selalu ada (float)
+        $diskon = $this->faker->randomElement([
+            0,
+            $this->faker->randomFloat(2, 1000, 100000)
+        ]);
+
+        $perlu_dibayar = max($total - $asuransi_nominal - $diskon, 0);
+
+        // Bayar antara 50%-150% dari yang harus dibayar
+        $customer_paying = $this->faker->randomFloat(2, $perlu_dibayar * 0.5, $perlu_dibayar * 1.5);
+
+        // Kurang bayar dan kembalian selalu angka (minimal 0, bukan null)
+        $kurang_bayar = max($perlu_dibayar - $customer_paying, 0);
+        $kembalian = max($customer_paying - $perlu_dibayar, 0);
 
         return [
             'user_id' => \App\Models\User::factory(),
@@ -25,11 +45,14 @@ class OrderanFactory extends Factory
             'order_status' => $this->faker->randomElement(['pending', 'complete']),
             'payment_method' => $this->faker->randomElement(['cash', 'card']),
             'payment_status' => $this->faker->randomElement(['unpaid', 'paid']),
-            'customer_paying' => $paying,
-            'perlu_dibayar' => $due,
-            'kembalian' => ($paying - $due) > 0 ? $paying - $due : null,
-            'asuransi_id' => $this->faker->optional()->randomDigitNotNull(),
-            'total' => $due,
+
+            'total' => $total,
+            'asuransi_id' => $asuransi_id,
+            'diskon' => $diskon,
+            'perlu_dibayar' => $perlu_dibayar,
+            'customer_paying' => $customer_paying,
+            'kurang_bayar' => $kurang_bayar,
+            'kembalian' => $kembalian,
         ];
     }
 }

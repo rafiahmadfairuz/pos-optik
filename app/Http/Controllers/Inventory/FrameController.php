@@ -15,9 +15,17 @@ class FrameController extends Controller
      */
     public function index()
     {
-        $frame = Frame::where('cabang_id', session('cabang_id'))->get();
+        $user = Auth::user();
+
+        if ($user->role === 'gudang_utama') {
+            $frame = Frame::whereNull('cabang_id')->get();
+        } else {
+            $frame = Frame::where('cabang_id', session('cabang_id'))->get();
+        }
+
         return view('Inventory.frame', compact('frame'));
     }
+
 
     /**
      * Show the form for creating a new resource.

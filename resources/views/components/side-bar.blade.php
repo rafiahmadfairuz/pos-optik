@@ -5,18 +5,44 @@
             <ul class="my-3">
 
                 <li class="menu-title fw-bold">NAVIGATION</li>
-                <li class="{{ Request::is('/') ? 'active' : '' }}">
-                    <a href="{{ url('/') }}">
-                        <img src="{{ asset('assets/img/icons/dashboard.svg') }}" alt="img">
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="{{ Request::is('report') ? 'active' : '' }}">
-                    <a href="{{ url('report') }}">
-                        <img src="{{ asset('assets/img/icons/time.svg') }}" alt="img">
-                        <span>Report</span>
-                    </a>
-                </li>
+                @if (in_array(Auth::user()->role, ['admin', 'cabang', 'gudang_cabang']))
+                    <li class="{{ Request::is('/') ? 'active' : '' }}">
+                        <a href="{{ url('/') }}">
+                            <img src="{{ asset('assets/img/icons/dashboard.svg') }}" alt="img">
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="{{ Request::is('report') ? 'active' : '' }}">
+                        <a href="{{ url('report') }}">
+                            <img src="{{ asset('assets/img/icons/time.svg') }}" alt="img">
+                            <span>Report</span>
+                        </a>
+                    </li>
+                @endif
+
+
+                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                    <li class="{{ Request::is('transferBarang') ? 'active' : '' }}">
+                        <a href="{{ url('transferBarang') }}">
+                            <i class="bi bi-box-arrow-right"></i><span> Transfer Barang</span>
+                        </a>
+                    </li>
+                    <li class="{{ Request::is('beliBarang') ? 'active' : '' }}">
+                        <a href="{{ url('beliBarang') }}">
+                            <i class="bi bi-cart-plus"></i><span> Beli Barang</span>
+                        </a>
+                    </li>
+                    <li class="{{ Request::is('pembelian') ? 'active' : '' }}">
+                        <a href="{{ url('pembelian') }}">
+                            <i class="bi bi-cart-check"></i><span>List Pembelian</span>
+                        </a>
+                    </li>
+                    <li class="{{ Request::is('supplier') ? 'active' : '' }}">
+                        <a href="{{ url('supplier') }}">
+                            <i class="bi bi-person-lines-fill"></i><span>Supplier</span>
+                        </a>
+                    </li>
+                @endif
 
                 @auth
                     @if (in_array(Auth::user()->role, ['admin', 'cabang']))

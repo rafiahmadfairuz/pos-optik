@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('harga_beli', 15, 2);
             $table->decimal('laba', 15, 2);
             $table->unsignedInteger('stok');
-            $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
+            $table->foreignId('cabang_id')->nullable()->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();
         });
     }

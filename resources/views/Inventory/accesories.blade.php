@@ -118,7 +118,7 @@
                                 @endif
                                 <th class="py-3 px-4 fw-bold">Harga Jual</th>
                                 <th class="py-3 px-4 fw-bold text-center">Stok</th>
-                                @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
                                     <th>Laba</th>
                                 @endif
                                 @auth

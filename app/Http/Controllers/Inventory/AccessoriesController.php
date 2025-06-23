@@ -15,7 +15,14 @@ class AccessoriesController extends Controller
      */
     public function index()
     {
-        $accessories = Accessories::where('cabang_id', session('cabang_id'))->get();
+        $user = Auth::user();
+
+        if ($user->role === 'gudang_utama') {
+            $accessories = Accessories::whereNull('cabang_id')->get();
+        } else {
+            $accessories = Accessories::where('cabang_id', session('cabang_id'))->get();
+        }
+
         return view("Inventory.accesories", compact("accessories"));
     }
 

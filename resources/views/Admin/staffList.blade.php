@@ -57,7 +57,8 @@
                         <select class="form-select @error('role') is-invalid @enderror" id="staffRole" name="role"
                             required>
                             <option selected disabled>Select Role</option>
-                            <option value="gudang" {{ old('role') == 'gudang' ? 'selected' : '' }}>Gudang</option>
+                            <option value="gudang_utama" {{ old('role') == 'gudang_utama' ? 'selected' : '' }}>Gudang Utama</option>
+                            <option value="gudang_cabang" {{ old('role') == 'gudang_cabang' ? 'selected' : '' }}>Gudang Cabang</option>
                             <option value="cabang" {{ old('role') == 'cabang' ? 'selected' : '' }}>Cabang</option>
                         </select>
                         @error('role')
@@ -183,7 +184,7 @@
             }
 
             function toggleBranch() {
-                if (staffRoleSelect.value === 'cabang') {
+                if (staffRoleSelect.value === 'cabang' || staffRoleSelect.value === "gudang_cabang") {
                     branchSelectContainer.classList.remove('d-none');
                 } else {
                     branchSelectContainer.classList.add('d-none');

@@ -164,6 +164,48 @@
                                         </table>
                                     </div>
                                 </div>
+                                {{-- Umur --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Umur</label>
+                                    <input type="number" name="umur"
+                                        class="form-control @error('umur') is-invalid @enderror"
+                                        value="{{ old('umur', $order->resep?->umur) }}"
+                                        {{ $isDisabled ? 'disabled' : '' }}>
+                                    @error('umur')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                {{-- Gender --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Gender</label>
+                                    <select name="gender" class="form-select @error('gender') is-invalid @enderror"
+                                        {{ $isDisabled ? 'disabled' : '' }}>
+                                        <option value="">Pilih Jenis Kelamin</option>
+                                        <option value="male"
+                                            {{ old('gender', $order->resep?->gender) == 'male' ? 'selected' : '' }}>
+                                            Laki-laki</option>
+                                        <option value="female"
+                                            {{ old('gender', $order->resep?->gender) == 'female' ? 'selected' : '' }}>
+                                            Perempuan</option>
+                                        <option value="other"
+                                            {{ old('gender', $order->resep?->gender) == 'other' ? 'selected' : '' }}>
+                                            Lainnya</option>
+                                    </select>
+                                    @error('gender')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                {{-- Alamat --}}
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Alamat</label>
+                                    <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3"
+                                        {{ $isDisabled ? 'disabled' : '' }}>{{ old('alamat', $order->resep?->alamat) }}</textarea>
+                                    @error('alamat')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
                                 <div class="col-md-12">
                                     <label class="form-label"><i class="bi bi-pencil-square me-1"></i>Catatan
                                         Tambahan</label>
@@ -226,9 +268,6 @@
                                         <option value="pelunasan"
                                             {{ old('payment_type', $order->payment_type) == 'pelunasan' ? 'selected' : '' }}>
                                             Pelunasan</option>
-                                        <option value="DP"
-                                            {{ old('payment_type', $order->payment_type) == 'DP' ? 'selected' : '' }}>
-                                            DP</option>
                                         <option value="asuransi"
                                             {{ old('payment_type', $order->payment_type) == 'asuransi' ? 'selected' : '' }}>
                                             Asuransi</option>
@@ -302,11 +341,25 @@
                                         <option value="paid"
                                             {{ old('payment_status', $order->payment_status) == 'paid' ? 'selected' : '' }}>
                                             Sudah Dibayar</option>
+                                        <option value="DP"
+                                            {{ old('payment_status', $order->payment_status) == 'DP' ? 'selected' : '' }}>
+                                            DP</option>
                                         <option value="unpaid"
                                             {{ old('payment_status', $order->payment_status) == 'unpaid' ? 'selected' : '' }}>
                                             Belum Dibayar</option>
                                     </select>
                                     @error('payment_status')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Diskon</label>
+                                    <input type="text" name="diskon"
+                                        value="{{ old('diskon', number_format(floatval(str_replace('.', '', $order->diskon ?? 0)), 0, ',', '.')) }}"
+                                        oninput="formatRupiah(this)"
+                                        class="form-control @error('diskon') is-invalid @enderror"
+                                        {{ $isDisabled ? 'disabled' : '' }}>
+                                    @error('diskon')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
@@ -327,7 +380,7 @@
                     </div>
                 </div>
                 {{-- Ringkasan Tagihan (tetap di luar formulir karena hanya tampilan) --}}
-                <div class="card mt-3 col-lg-4 col-md-6 col-sm-12 shadow rounded-4">
+                <div class="card mt-3 col-lg-4 col-md-6 col-sm-12 shadow rounded-4 position-relative overflow-hidden">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span class="fw-bold text-decoration-underline">
                             <i class="bi bi-receipt-cutoff me-2"></i>Ringkasan Tagihan
@@ -335,42 +388,84 @@
                         <small class="text-muted">{{ $order->order_date ?? 'N/A' }}</small>
                     </div>
                     <div class="card-body fs-5">
+                        {{-- Total --}}
                         <p>
                             <i class="bi bi-cash-stack me-2"></i>
                             Total:
                             <strong class="float-end">Rp.
-                                {{ number_format($order->total ?? 0, 0, ',', '.') }}</strong>
+                                {{ number_format((float) ($order->total ?? 0), 2, ',', '.') }}
+                            </strong>
                         </p>
+
+                        {{-- Diskon --}}
+                        <p>
+                            <i class="bi bi-tag me-2"></i>
+                            Diskon:
+                            <strong class="float-end">Rp.
+                                {{ number_format((float) ($order->diskon ?? 0), 2, ',', '.') }}
+                            </strong>
+                        </p>
+
+                        {{-- Asuransi --}}
                         <p>
                             <i class="bi bi-shield-check me-2"></i>
                             Asuransi:
                             <strong class="float-end">Rp.
-                                {{ number_format($order->asuransi?->nominal ?? 0, 0, ',', '.') }}</strong>
-                        </p>
-                        <hr>
-                        <p>
-                            <i class="bi bi-calculator me-2"></i>
-                            Total Akhir:
-                            <strong class="float-end">Rp.
-                                {{ number_format($order->perlu_dibayar ?? 0, 0, ',', '.') }}</strong>
-                        </p>
-                        <p>
-                            <i class="bi bi-wallet2 me-2"></i>
-                            Dibayar Pelanggan:
-                            <strong class="float-end">
-                                Rp.
-                                {{ number_format((int) preg_replace('/[^\d]/', '', $order->customer_paying ?? '0'), 0, ',', '.') }}
+                                {{ number_format((float) ($order->asuransi?->nominal ?? 0), 2, ',', '.') }}
                             </strong>
                         </p>
+
                         <hr>
+
+                        {{-- Total Final --}}
+                        <p>
+                            <i class="bi bi-calculator me-2"></i>
+                            Total Final:
+                            <strong class="float-end">Rp.
+                                {{ number_format((float) ($order->perlu_dibayar ?? 0), 2, ',', '.') }}
+                            </strong>
+                        </p>
+
+                        {{-- Dibayar --}}
+                        <p>
+                            <i class="bi bi-wallet2 me-2"></i>
+                            Dibayar:
+                            <strong class="float-end">Rp.
+                                {{ number_format((float) ($order->customer_paying ?? 0), 2, ',', '.') }}
+                            </strong>
+                        </p>
+
+                        <hr>
+
+                        {{-- Kurang Bayar --}}
+                        <p>
+                            <i class="bi bi-dash-circle me-2"></i>
+                            Kurang Bayar:
+                            <strong class="float-end">Rp.
+                                {{ number_format((float) ($order->kurang_bayar ?? 0), 2, ',', '.') }}
+                            </strong>
+                        </p>
+
+                        {{-- Kembalian --}}
                         <p>
                             <i class="bi bi-arrow-repeat me-2"></i>
                             Kembalian:
                             <strong class="float-end">Rp.
-                                {{ number_format($order->kembalian ?? 0, 0, ',', '.') }}</strong>
+                                {{ number_format((float) ($order->kembalian ?? 0), 2, ',', '.') }}
+                            </strong>
                         </p>
+
                     </div>
+
+                    {{-- Tambahan Badge "LUNAS" --}}
+                    @if ($order->payment_status === 'paid')
+                        <div class="position-absolute bottom-0 start-0 w-100 text-center py-3 bg-success text-white fw-bold fs-4 rounded-bottom-4 shadow-sm"
+                            style="letter-spacing: 2px;">
+                            <i class="bi bi-patch-check-fill me-2"></i>LUNAS
+                        </div>
+                    @endif
                 </div>
+
 
                 {{-- Tombol submit tunggal di akhir formulir --}}
                 <div class="col-md-4 d-flex justify-content-start  align-items-start mt-3">

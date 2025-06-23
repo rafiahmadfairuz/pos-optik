@@ -39,8 +39,8 @@ class StaffController extends Controller
                 'name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
                 'email' => 'required|email:rfc|unique:staff,email|max:255',
                 'password' => 'required|string|min:4',
-                'role' => 'required|in:gudang,cabang',
-                'cabang' => $request->role === 'cabang' ? 'required|exists:cabangs,id' : 'nullable',
+                'role' => 'required|in:gudang_cabang,gudang_utama,cabang',
+                'cabang' => in_array($request->role, ['cabang', 'gudang_cabang']) ? 'required|exists:cabangs,id' : 'nullable',
             ]);
 
             $newDataStaff = [
@@ -91,7 +91,7 @@ class StaffController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'password' => 'nullable|string|min:6',
-            'role' => 'required|in:gudang,cabang',
+            'role' => 'required|in:gudang_cabang,gudang_utama,cabang',
             'cabang' => 'nullable|exists:cabangs,id',
         ]);
 

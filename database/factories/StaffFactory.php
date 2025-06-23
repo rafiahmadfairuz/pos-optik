@@ -28,6 +28,6 @@ class StaffFactory extends Factory
 
     public function gudang()
     {
-        return $this->state(fn() => ['role' => 'gudang']);
+        return $this->state(fn() => ['role' => 'gudang_utama']);
     }
 }

@@ -81,6 +81,8 @@ class Kasir extends Component
                 'payment_status'   => $this->orderData['payment_status'],
                 'customer_paying'  => $this->orderData['customer_paying'],
                 'asuransi_id'      => $this->orderData['asuransi_id'],
+                'diskon'      => $this->orderData['diskon'],
+                'kurang_bayar'      => $this->orderData['kurang_bayar'],
                 'total'            => $this->total,
                 'perlu_dibayar'    => $this->perluDibayar,
                 'kembalian'        => $this->kembalian,
@@ -146,6 +148,9 @@ class Kasir extends Component
                     'add_left'      => $this->resepData['add_left'] ?? null,
                     'pd_right'      => $this->resepData['pd_right'] ?? null,
                     'pd_left'       => $this->resepData['pd_left'] ?? null,
+                    'alamat'         => $this->resepData['alamat'] ?? null,
+                    'umur'         => $this->resepData['umur'] ?? null,
+                    'gender'         => $this->resepData['gender'] ?? null,
                     'notes'         => $this->resepData['notes'] ?? null,
                 ]);
             }

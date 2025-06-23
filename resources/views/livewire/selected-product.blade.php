@@ -1,4 +1,4 @@
-<div class="col-md-7">
+<div class="col-md-12">
     <div class="card">
         <div class="card-header fw-bold text-decoration-underline">Shopping Cart</div>
         <div class="card-body text-muted text-center">

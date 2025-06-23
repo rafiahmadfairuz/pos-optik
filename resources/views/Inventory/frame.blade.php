@@ -136,7 +136,7 @@
                                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
                                         <th>Laba</th>
                                     @endif
-                                
+
                                 @auth
                                     <th class="py-3 px-4 fw-bold">Aksi</th>
                                 @endauth

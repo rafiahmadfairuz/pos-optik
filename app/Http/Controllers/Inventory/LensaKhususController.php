@@ -6,6 +6,7 @@ use App\Models\LensaKhusus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class LensaKhususController extends Controller
 {
@@ -14,7 +15,14 @@ class LensaKhususController extends Controller
      */
     public function index()
     {
-        $lensaKhusus = LensaKhusus::where('cabang_id', session('cabang_id'))->get();
+        $user = Auth::user();
+
+        if ($user->role === 'gudang_utama') {
+            $lensaKhusus = LensaKhusus::whereNull('cabang_id')->get();
+        } else {
+            $lensaKhusus = LensaKhusus::where('cabang_id', session('cabang_id'))->get();
+        }
+
         return view('Inventory.lensaKhusus', compact('lensaKhusus'));
     }
 

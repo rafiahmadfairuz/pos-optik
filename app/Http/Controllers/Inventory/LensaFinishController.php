@@ -15,9 +15,17 @@ class LensaFinishController extends Controller
      */
     public function index()
     {
-        $lensaFinish = LensaFinish::where('cabang_id', session('cabang_id'))->get();
+        $user = Auth::user();
+
+        if ($user->role === 'gudang_utama') {
+            $lensaFinish = LensaFinish::whereNull('cabang_id')->get();
+        } else {
+            $lensaFinish = LensaFinish::where('cabang_id', session('cabang_id'))->get();
+        }
+
         return view('Inventory.lensaFinish', compact('lensaFinish'));
     }
+
 
     /**
      * Show the form for creating a new resource.

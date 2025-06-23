@@ -3,19 +3,20 @@
 namespace App\Livewire;
 
 use App\Models\Staff;
-use App\Models\Asuransi;
 use Livewire\Component;
+use App\Models\Asuransi;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class TransactionDetail extends Component
 {
     public $right_sph_d, $right_cyl_d, $right_axis_d, $right_va_d;
     public $left_sph_d, $left_cyl_d, $left_axis_d, $left_va_d;
     public $add_right, $add_left;
-    public $pd_right, $pd_left, $notes;
+    public $pd_right, $pd_left, $alamat, $gender, $umur, $notes;
 
     public $order_status, $order_date, $complete_date;
-    public $payment_type, $optometrist_id, $customer_paying;
+    public $payment_type, $optometrist_id, $diskon, $customer_paying;
     public $payment_method, $payment_status, $asuransi;
 
     public $asuransiList = [];
@@ -26,6 +27,7 @@ class TransactionDetail extends Component
     public $total = 0;
     public $kembalian = 0;
     public $perluDibayar = 0;
+    public $kurangBayar = 0;
 
     public $forcePendingStatus = false;
 
@@ -49,8 +51,14 @@ class TransactionDetail extends Component
 
     public function updatedCustomerPaying($value)
     {
-        logger($value);
         $this->dispatch('customerPayingUpdated', $value);
+        Log::info("Customer Membayar : " . $value);
+    }
+
+    public function updatedDiskon($value)
+    {
+        $this->dispatch('diskon', $value);
+        Log::info("Dapat Diskon : " . $value);
     }
 
 
@@ -61,11 +69,11 @@ class TransactionDetail extends Component
             'order_status' => ['required', Rule::in(['pending', 'complete'])],
             'order_date' => 'required|date',
             'complete_date' => 'required|date|after_or_equal:order_date',
-            'payment_type' => ['required', Rule::in(['DP', 'pelunasan', 'asuransi'])],
+            'payment_type' => ['required', Rule::in(['pelunasan', 'asuransi'])],
             'optometrist_id' => 'required|exists:staff,id',
             'customer_paying' => 'required|numeric|min:0',
             'payment_method' => ['required', Rule::in(['cash', 'card'])],
-            'payment_status' => ['required', Rule::in(['paid', 'unpaid'])],
+            'payment_status' => ['required', Rule::in(['paid', 'DP', 'unpaid'])],
             'asuransi' => 'nullable|exists:asuransis,id',
 
             'right_sph_d' => 'nullable|string|max:10',
@@ -81,6 +89,9 @@ class TransactionDetail extends Component
             'pd_right' => 'nullable|string|max:10',
             'pd_left' => 'nullable|string|max:10',
             'notes' => 'nullable|string|max:2000',
+            'umur' => 'nullable|integer|min:0|max:120',
+            'gender' => 'nullable|in:male,female,other',
+            'alamat' => 'nullable|string|max:1000',
         ];
     }
 
@@ -114,22 +125,32 @@ class TransactionDetail extends Component
 
     public function handleTotal($total)
     {
-        $this->total = $total['total'];
-        $this->kembalian = $total['kembalian'];
-        $this->perluDibayar = $total['perlu_dibayar'];
+        $this->total = $total['total'] ?? 0;
+        $this->diskon = $total['diskon'] ?? 0;
+        $this->kembalian = $total['kembalian'] ?? 0;
+        $this->perluDibayar = $total['perlu_dibayar'] ?? 0;
+        $this->kurangBayar = $total['kurang_bayar'] ?? 0;
+
+        logger('==================== HANDLE TOTAL ====================');
+        logger('TOTAL          : Rp ' . number_format($this->total, 0, ',', '.'));
+        logger('DISKON         : Rp ' . number_format($this->diskon, 0, ',', '.'));
+        logger('KEMBALIAN      : Rp ' . number_format($this->kembalian, 0, ',', '.'));
+        logger('PERLU DIBAYAR  : Rp ' . number_format($this->perluDibayar, 0, ',', '.'));
+        logger('KURANG BAYAR   : Rp ' . number_format($this->kurangBayar, 0, ',', '.'));
+        logger('======================================================');
     }
+
+
 
     public function submit()
     {
-        $cleanInput = str_replace('.', '', $this->customer_paying); // hilangkan pemisah ribuan
-        $cleanInput = str_replace(',', '.', $cleanInput); // ubah desimal jadi titik
-        $bayar = floatval($cleanInput); // ubah ke angka
+        $cleanInput = str_replace('.', '', $this->customer_paying);
+        $cleanInput = str_replace(',', '.', $cleanInput);
+        $bayar = floatval($cleanInput);
 
-        $this->customer_paying = $bayar; // overwrite dengan versi numeric
+        $this->customer_paying = $bayar;
 
         $this->validate();
-
-
 
         $transactionData = [
             'order_data' => [
@@ -139,6 +160,8 @@ class TransactionDetail extends Component
                 'payment_type' => $this->payment_type,
                 'optometrist_id' => $this->optometrist_id,
                 'customer_paying' => $bayar,
+                'diskon' => $this->diskon,
+                'kurang_bayar' => $this->kurangBayar,
                 'payment_method' => $this->payment_method,
                 'payment_status' => $this->payment_status,
                 'asuransi_id' => $this->asuransi,
@@ -156,14 +179,18 @@ class TransactionDetail extends Component
                 'add_left' => $this->add_left,
                 'pd_right' => $this->pd_right,
                 'pd_left' => $this->pd_left,
+                'alamat' => $this->alamat,
+                'umur' => $this->umur,
+                'gender' => $this->gender,
                 'notes' => $this->notes,
             ],
             'customer_data' => $this->customerData,
             'cart_data' => $this->cartData,
             'total' => $this->total,
-            'kembalian' => $this->kembalian,
             'perluDibayar' => $this->perluDibayar,
+            'kembalian' => $this->kembalian,
         ];
+
 
         $this->dispatch('initiateTransactionSave',  $transactionData);
     }
