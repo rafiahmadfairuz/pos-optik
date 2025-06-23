@@ -14,12 +14,10 @@ return new class extends Migration
         Schema::create('pembelians', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
-            $table->morphs('itemable');
-            $table->integer('quantity');
-            $table->decimal('price', 15, 2);
-            $table->decimal('subtotal', 15, 2);
-            $table->decimal('total', 15, 2);
-            $table->boolean('retur');
+            $table->date('tanggal')->default(now());
+            $table->string('kode')->unique();
+            $table->decimal('total', 15, 2)->default(0);
+            $table->boolean('retur')->default(false);
             $table->timestamps();
         });
     }

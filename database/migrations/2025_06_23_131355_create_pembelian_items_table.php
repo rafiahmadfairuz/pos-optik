@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transfers', function (Blueprint $table) {
+        Schema::create('pembelian_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade'); 
-            $table->date('tanggal')->default(now());
-            $table->string('kode')->unique();
-            $table->boolean('retur')->default(false);
+            $table->foreignId('pembelian_id')->constrained('pembelians')->onDelete('cascade');
+            $table->morphs('itemable');
+            $table->integer('quantity');
+            $table->decimal('price', 15, 2);
+            $table->decimal('subtotal', 15, 2);
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transfers');
+        Schema::dropIfExists('pembelian_items');
     }
 };

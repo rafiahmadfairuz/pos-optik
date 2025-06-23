@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Cabang;
+use App\Models\Transfer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,24 +11,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TransferFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Transfer::class;
+
     public function definition(): array
     {
-        $quantity = $this->faker->numberBetween(1, 5);
-        $price = $this->faker->randomFloat(2, 30000, 150000);
-
         return [
             'cabang_id' => Cabang::inRandomOrder()->first()?->id ?? Cabang::factory(),
-            'itemable_id' => 1, // override nanti
-            'itemable_type' => 'frame',
-            'quantity' => $quantity,
-            'price' => $price,
-            'retur' => $this->faker->randomElement([0, 1]),
-
+            'tanggal' => now(),
+            'kode' => 'TF-' . date('Ymd') . '-' . $this->faker->unique()->numberBetween(1, 1000),
+            'retur' => $this->faker->boolean,
         ];
     }
 }

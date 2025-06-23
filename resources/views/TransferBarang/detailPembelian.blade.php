@@ -34,25 +34,30 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            @foreach ($pembelian->items as $item)
                                 @php
-                                    $type = class_basename($pembelian->itemable_type ?? '');
-                                    $merk = $pembelian->itemable->merk ?? 'Merk Tidak Diketahui';
-                                    $tipeProduk = $pembelian->itemable->tipe ?? null;
+                                    $itemable = $item->itemable;
+                                    $type = class_basename($item->itemable_type ?? '');
+                                    $merk = $itemable->merk ?? 'Merk Tidak Diketahui';
+                                    $tipeProduk = $itemable->tipe ?? null;
                                 @endphp
-                                <td>
-                                    {{ $merk }}
-                                    @if ($tipeProduk)
-                                        <small class="text-muted">({{ $type }} - {{ $tipeProduk }})</small>
-                                    @else
-                                        <small class="text-muted">({{ $type }})</small>
-                                    @endif
-                                </td>
-                                <td>{{ $pembelian->quantity ?? 0 }}</td>
-                                <td>Rp {{ number_format($pembelian->price ?? 0, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($pembelian->subtotal ?? 0, 0, ',', '.') }}</td>
-                            </tr>
+                                <tr>
+                                    <td>
+                                        {{ $merk }}
+                                        @if ($tipeProduk)
+                                            <small class="text-muted">({{ $type }} -
+                                                {{ $tipeProduk }})</small>
+                                        @else
+                                            <small class="text-muted">({{ $type }})</small>
+                                        @endif
+                                    </td>
+                                    <td>{{ $item->quantity }}</td>
+                                    <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
                         </tbody>
+
                     </table>
                 </div>
             </div>
