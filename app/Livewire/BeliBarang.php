@@ -23,6 +23,8 @@ class BeliBarang extends Component
 
     public $search = '';
     public $searchInput = '';
+    public $searchProduk = '';
+    public $searchInputProduk = '';
     public $supplier = null;
     public $cart = [];
     public $page = 1;
@@ -90,6 +92,18 @@ class BeliBarang extends Component
     {
         $this->search = '';
         $this->searchInput = '';
+        $this->page = 1;
+    }
+    public function runSearchProduk()
+    {
+        $this->searchProduk = $this->searchInputProduk;
+        $this->page = 1;
+    }
+
+    public function resetSearchProduk()
+    {
+        $this->searchProduk = '';
+        $this->searchInputProduk = '';
         $this->page = 1;
     }
 
@@ -165,9 +179,9 @@ class BeliBarang extends Component
 
             $user = Auth::user();
             if ($user->role === 'admin') {
-                return redirect()->to('/dashboard');
+                return redirect()->route('dashboard');
             } elseif ($user->role === 'gudang_utama') {
-                return redirect()->to('/frame');
+                return redirect()->route('frame.index');
             }
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -188,7 +202,7 @@ class BeliBarang extends Component
 
     protected function queryLensaKhusus()
     {
-        return LensaKhusus::where('merk', 'like', "%{$this->search}%")
+        return LensaKhusus::where('merk', 'like', "%{$this->searchProduk}%")
             ->whereNull('cabang_id')
             ->get()
             ->map(fn($item) => [
@@ -204,7 +218,7 @@ class BeliBarang extends Component
 
     protected function queryFrames()
     {
-        return Frame::where('merk', 'like', "%{$this->search}%")
+        return Frame::where('merk', 'like', "%{$this->searchProduk}%")
             ->whereNull('cabang_id')
             ->get()
             ->map(function ($item) {
@@ -221,7 +235,7 @@ class BeliBarang extends Component
 
     protected function queryLensaFinish()
     {
-        return LensaFinish::where('merk', 'like', "%{$this->search}%")
+        return LensaFinish::where('merk', 'like', "%{$this->searchProduk}%")
             ->whereNull('cabang_id')
             ->get()
             ->map(function ($item) {
@@ -238,7 +252,7 @@ class BeliBarang extends Component
 
     protected function querySoftlens()
     {
-        return Softlen::where('merk', 'like', "%{$this->search}%")
+        return Softlen::where('merk', 'like', "%{$this->searchProduk}%")
             ->whereNull('cabang_id')
             ->get()
             ->map(function ($item) {
@@ -255,7 +269,7 @@ class BeliBarang extends Component
 
     protected function queryAccessories()
     {
-        return Accessories::where('nama', 'like', "%{$this->search}%")
+        return Accessories::where('nama', 'like', "%{$this->searchProduk}%")
             ->whereNull('cabang_id')
             ->get()
             ->map(function ($item) {
@@ -290,7 +304,10 @@ class BeliBarang extends Component
             $this->getAllProducts(),
             $this->perPage,
             $this->page,
-            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+            [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
         );
 
         $suppliers = Supplier::when($this->search, function ($q) {

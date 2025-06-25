@@ -95,14 +95,14 @@
                 <div
                     class="card-header fw-semibold d-flex justify-content-between align-items-center bg-white border-bottom">
                     <div><i class="bi bi-search me-2"></i>Choose Supplier</div>
-                    <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddSupplier">
+                    {{-- <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddSupplier">
                         Tambah Data
-                    </button>
+                    </button> --}}
                 </div>
                 <div class="card-body p-3 position-relative">
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" placeholder="Search by name, email, or phone..."
-                            wire:model.defer="search" autocomplete="off">
+                            wire:model.defer="searchInput" autocomplete="off">
                         <button class="btn btn-primary" wire:click="runSearch"><i class="bi bi-search"></i></button>
                         <button class="btn btn-outline-primary" wire:click="resetSearch"><i
                                 class="bi bi-x-circle"></i></button>
@@ -142,8 +142,49 @@
                             </tbody>
                         </table>
                         <div class="mt-3 d-flex justify-content-end">
-                            {{ $suppliers->links('pagination::bootstrap-5') }}
+                            @if ($suppliers->hasPages())
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        {{-- Previous Page Link --}}
+                                        @if ($suppliers->onFirstPage())
+                                            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                                        @else
+                                            <li class="page-item">
+                                                <a href="#"
+                                                    wire:click.prevent="gotoPage({{ $suppliers->currentPage() - 1 }})"
+                                                    class="page-link">&laquo;</a>
+                                            </li>
+                                        @endif
+
+                                        {{-- Pagination Elements --}}
+                                        @foreach ($suppliers->links()->elements[0] as $page => $url)
+                                            @if ($page == $suppliers->currentPage())
+                                                <li class="page-item active"><span
+                                                        class="page-link">{{ $page }}</span></li>
+                                            @else
+                                                <li class="page-item">
+                                                    <a href="#"
+                                                        wire:click.prevent="gotoPage({{ $page }})"
+                                                        class="page-link">{{ $page }}</a>
+                                                </li>
+                                            @endif
+                                        @endforeach
+
+                                        {{-- Next Page Link --}}
+                                        @if ($suppliers->hasMorePages())
+                                            <li class="page-item">
+                                                <a href="#"
+                                                    wire:click.prevent="gotoPage({{ $suppliers->currentPage() + 1 }})"
+                                                    class="page-link">&raquo;</a>
+                                            </li>
+                                        @else
+                                            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                                        @endif
+                                    </ul>
+                                </nav>
+                            @endif
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -157,9 +198,9 @@
             <div class="card-body p-2">
                 <div class="input-group mb-2">
                     <input type="text" class="form-control" placeholder="Search products by name..."
-                        wire:model.defer="searchInput" autocomplete="off">
-                    <button class="btn btn-primary" wire:click="runSearch"><i class="bi bi-search"></i></button>
-                    <button class="btn btn-outline-primary" wire:click="resetSearch"><i
+                        wire:model.defer="searchInputProduk" autocomplete="off">
+                    <button class="btn btn-primary" wire:click="runSearchProduk"><i class="bi bi-search"></i></button>
+                    <button class="btn btn-outline-primary" wire:click="resetSearchProduk"><i
                             class="bi bi-x-circle"></i></button>
                 </div>
 
@@ -202,8 +243,42 @@
                 </div>
 
                 <div class="mt-2 d-flex justify-content-center">
-                    {{ $products->links('pagination::bootstrap-5') }}
+                    @if ($products->hasPages())
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                {{-- Previous Page Link --}}
+                                @if ($products->onFirstPage())
+                                    <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                                @else
+                                    <li class="page-item"><a href="#"
+                                            wire:click.prevent="gotoPage({{ $products->currentPage() - 1 }})"
+                                            class="page-link">&laquo;</a></li>
+                                @endif
+
+                                {{-- Pagination Elements --}}
+                                @foreach ($products->links()->elements[0] as $page => $url)
+                                    @if ($page == $products->currentPage())
+                                        <li class="page-item active"><span
+                                                class="page-link">{{ $page }}</span></li>
+                                    @else
+                                        <li class="page-item"><a href="#"
+                                                wire:click.prevent="gotoPage({{ $page }})"
+                                                class="page-link">{{ $page }}</a></li>
+                                    @endif
+                                @endforeach
+                                {{-- Next Page Link --}}
+                                @if ($products->hasMorePages())
+                                    <li class="page-item"><a href="#"
+                                            wire:click.prevent="gotoPage({{ $products->currentPage() + 1 }})"
+                                            class="page-link">&raquo;</a></li>
+                                @else
+                                    <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                                @endif
+                            </ul>
+                        </nav>
+                    @endif
                 </div>
+
             </div>
         </div>
     </div>
@@ -297,7 +372,7 @@
         </div>
     </div>
 
-    <div class="text-end mt-4" >
+    <div class="text-end mt-4">
         <div class="d-flex flex-wrap gap-2 justify-content-start">
             <button wire:click='submit' class="btn btn-primary px-4">
                 <i class="bi bi-check-circle me-1"></i> Selesai
