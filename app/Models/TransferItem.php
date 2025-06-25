@@ -15,5 +15,8 @@ class TransferItem extends Model
     {
         return $this->morphTo();
     }
-   
+    public function transfer()
+    {
+        return $this->belongsTo(Transfer::class);
+    }
 }

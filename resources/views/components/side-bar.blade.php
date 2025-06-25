@@ -4,8 +4,8 @@
         <div id="sidebar-menu" class="sidebar-menu">
             <ul class="my-3">
 
-                <li class="menu-title fw-bold">NAVIGATION</li>
                 @if (in_array(Auth::user()->role, ['admin', 'cabang', 'gudang_cabang']))
+                    <li class="menu-title fw-bold">NAVIGATION</li>
                     <li class="{{ Request::is('/') ? 'active' : '' }}">
                         <a href="{{ url('/') }}">
                             <img src="{{ asset('assets/img/icons/dashboard.svg') }}" alt="img">
@@ -22,6 +22,8 @@
 
 
                 @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                    <li class="menu-title fw-bold">PEMBELIAN & TRANSFER</li>
+
                     <li class="{{ Request::is('transferBarang') ? 'active' : '' }}">
                         <a href="{{ url('transferBarang') }}">
                             <i class="bi bi-box-arrow-right"></i><span> Transfer Barang</span>
@@ -37,12 +39,24 @@
                             <i class="bi bi-cart-check"></i><span>List Pembelian</span>
                         </a>
                     </li>
+                @endif
+
+                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama', 'gudang_cabang']))
+                    <li class="{{ Request::is('listTransferBarang') ? 'active' : '' }}">
+                        <a href="{{ url('listTransferBarang') }}">
+                            <i class="bi bi-cart-check"></i><span>List Transfer</span>
+                        </a>
+                    </li>
+                @endif
+
+                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                     <li class="{{ Request::is('supplier') ? 'active' : '' }}">
                         <a href="{{ url('supplier') }}">
                             <i class="bi bi-person-lines-fill"></i><span>Supplier</span>
                         </a>
                     </li>
                 @endif
+
 
                 @auth
                     @if (in_array(Auth::user()->role, ['admin', 'cabang']))

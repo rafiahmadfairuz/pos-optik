@@ -12,14 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('softlens', function (Blueprint $table) {
-              $table->id();
+            $table->id();
+            $table->string('sku');
             $table->string('merk', 100);
             $table->string('tipe', 50);
             $table->string('warna', 50);
-            $table->decimal('harga', 15, 2);
-            $table->decimal('harga_beli', 15, 2);
+            $table->bigInteger('harga');
+            $table->bigInteger('harga_beli');
+            $table->bigInteger('laba');
             $table->unsignedInteger('stok');
-            $table->decimal('laba', 15, 2);
             $table->foreignId('cabang_id')->nullable()->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();
         });

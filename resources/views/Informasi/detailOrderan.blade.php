@@ -104,62 +104,159 @@
                                             <tbody>
                                                 <tr>
                                                     <td>D</td>
-                                                    <td><input type="text" name="resep_left_sph_d"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->left_sph_d ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td><input type="text" name="resep_left_cyl_d"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->left_cyl_d ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td><input type="text" name="resep_left_axis_d"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->left_axis_d ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td><input type="text" name="resep_left_va_d"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->left_va_d ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td><input type="text" name="resep_right_sph_d"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->right_sph_d ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td><input type="text" name="resep_right_cyl_d"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->right_cyl_d ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td><input type="text" name="resep_right_axis_d"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->right_axis_d ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td><input type="text" name="resep_right_va_d"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->right_va_d ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
+                                                    <!-- LEFT SIDE -->
+                                                    <td>
+                                                        <input type="number" step="0.25" min="-20"
+                                                            max="20" name="resep_left_sph_d"
+                                                            class="form-control @error('resep_left_sph_d') is-invalid @enderror"
+                                                            placeholder="SPH Contoh: -2.00"
+                                                            value="{{ old('resep_left_sph_d', $order->resep?->left_sph_d) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_left_sph_d')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="number" step="0.25" min="-6"
+                                                            max="6" name="resep_left_cyl_d"
+                                                            class="form-control @error('resep_left_cyl_d') is-invalid @enderror"
+                                                            placeholder="CYL Contoh: -1.25"
+                                                            value="{{ old('resep_left_cyl_d', $order->resep?->left_cyl_d) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_left_cyl_d')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="number" step="1" min="0"
+                                                            max="180" name="resep_left_axis_d"
+                                                            class="form-control @error('resep_left_axis_d') is-invalid @enderror"
+                                                            placeholder="Axis Contoh: 90"
+                                                            value="{{ old('resep_left_axis_d', $order->resep?->left_axis_d) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_left_axis_d')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" name="resep_left_va_d"
+                                                            class="form-control @error('resep_left_va_d') is-invalid @enderror"
+                                                            placeholder="VA Contoh: 6/6 atau 20/20"
+                                                            value="{{ old('resep_left_va_d', $order->resep?->left_va_d) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_left_va_d')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <!-- RIGHT SIDE -->
+                                                    <td>
+                                                        <input type="number" step="0.25" min="-20"
+                                                            max="20" name="resep_right_sph_d"
+                                                            class="form-control @error('resep_right_sph_d') is-invalid @enderror"
+                                                            placeholder="SPH Contoh: -2.00"
+                                                            value="{{ old('resep_right_sph_d', $order->resep?->right_sph_d) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_right_sph_d')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="number" step="0.25" min="-6"
+                                                            max="6" name="resep_right_cyl_d"
+                                                            class="form-control @error('resep_right_cyl_d') is-invalid @enderror"
+                                                            placeholder="CYL Contoh: -1.25"
+                                                            value="{{ old('resep_right_cyl_d', $order->resep?->right_cyl_d) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_right_cyl_d')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="number" step="1" min="0"
+                                                            max="180" name="resep_right_axis_d"
+                                                            class="form-control @error('resep_right_axis_d') is-invalid @enderror"
+                                                            placeholder="Axis Contoh: 90"
+                                                            value="{{ old('resep_right_axis_d', $order->resep?->right_axis_d) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_right_axis_d')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" name="resep_right_va_d"
+                                                            class="form-control @error('resep_right_va_d') is-invalid @enderror"
+                                                            placeholder="VA Contoh: 6/6 atau 20/20"
+                                                            value="{{ old('resep_right_va_d', $order->resep?->right_va_d) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_right_va_d')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
                                                 </tr>
 
+                                                <!-- ADD -->
                                                 <tr>
                                                     <td>ADD</td>
-                                                    <td colspan="4"><input type="text" name="resep_add_left"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->add_left ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td colspan="4"><input type="text" name="resep_add_right"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->add_right ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
+                                                    <td colspan="4">
+                                                        <input type="number" step="0.25" min="0.75"
+                                                            max="3.5" name="resep_add_left"
+                                                            class="form-control @error('resep_add_left') is-invalid @enderror"
+                                                            placeholder="ADD Contoh: +1.00"
+                                                            value="{{ old('resep_add_left', $order->resep?->add_left) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_add_left')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <td colspan="4">
+                                                        <input type="number" step="0.25" min="0.75"
+                                                            max="3.5" name="resep_add_right"
+                                                            class="form-control @error('resep_add_right') is-invalid @enderror"
+                                                            placeholder="ADD Contoh: +1.00"
+                                                            value="{{ old('resep_add_right', $order->resep?->add_right) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_add_right')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
                                                 </tr>
+
+                                                <!-- PD -->
                                                 <tr>
                                                     <td>PD</td>
-                                                    <td colspan="4"><input type="text" name="resep_pd_left"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->pd_left ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
-                                                    <td colspan="4"><input type="text" name="resep_pd_right"
-                                                            class="form-control"
-                                                            value="{{ $order->resep?->pd_right ?? '' }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}></td>
+                                                    <td colspan="4">
+                                                        <input type="number" step="0.5" min="25"
+                                                            max="40" name="resep_pd_left"
+                                                            class="form-control @error('resep_pd_left') is-invalid @enderror"
+                                                            placeholder="PD Left Contoh: 32"
+                                                            value="{{ old('resep_pd_left', $order->resep?->pd_left) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_pd_left')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
+
+                                                    <td colspan="4">
+                                                        <input type="number" step="0.5" min="25"
+                                                            max="40" name="resep_pd_right"
+                                                            class="form-control @error('resep_pd_right') is-invalid @enderror"
+                                                            placeholder="PD Right Contoh: 32"
+                                                            value="{{ old('resep_pd_right', $order->resep?->pd_right) }}"
+                                                            {{ $isDisabled ? 'disabled' : '' }}>
+                                                        @error('resep_pd_right')
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </td>
                                                 </tr>
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -387,13 +484,14 @@
                         </span>
                         <small class="text-muted">{{ $order->order_date ?? 'N/A' }}</small>
                     </div>
+
                     <div class="card-body fs-5">
                         {{-- Total --}}
                         <p>
                             <i class="bi bi-cash-stack me-2"></i>
                             Total:
                             <strong class="float-end">Rp.
-                                {{ number_format((float) ($order->total ?? 0), 2, ',', '.') }}
+                                {{ number_format((int) ($order->total ?? 0), 0, ',', '.') }}
                             </strong>
                         </p>
 
@@ -402,7 +500,7 @@
                             <i class="bi bi-tag me-2"></i>
                             Diskon:
                             <strong class="float-end">Rp.
-                                {{ number_format((float) ($order->diskon ?? 0), 2, ',', '.') }}
+                                {{ number_format((int) ($order->diskon ?? 0), 0, ',', '.') }}
                             </strong>
                         </p>
 
@@ -411,7 +509,7 @@
                             <i class="bi bi-shield-check me-2"></i>
                             Asuransi:
                             <strong class="float-end">Rp.
-                                {{ number_format((float) ($order->asuransi?->nominal ?? 0), 2, ',', '.') }}
+                                {{ number_format((int) ($order->asuransi?->nominal ?? 0), 0, ',', '.') }}
                             </strong>
                         </p>
 
@@ -422,7 +520,7 @@
                             <i class="bi bi-calculator me-2"></i>
                             Total Final:
                             <strong class="float-end">Rp.
-                                {{ number_format((float) ($order->perlu_dibayar ?? 0), 2, ',', '.') }}
+                                {{ number_format((int) ($order->perlu_dibayar ?? 0), 0, ',', '.') }}
                             </strong>
                         </p>
 
@@ -431,7 +529,7 @@
                             <i class="bi bi-wallet2 me-2"></i>
                             Dibayar:
                             <strong class="float-end">Rp.
-                                {{ number_format((float) ($order->customer_paying ?? 0), 2, ',', '.') }}
+                                {{ number_format((int) ($order->customer_paying ?? 0), 0, ',', '.') }}
                             </strong>
                         </p>
 
@@ -442,7 +540,7 @@
                             <i class="bi bi-dash-circle me-2"></i>
                             Kurang Bayar:
                             <strong class="float-end">Rp.
-                                {{ number_format((float) ($order->kurang_bayar ?? 0), 2, ',', '.') }}
+                                {{ number_format((int) ($order->kurang_bayar ?? 0), 0, ',', '.') }}
                             </strong>
                         </p>
 
@@ -451,13 +549,20 @@
                             <i class="bi bi-arrow-repeat me-2"></i>
                             Kembalian:
                             <strong class="float-end">Rp.
-                                {{ number_format((float) ($order->kembalian ?? 0), 2, ',', '.') }}
+                                {{ number_format((int) ($order->kembalian ?? 0), 0, ',', '.') }}
                             </strong>
                         </p>
 
+                        {{-- Tombol Cetak Nota --}}
+                        <div class="d-flex justify-content-center mt-4">
+                            <a href="{{ route('cetak.nota', $order->id) }}" target="_blank"
+                                class="btn btn-success rounded-pill shadow-sm">
+                                <i class="bi bi-printer me-1"></i> Cetak Nota
+                            </a>
+                        </div>
                     </div>
 
-                    {{-- Tambahan Badge "LUNAS" --}}
+                    {{-- Badge "LUNAS" --}}
                     @if ($order->payment_status === 'paid')
                         <div class="position-absolute bottom-0 start-0 w-100 text-center py-3 bg-success text-white fw-bold fs-4 rounded-bottom-4 shadow-sm"
                             style="letter-spacing: 2px;">
@@ -465,6 +570,8 @@
                         </div>
                     @endif
                 </div>
+
+
 
 
                 {{-- Tombol submit tunggal di akhir formulir --}}

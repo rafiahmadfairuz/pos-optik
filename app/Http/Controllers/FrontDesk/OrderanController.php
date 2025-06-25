@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\FrontDesk;
 
 use App\Models\Staff;
+use App\Models\Cabang;
 use App\Models\Orderan;
 use App\Models\Asuransi;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -56,18 +58,18 @@ class OrderanController extends Controller
         ]);
 
         $validatedData = $request->validate([
-            'resep_left_sph_d' => 'nullable|string|max:255',
-            'resep_left_cyl_d' => 'nullable|string|max:255',
-            'resep_left_axis_d' => 'nullable|string|max:255',
-            'resep_left_va_d' => 'nullable|string|max:255',
-            'resep_right_sph_d' => 'nullable|string|max:255',
-            'resep_right_cyl_d' => 'nullable|string|max:255',
-            'resep_right_axis_d' => 'nullable|string|max:255',
-            'resep_right_va_d' => 'nullable|string|max:255',
-            'resep_add_left' => 'nullable|string|max:255',
-            'resep_add_right' => 'nullable|string|max:255',
-            'resep_pd_left' => 'nullable|string|max:255',
-            'resep_pd_right' => 'nullable|string|max:255',
+            'resep_right_sph_d' => 'nullable|numeric|between:-20,20|regex:/^\-?\d+(\.\d{1,2})?$/',
+            'resep_right_cyl_d' => 'nullable|numeric|between:-6,6|regex:/^\-?\d+(\.\d{1,2})?$/',
+            'resep_right_axis_d' => 'nullable|numeric|regex:/^\d{1,3}$/|between:0,180',
+            'resep_right_va_d' => 'nullable|numeric',
+            'resep_left_sph_d' => 'nullable|numeric|between:-20,20|regex:/^\-?\d+(\.\d{1,2})?$/',
+            'resep_left_cyl_d' => 'nullable|numeric|between:-6,6|regex:/^\-?\d+(\.\d{1,2})?$/',
+            'resep_left_axis_d' => 'nullable|numeric|regex:/^\d{1,3}$/|between:0,180',
+            'resep_left_va_d' => 'nullable|numeric',
+            'resep_add_right' => 'nullable|numeric|between:0.75,3.5|regex:/^\d+(\.\d{1,2})?$/',
+            'resep_add_left' => 'nullable|numeric|between:0.75,3.5|regex:/^\d+(\.\d{1,2})?$/',
+            'resep_pd_right' => 'nullable|numeric|between:25,40|regex:/^\d+(\.\d{1,2})?$/',
+            'resep_pd_left' => 'nullable|numeric|between:25,40|regex:/^\d+(\.\d{1,2})?$/',
             'resep_notes' => 'nullable|string',
             'order_date' => 'required|date',
             'complete_date' => 'required|date',
@@ -181,5 +183,17 @@ class OrderanController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal memperbarui order: ' . $e->getMessage());
         }
+    }
+
+
+    public function cetakNota($id)
+    {
+        $order = Orderan::with('asuransi')->findOrFail($id);
+        $cabang = Cabang::findOrFail(session('cabang_id'));
+
+        $pdf = Pdf::loadView('nota', compact('order', 'cabang'))
+            ->setPaper([0, 0, 226.77, 600], 'portrait');
+
+        return $pdf->stream('nota-' . $order->id . '.pdf');
     }
 }

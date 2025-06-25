@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('asuransis', function (Blueprint $table) {
             $table->id();
-            $table->string("nama");
-            $table->decimal('nominal', 15, 2);
+            $table->string('nama');
+            $table->bigInteger('nominal');
             $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();
         });

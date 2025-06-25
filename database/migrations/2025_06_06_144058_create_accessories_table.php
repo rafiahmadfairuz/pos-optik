@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('accessories', function (Blueprint $table) {
             $table->id();
+            $table->string('sku');
             $table->string('nama', 100);
             $table->string('jenis', 50);
-            $table->decimal('harga', 15, 2);
-            $table->decimal('harga_beli', 15, 2);
-            $table->decimal('laba', 15, 2);
+            $table->bigInteger('harga');
+            $table->bigInteger('harga_beli');
+            $table->bigInteger('laba');
             $table->unsignedInteger('stok');
             $table->foreignId('cabang_id')->nullable()->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();

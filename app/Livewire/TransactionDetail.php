@@ -76,22 +76,26 @@ class TransactionDetail extends Component
             'payment_status' => ['required', Rule::in(['paid', 'DP', 'unpaid'])],
             'asuransi' => 'nullable|exists:asuransis,id',
 
-            'right_sph_d' => 'nullable|string|max:10',
-            'right_cyl_d' => 'nullable|string|max:10',
-            'right_axis_d' => 'nullable|string|max:10',
-            'right_va_d' => 'nullable|string|max:10',
-            'left_sph_d' => 'nullable|string|max:10',
-            'left_cyl_d' => 'nullable|string|max:10',
-            'left_axis_d' => 'nullable|string|max:10',
-            'left_va_d' => 'nullable|string|max:10',
-            'add_right' => 'nullable|string|max:10',
-            'add_left' => 'nullable|string|max:10',
-            'pd_right' => 'nullable|string|max:10',
-            'pd_left' => 'nullable|string|max:10',
-            'notes' => 'nullable|string|max:2000',
+            'right_sph_d' => 'nullable|numeric|between:-20,20|regex:/^\-?\d+(\.\d{1,2})?$/',
+            'right_cyl_d' => 'nullable|numeric|between:-6,6|regex:/^\-?\d+(\.\d{1,2})?$/',
+            'right_axis_d' => 'nullable|integer|between:0,180',
+            'right_va_d' => 'nullable|numeric',
+
+            'left_sph_d' => 'nullable|numeric|between:-20,20|regex:/^\-?\d+(\.\d{1,2})?$/',
+            'left_cyl_d' => 'nullable|numeric|between:-6,6|regex:/^\-?\d+(\.\d{1,2})?$/',
+            'left_axis_d' => 'nullable|integer|between:0,180',
+            'left_va_d' => 'nullable|numeric',
+
+            'add_right' => 'nullable|numeric|between:0.75,3.5|regex:/^\d+(\.\d{1,2})?$/',
+            'add_left' => 'nullable|numeric|between:0.75,3.5|regex:/^\d+(\.\d{1,2})?$/',
+
+            'pd_right' => 'nullable|numeric|between:25,40',
+            'pd_left' => 'nullable|numeric|between:25,40',
+
+            'notes' => 'nullable|max:2000',
             'umur' => 'nullable|integer|min:0|max:120',
             'gender' => 'nullable|in:male,female,other',
-            'alamat' => 'nullable|string|max:1000',
+            'alamat' => 'nullable|max:1000',
         ];
     }
 

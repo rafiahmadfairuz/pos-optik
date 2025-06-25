@@ -13,18 +13,32 @@ class LensaFinishController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $search = $request->input('search');
+
+        $query = LensaFinish::query();
 
         if ($user->role === 'gudang_utama') {
-            $lensaFinish = LensaFinish::whereNull('cabang_id')->get();
+            $query->whereNull('cabang_id');
         } else {
-            $lensaFinish = LensaFinish::where('cabang_id', session('cabang_id'))->get();
+            $query->where('cabang_id', session('cabang_id'));
         }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('merk', 'like', "%{$search}%")
+                    ->orWhere('desain', 'like', "%{$search}%")
+                    ->orWhere('tipe', 'like', "%{$search}%");
+            });
+        }
+
+        $lensaFinish = $query->get();
 
         return view('Inventory.lensaFinish', compact('lensaFinish'));
     }
+
 
 
     /**
@@ -42,6 +56,7 @@ class LensaFinishController extends Controller
     {
         try {
             $validated = $request->validate([
+                'sku' => 'required|string|max:50|unique:lensa_finishes,sku',
                 'merk' => 'required|string|max:50',
                 'desain' => 'required|string|max:50',
                 'tipe' => 'required|string|max:50',
@@ -96,6 +111,7 @@ class LensaFinishController extends Controller
     public function update(Request $request, string $id)
     {
         $rules = [
+            'sku' => 'required|string|max:50|unique:lensa_finishes,sku,' . $id,
             'merk' => 'required|string|max:50',
             'desain' => 'required|string|max:50',
             'tipe' => 'required|string|max:50',
@@ -115,6 +131,7 @@ class LensaFinishController extends Controller
         try {
             $lensa = LensaFinish::findOrFail($id);
 
+            $lensa->sku = $validated['sku'];
             $lensa->merk = $validated['merk'];
             $lensa->desain = $validated['desain'];
             $lensa->tipe = $validated['tipe'];
@@ -129,7 +146,6 @@ class LensaFinishController extends Controller
                 $lensa->harga_beli = $validated['harga_beli'];
                 $lensa->laba = $validated['harga'] - $validated['harga_beli'];
             } else {
-                // Gunakan harga_beli yang sudah ada
                 $lensa->laba = $validated['harga'] - $lensa->harga_beli;
             }
 

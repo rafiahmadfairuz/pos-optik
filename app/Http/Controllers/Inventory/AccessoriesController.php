@@ -13,17 +13,31 @@ class AccessoriesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $search = $request->input('search');
 
+        $query = Accessories::query();
+
+        // Filter berdasarkan cabang
         if ($user->role === 'gudang_utama') {
-            $accessories = Accessories::whereNull('cabang_id')->get();
+            $query->whereNull('cabang_id');
         } else {
-            $accessories = Accessories::where('cabang_id', session('cabang_id'))->get();
+            $query->where('cabang_id', session('cabang_id'));
         }
 
-        return view("Inventory.accesories", compact("accessories"));
+        // Filter search berdasarkan nama atau jenis
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('jenis', 'like', "%{$search}%");
+            });
+        }
+
+        $accessories = $query->get();
+
+        return view('Inventory.accesories', compact('accessories'));
     }
 
     /**
@@ -41,6 +55,7 @@ class AccessoriesController extends Controller
     {
         try {
             $validated = $request->validate([
+                'sku' => 'required|string|max:50|unique:accessories,sku',
                 'nama' => 'required|string|max:100',
                 'jenis' => 'required|string|max:50',
                 'harga_beli' => 'required|numeric|min:0',
@@ -48,6 +63,7 @@ class AccessoriesController extends Controller
                 'stok' => 'required|integer|min:0',
             ]);
 
+            // Hitung laba otomatis
             $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
             Accessories::create([
@@ -64,6 +80,7 @@ class AccessoriesController extends Controller
             return back()->with('error', $e->getMessage())->withInput();
         }
     }
+
 
 
     /**
@@ -89,6 +106,7 @@ class AccessoriesController extends Controller
     {
         try {
             $rules = [
+                'sku' => 'required|string|max:50|unique:accessories,sku,' . $id,
                 'nama' => 'required|string|max:100',
                 'jenis' => 'required|string|max:50',
                 'harga' => 'required|numeric|min:0',
@@ -103,6 +121,7 @@ class AccessoriesController extends Controller
 
             $accessory = Accessories::findOrFail($id);
 
+            $accessory->sku = $validated['sku'];
             $accessory->nama = $validated['nama'];
             $accessory->jenis = $validated['jenis'];
             $accessory->harga = $validated['harga'];
@@ -113,7 +132,6 @@ class AccessoriesController extends Controller
                 $accessory->harga_beli = $validated['harga_beli'];
                 $accessory->laba = $validated['harga'] - $validated['harga_beli'];
             } else {
-                // pakai harga_beli lama
                 $accessory->laba = $validated['harga'] - $accessory->harga_beli;
             }
 

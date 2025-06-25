@@ -12,10 +12,11 @@ class OrderItemsFactory extends Factory
     public function definition(): array
     {
         $quantity = rand(1, 3);
-        $price = $this->faker->randomFloat(2, 50000, 300000);
+        $price = $this->faker->numberBetween(50000, 300000);
+
         return [
             'order_id' => \App\Models\Orderan::factory(),
-            'itemable_id' => 1, // nanti override manual
+            'itemable_id' => 1, // override manual
             'itemable_type' => 'frame',
             'quantity' => $quantity,
             'price' => $price,

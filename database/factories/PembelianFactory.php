@@ -18,9 +18,9 @@ class PembelianFactory extends Factory
         return [
             'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
             'tanggal' => now(),
-            'kode' => 'PB-' . date('Ymd') . '-' . $this->faker->unique()->numberBetween(1, 9999),
-            'total' => 0, 
-            'retur' => $this->faker->randomElement([0, 1]),
+            'kode' => 'PB-' . now()->format('Ymd') . '-' . str_pad($this->faker->unique()->numberBetween(1, 9999), 4, '0', STR_PAD_LEFT),
+            'total' => 0,
+            'retur' => $this->faker->boolean(),
         ];
     }
 }

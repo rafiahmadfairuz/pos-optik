@@ -13,27 +13,33 @@ class FrameController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $search = $request->input('search');
+
+        $query = Frame::query();
 
         if ($user->role === 'gudang_utama') {
-            $frame = Frame::whereNull('cabang_id')->get();
+            $query->whereNull('cabang_id');
         } else {
-            $frame = Frame::where('cabang_id', session('cabang_id'))->get();
+            $query->where('cabang_id', session('cabang_id'));
         }
+
+        // Filter search berdasarkan merk atau tipe
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('merk', 'like', "%{$search}%")
+                    ->orWhere('tipe', 'like', "%{$search}%");
+            });
+        }
+
+        $frame = $query->get();
 
         return view('Inventory.frame', compact('frame'));
     }
 
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -42,6 +48,7 @@ class FrameController extends Controller
     {
         try {
             $validated = $request->validate([
+                'sku' => 'required|string|max:50|unique:frames,sku',
                 'merk' => 'required|string|max:50',
                 'tipe' => 'required|string|max:50',
                 'warna' => 'required|string|max:50',
@@ -50,6 +57,7 @@ class FrameController extends Controller
                 'stok' => 'required|integer|min:0',
             ]);
 
+            // Hitung laba otomatis
             $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
             Frame::create([
@@ -70,21 +78,6 @@ class FrameController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -93,6 +86,7 @@ class FrameController extends Controller
     {
         try {
             $rules = [
+                'sku' => 'required|string|max:50|unique:frames,sku,' . $id,
                 'merk' => 'required|string|max:50',
                 'tipe' => 'required|string|max:50',
                 'warna' => 'required|string|max:50',
@@ -108,6 +102,7 @@ class FrameController extends Controller
 
             $frame = Frame::findOrFail($id);
 
+            $frame->sku = $validated['sku'];
             $frame->merk = $validated['merk'];
             $frame->tipe = $validated['tipe'];
             $frame->warna = $validated['warna'];
@@ -119,7 +114,6 @@ class FrameController extends Controller
                 $frame->harga_beli = $validated['harga_beli'];
                 $frame->laba = $validated['harga'] - $validated['harga_beli'];
             } else {
-                // jika bukan admin/gudang, ambil harga_beli dari data lama
                 $frame->laba = $validated['harga'] - $frame->harga_beli;
             }
 
@@ -137,6 +131,7 @@ class FrameController extends Controller
             return back()->with('error', 'Gagal memperbarui frame.')->withInput();
         }
     }
+
 
 
     /**

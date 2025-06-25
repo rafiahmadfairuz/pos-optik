@@ -13,7 +13,7 @@ class AsuransiFactory extends Factory
     {
         return [
             'nama' => $this->faker->company . ' Asuransi',
-            'nominal' => $this->faker->numberBetween(1000, 20000),
+            'nominal' => $this->faker->numberBetween(10000, 50000),
             'cabang_id' => \App\Models\Cabang::factory(),
         ];
     }

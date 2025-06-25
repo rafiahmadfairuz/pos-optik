@@ -88,12 +88,29 @@ class ProductSearch extends Component
             });
     }
 
-    public function getAllProducts(): Collection
+    protected function queryLensaKhusus()
+    {
+        return LensaKhusus::where('merk', 'like', "%{$this->search}%")
+            ->where('cabang_id', session('cabang_id'))
+            ->get()
+            ->map(fn($item) => [
+                'id' => $item->id,
+                'name' => $item->merk,
+                'price' => $item->harga,
+                'laba' => $item->laba,
+                'stock' => $item->stok,
+                'type' => 'lensa_khusus',
+            ]);
+    }
+
+
+    protected function getAllProducts(): Collection
     {
         return $this->queryFrames()
             ->concat($this->queryLensaFinish())
             ->concat($this->querySoftlens())
-            ->concat($this->queryAccessories());
+            ->concat($this->queryAccessories())
+            ->concat($this->queryLensaKhusus());
     }
 
     public function paginateCollection(Collection $items, $perPage, $page = null, $options = [])

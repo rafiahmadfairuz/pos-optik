@@ -13,13 +13,12 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Lensa Finish</h5>
                     @auth
-                        @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                        @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                             <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddLensa">
                                 Tambah Data
                             </button>
                         @endif
                     @endauth
-
                 </div>
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
@@ -27,6 +26,16 @@
                         <form id="lensaForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="lensa_id" id="lensaId" value="">
+                            <div class="col-md-6">
+                                <label for="sku" class="form-label">SKU <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('sku') is-invalid @enderror"
+                                    id="sku" name="sku" value="{{ old('sku') }}" required>
+                                @error('sku')
+                                    <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                        <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                    </div>
+                                @enderror
+                            </div>
 
                             <div class="row g-3">
                                 <div class="col-md-6">
@@ -120,9 +129,10 @@
                                         </div>
                                     @enderror
                                 </div>
-                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                     <div class="col-md-3">
-                                        <label for="harga" class="form-label">Harga Beli</label>
+                                        <label for="harga_beli" class="form-label">Harga Beli</label>
                                         <input type="number" step="any"
                                             class="form-control @error('harga_beli') is-invalid @enderror"
                                             id="harga_beli" name="harga_beli" value="{{ old('harga_beli') }}">
@@ -135,6 +145,7 @@
                                         @enderror
                                     </div>
                                 @endif
+
                                 <div class="col-md-3">
                                     <label for="harga" class="form-label">Harga Jual</label>
                                     <input type="number" step="any"
@@ -161,36 +172,47 @@
                 <hr class="mb-4 mt-0" style="border-top: 2px solid #dee2e6;">
 
                 <div class="table-responsive mt-3">
+                    <form method="GET" action="{{ route('lensaFinish.index') }}" class="input-group mb-4">
+                        <input type="text" class="form-control" name="search"
+                            placeholder="Search by merk, tipe or Desain..." value="{{ request('search') }}"
+                            autocomplete="off">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <a href="{{ route('lensaFinish.index') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    </form>
                     <table class="table table-borderless align-middle" id="lensaTable">
                         <thead class="table-light">
                             <tr>
+                                <th>SKU</th>
                                 <th>Merk</th>
                                 <th>Desain</th>
-                                <th>Type</th>
+                                <th>Tipe</th>
                                 <th>SPH</th>
                                 <th>CYL</th>
                                 <th>ADD</th>
                                 <th>Stok</th>
-                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                     <th>Harga Beli</th>
                                 @endif
                                 <th>Harga Jual</th>
-                                   @if (in_array(Auth::user()->role, ['admin', 'gudang']))
-                                        <th>Laba</th>
-                                    @endif
-                                @auth
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                    <th>Laba</th>
                                     <th>Aksi</th>
-                                @endauth
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($lensaFinish as $item)
-                                <tr data-id="{{ $item->id }}" data-merk="{{ $item->merk }}"
-                                    data-desain="{{ $item->desain }}" data-type="{{ $item->tipe }}"
-                                    data-sph="{{ $item->sph }}" data-cyl="{{ $item->cyl }}"
-                                    data-add="{{ $item->add }}" data-stok="{{ $item->stok }}"
-                                    data-harga="{{ $item->harga }}"
-                                    @if (in_array(Auth::user()->role, ['admin', 'gudang'])) data-harga_beli="{{ $item->harga_beli }}" @endif>
+                                <tr data-id="{{ $item->id }}" data-sku="{{ $item->sku }}"
+                                    data-merk="{{ $item->merk }}" data-desain="{{ $item->desain }}"
+                                    data-tipe="{{ $item->tipe }}" data-sph="{{ $item->sph }}"
+                                    data-cyl="{{ $item->cyl }}" data-add="{{ $item->add }}"
+                                    data-stok="{{ $item->stok }}" data-harga="{{ $item->harga }}"
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama'])) data-harga_beli="{{ $item->harga_beli }}" @endif>
+                                    <td>{{ $item->sku }}</td>
                                     <td>{{ $item->merk }}</td>
                                     <td>{{ $item->desain }}</td>
                                     <td>{{ $item->tipe }}</td>
@@ -198,33 +220,33 @@
                                     <td>{{ $item->cyl }}</td>
                                     <td>{{ $item->add }}</td>
                                     <td>{{ $item->stok }}</td>
-                                    @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                         <td>Rp {{ number_format($item->harga_beli, 0, ',', '.') }}</td>
                                     @endif
                                     <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                     @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                         <td>Rp {{ number_format($item->laba, 0, ',', '.') }}</td>
-                                    @endif
-                                    @auth
                                         <td>
                                             <button class="btn btn-sm btn-edit-lensa" title="Edit Lensa">
                                                 <i class="bi bi-pencil-fill"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-delete-lensa text-danger" data-bs-toggle="modal"
-                                                data-bs-target="#deleteLensaModal">
+                                            <button class="btn btn-sm btn-delete-lensa text-danger"
+                                                data-bs-toggle="modal" data-bs-target="#deleteLensaModal">
                                                 <i class="bi bi-trash-fill"></i>
                                             </button>
                                         </td>
-                                    @endauth
+                                    @endif
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+
                 </div>
 
             </div>
         </div>
     </div>
+
 
     <div class="modal fade" id="deleteLensaModal" tabindex="-1" aria-labelledby="deleteLensaModalLabel"
         aria-hidden="true">
@@ -299,6 +321,7 @@
                     form.action = `/lensaFinish/${id}`;
                     setFormMethod(form, 'PUT');
                     idInput.value = id;
+                    form.sku.value = tr.dataset.sku;
                     form.merk.value = tr.dataset.merk;
                     form.desain.value = tr.dataset.desain;
                     form.tipe.value = tr.dataset.tipe;

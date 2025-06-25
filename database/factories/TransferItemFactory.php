@@ -28,13 +28,14 @@ class TransferItemFactory extends Factory
         ];
 
         $type = array_rand($groups);
-
         $collection = $groups[$type];
         $product = $collection->isNotEmpty() ? $collection->random() : null;
 
         $quantity = $this->faker->numberBetween(1, 5);
-        $price = $product ? ($product->harga ?? $this->faker->randomFloat(2, 30000, 150000))
-            : $this->faker->randomFloat(2, 30000, 150000);
+
+        $price = $product
+            ? ($product->harga ?? $this->faker->numberBetween(30000, 150000))
+            : $this->faker->numberBetween(30000, 150000);
 
         return [
             'itemable_id'   => $product ? $product->id : 1,

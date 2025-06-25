@@ -1,5 +1,7 @@
 <?php
+
 namespace Database\Factories;
+
 use App\Models\LensaFinish;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -9,11 +11,12 @@ class LensaFinishFactory extends Factory
 
     public function definition(): array
     {
-        $hargaBeli = $this->faker->randomFloat(2, 100000, 500000);
-        $hargaJual = $this->faker->randomFloat(2, $hargaBeli + 10000, $hargaBeli + 150000);
+        $hargaBeli = $this->faker->numberBetween(100000, 500000);
+        $hargaJual = $this->faker->numberBetween($hargaBeli + 10000, $hargaBeli + 150000);
         $laba = $hargaJual - $hargaBeli;
 
         return [
+            'sku' => strtoupper('LEN-' . $this->faker->unique()->bothify('??##')),
             'merk' => ucfirst($this->faker->word()),
             'desain' => ucfirst($this->faker->word()),
             'tipe' => ucfirst($this->faker->word()),

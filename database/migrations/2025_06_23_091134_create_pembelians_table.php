@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
             $table->date('tanggal')->default(now());
             $table->string('kode')->unique();
-            $table->decimal('total', 15, 2)->default(0);
+            $table->bigInteger('total')->default(0);
             $table->boolean('retur')->default(false);
             $table->timestamps();
         });

@@ -13,7 +13,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Softlens</h5>
                     @auth
-                        @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                        @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                             <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddSoftlens">
                                 Tambah Data
                             </button>
@@ -29,6 +29,20 @@
                             <input type="hidden" name="softlens_id" id="softlensId" value="">
 
                             <div class="row g-3">
+                                 <div class="col-md-6">
+                                    <label for="sku" class="form-label">SKU <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('sku') is-invalid @enderror"
+                                        id="sku" name="sku" value="{{ old('sku') }}" required>
+                                    @error('sku')
+                                        <div class="invalid-feedback d-flex align-items-center mt-1"
+                                            style="display: block;">
+                                            <i
+                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        </div>
+                                    @enderror
+                                </div>
+
                                 <div class="col-md-6">
                                     <label for="merk" class="form-label">Merk <span
                                             class="text-danger">*</span></label>
@@ -68,7 +82,7 @@
                                         </div>
                                     @enderror
                                 </div>
-                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                     <div class="col-md-3">
                                         <label for="harga" class="form-label">Harga Beli</label>
                                         <input type="number" step="any"
@@ -125,22 +139,34 @@
                 <hr class="mb-4 mt-0" style="border-top: 2px solid #dee2e6;">
 
                 <div class="table-responsive mt-3">
+                    <form method="GET" action="{{ route('softlens.index') }}" class="input-group mb-4">
+                        <input type="text" class="form-control" name="search"
+                            placeholder="Search by merk, tipe or warna..." value="{{ request('search') }}"
+                            autocomplete="off">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <a href="{{ route('softlens.index') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    </form>
                     <table class="table table-borderless align-middle" id="softlensTable">
                         <thead class="table-light">
                             <tr>
+                                <th>SKU</th>
                                 <th>Merk</th>
                                 <th>Tipe</th>
                                 <th>Warna</th>
-                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                     <th>Harga Beli</th>
                                 @endif
                                 <th>Harga Jual</th>
                                 <th>Stok</th>
-                                   @if (in_array(Auth::user()->role, ['admin', 'cabang']))
-                                        <th>Laba</th>
-                                    @endif
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                    <th>Laba</th>
+                                @endif
                                 @auth
-                                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                         <th>Aksi</th>
                                     @endif
                                 @endauth
@@ -148,24 +174,25 @@
                         </thead>
                         <tbody>
                             @foreach ($softlens as $item)
-                                <tr data-id="{{ $item->id }}" data-merk="{{ $item->merk }}"
-                                    data-tipe="{{ $item->tipe }}" data-warna="{{ $item->warna }}"
-                                    data-harga="{{ $item->harga }}"
-                                    @if (in_array(Auth::user()->role, ['admin', 'gudang'])) data-harga_beli="{{ $item->harga_beli }}" @endif
+                                <tr data-id="{{ $item->id }}" data-sku="{{ $item->sku }}"
+                                    data-merk="{{ $item->merk }}" data-tipe="{{ $item->tipe }}"
+                                    data-warna="{{ $item->warna }}" data-harga="{{ $item->harga }}"
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama'])) data-harga_beli="{{ $item->harga_beli }}" @endif
                                     data-stok="{{ $item->stok }}">
+                                    <td>{{ $item->sku }}</td>
                                     <td>{{ $item->merk }}</td>
                                     <td>{{ $item->tipe }}</td>
                                     <td>{{ $item->warna }}</td>
-                                    @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                         <td>Rp {{ number_format($item->harga_beli, 0, ',', '.') }}</td>
                                     @endif
                                     <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                     <td>{{ $item->stok }}</td>
-                                     @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                         <td>Rp {{ number_format($item->laba, 0, ',', '.') }}</td>
                                     @endif
                                     @auth
-                                        @if (in_array(Auth::user()->role, ['admin', 'cabang']))
+                                        @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                             <td>
                                                 <button class="btn btn-sm btn-edit-softlens" title="Edit Softlens">
                                                     <img src="/assets/img/icons/edit.svg" alt="edit">
@@ -181,6 +208,7 @@
                             @endforeach
                         </tbody>
                     </table>
+
                 </div>
 
             </div>
@@ -258,6 +286,7 @@
                     setFormMethod(form, 'PUT');
 
                     idInput.value = id;
+                    form.sku.value = tr.dataset.sku;
                     form.merk.value = tr.dataset.merk;
                     form.tipe.value = tr.dataset.tipe;
                     form.warna.value = tr.dataset.warna;

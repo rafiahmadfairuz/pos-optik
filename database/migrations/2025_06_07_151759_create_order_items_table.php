@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained('orderans')->onDelete('cascade');
             $table->morphs('itemable');
             $table->integer('quantity');
-            $table->decimal('price', 15, 2);
-            $table->decimal('subtotal', 15, 2);
+            $table->bigInteger('price');
+            $table->bigInteger('subtotal');
             $table->timestamps();
         });
     }

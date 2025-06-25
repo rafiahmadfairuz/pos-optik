@@ -13,15 +13,16 @@ return new class extends Migration
     {
         Schema::create('lensa_finishes', function (Blueprint $table) {
             $table->id();
+            $table->string('sku');
             $table->string('merk', 100);
             $table->string('desain', 50);
             $table->string('tipe', 50);
             $table->decimal('sph', 5, 2);
             $table->decimal('cyl', 5, 2);
             $table->decimal('add', 5, 2);
-            $table->decimal('harga', 15, 2);
-            $table->decimal('harga_beli', 15, 2);
-            $table->decimal('laba', 15, 2);
+            $table->bigInteger('harga');
+            $table->bigInteger('harga_beli');
+            $table->bigInteger('laba');
             $table->unsignedInteger('stok');
             $table->foreignId('cabang_id')->nullable()->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();

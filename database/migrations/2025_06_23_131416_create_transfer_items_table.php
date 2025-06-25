@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('transfer_id')->constrained('transfers')->onDelete('cascade');
             $table->morphs('itemable');
             $table->integer('quantity');
-            $table->decimal('price', 15, 2)->nullable(); 
+            $table->bigInteger('price')->nullable();
             $table->timestamps();
         });
     }

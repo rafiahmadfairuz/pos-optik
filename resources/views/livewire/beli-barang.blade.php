@@ -1,16 +1,3 @@
-<style>
-    .card-scroll {
-        max-height: 300px;
-        overflow-y: auto;
-    }
-
-    .table thead th {
-        position: sticky;
-        top: 0;
-        background: #fff;
-    }
-</style>
-
 <div class="container-fluid py-3">
     <h2 class="fw-bold "><i class="bi bi-cash-stack me-2"></i>Beli Barang</h2>
     <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
@@ -61,6 +48,7 @@
         </div>
     </div>
 
+    {{-- Informasi Supplier --}}
     <div class="row g-3 align-items-stretch">
         <div class="col-lg-5 col-md-12">
             <div class="card shadow-sm h-100 border-0 rounded-3">
@@ -101,13 +89,12 @@
             </div>
         </div>
 
+        {{-- Pilih Supplier --}}
         <div class="col-lg-7 col-md-12">
             <div class="card shadow-sm h-100">
                 <div
                     class="card-header fw-semibold d-flex justify-content-between align-items-center bg-white border-bottom">
-                    <div>
-                        <i class="bi bi-search me-2"></i>Choose Supplier
-                    </div>
+                    <div><i class="bi bi-search me-2"></i>Choose Supplier</div>
                     <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddSupplier">
                         Tambah Data
                     </button>
@@ -116,20 +103,15 @@
                     <div class="input-group mb-3">
                         <input type="text" class="form-control" placeholder="Search by name, email, or phone..."
                             wire:model.defer="search" autocomplete="off">
-                        <button class="btn btn-primary" wire:click="runSearch">
-                            <i class="bi bi-search"></i>
-                        </button>
-                        <button class="btn btn-outline-primary" wire:click="resetSearch">
-                            <i class="bi bi-x-circle"></i>
-                        </button>
+                        <button class="btn btn-primary" wire:click="runSearch"><i class="bi bi-search"></i></button>
+                        <button class="btn btn-outline-primary" wire:click="resetSearch"><i
+                                class="bi bi-x-circle"></i></button>
                     </div>
 
                     <div wire:loading.flex wire:target="selectSupplier"
-                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;"
-                        class="align-items-center justify-content-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
+                        class="position-absolute top-50 start-50 translate-middle z-10 align-items-center justify-content-center">
+                        <div class="spinner-border text-primary" role="status"><span
+                                class="visually-hidden">Loading...</span></div>
                     </div>
 
                     <div wire:loading.class="opacity-50" wire:target="selectSupplier"
@@ -149,10 +131,8 @@
                                         <td>{{ $supplier->name }}</td>
                                         <td>{{ $supplier->phone }}</td>
                                         <td>{{ $supplier->email }}</td>
-                                        <td>
-                                            <button wire:click="selectSupplier({{ $supplier->id }})" class="btn"
-                                                wire:loading.attr="disabled">+</button>
-                                        </td>
+                                        <td><button wire:click="selectSupplier({{ $supplier->id }})" class="btn"
+                                                wire:loading.attr="disabled">+</button></td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -162,7 +142,7 @@
                             </tbody>
                         </table>
                         <div class="mt-3 d-flex justify-content-end">
-                            {{ $suppliers->links() }}
+                            {{ $suppliers->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>
@@ -170,22 +150,17 @@
         </div>
     </div>
 
-
-
+    {{-- Pilih Produk --}}
     <div class="col-md-12 mt-3">
         <div class="card">
             <div class="card-header fw-bold text-decoration-underline">Choose Product</div>
             <div class="card-body p-2">
-
                 <div class="input-group mb-2">
                     <input type="text" class="form-control" placeholder="Search products by name..."
                         wire:model.defer="searchInput" autocomplete="off">
-                    <button class="btn btn-primary" wire:click="runSearch">
-                        <i class="bi bi-search"></i>
-                    </button>
-                    <button class="btn btn-outline-primary" wire:click="resetSearch">
-                        <i class="bi bi-x-circle"></i>
-                    </button>
+                    <button class="btn btn-primary" wire:click="runSearch"><i class="bi bi-search"></i></button>
+                    <button class="btn btn-outline-primary" wire:click="resetSearch"><i
+                            class="bi bi-x-circle"></i></button>
                 </div>
 
                 <div class="table-responsive card-scroll" style="max-height: 300px;">
@@ -224,54 +199,17 @@
                             @endforelse
                         </tbody>
                     </table>
-
                 </div>
 
-                <!-- pagination tetap sama -->
                 <div class="mt-2 d-flex justify-content-center">
-                    @if ($products->hasPages())
-                        <nav>
-                            <ul class="pagination pagination-sm mb-0">
-                                {{-- Previous Page Link --}}
-                                @if ($products->onFirstPage())
-                                    <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
-                                @else
-                                    <li class="page-item"><a href="#"
-                                            wire:click.prevent="gotoPage({{ $products->currentPage() - 1 }})"
-                                            class="page-link">&laquo;</a></li>
-                                @endif
-
-                                {{-- Pagination Elements --}}
-                                @foreach ($products->links()->elements[0] as $page => $url)
-                                    @if ($page == $products->currentPage())
-                                        <li class="page-item active"><span
-                                                class="page-link">{{ $page }}</span></li>
-                                    @else
-                                        <li class="page-item"><a href="#"
-                                                wire:click.prevent="gotoPage({{ $page }})"
-                                                class="page-link">{{ $page }}</a></li>
-                                    @endif
-                                @endforeach
-
-                                {{-- Next Page Link --}}
-                                @if ($products->hasMorePages())
-                                    <li class="page-item"><a href="#"
-                                            wire:click.prevent="gotoPage({{ $products->currentPage() + 1 }})"
-                                            class="page-link">&raquo;</a></li>
-                                @else
-                                    <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
-                                @endif
-                            </ul>
-                        </nav>
-                    @endif
+                    {{ $products->links('pagination::bootstrap-5') }}
                 </div>
-
             </div>
-
         </div>
     </div>
-    <div class="row">
 
+    {{-- Cart dan Bill Summary --}}
+    <div class="row mt-3">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header fw-bold text-decoration-underline">Shopping Cart</div>
@@ -283,7 +221,8 @@
                             <thead>
                                 <tr>
                                     <th>Nama Produk</th>
-                                    <th>Harga</th>
+                                    <th>Harga Beli</th>
+                                    <th>Harga Jual</th>
                                     <th>Qty</th>
                                     <th>Total</th>
                                     <th>Aksi</th>
@@ -294,12 +233,13 @@
                                     <tr>
                                         <td>{{ $item['name'] }}</td>
                                         <td>Rp. {{ number_format($item['price'] ?? 0, 0, ',', '.') }}</td>
+                                        <td>Rp. {{ number_format($item['harga_jual'] ?? 0, 0, ',', '.') }}</td>
                                         <td>{{ $item['quantity'] }}</td>
                                         <td>Rp.
                                             {{ number_format(($item['price'] ?? 0) * $item['quantity'], 0, ',', '.') }}
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm "
+                                            <button class="btn btn-sm"
                                                 wire:click="decreaseQuantity({{ $index }})">-</button>
                                         </td>
                                     </tr>
@@ -313,13 +253,12 @@
             </div>
         </div>
 
-
+        {{-- Bill Summary --}}
         <div class="col-md-4">
             <div class="card mb-4 shadow rounded-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-decoration-underline">
-                        <i class="bi bi-receipt-cutoff me-2"></i>Bill Summary
-                    </span>
+                    <span class="fw-bold text-decoration-underline"><i class="bi bi-receipt-cutoff me-2"></i>Bill
+                        Summary</span>
                     <small class="text-muted">{{ date('Y/m/d') }}</small>
                 </div>
                 <div class="card-body fs-5">
@@ -333,16 +272,40 @@
         </div>
     </div>
 
+    {{-- Input Surat Jalan & Tanggal Pemesanan --}}
+    <div class="card mb-4">
+        <div class="card-header fw-bold text-decoration-underline">Detail Tambahan</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="suratJalan" class="form-label">Surat Jalan</label>
+                    <input type="text" wire:model.lazy="surat_jalan" id="suratJalan"
+                        class="form-control @error('surat_jalan') is-invalid @enderror">
+                    @error('surat_jalan')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+                <div class="col-md-6">
+                    <label for="tanggalPemesanan" class="form-label">Tanggal Pemesanan</label>
+                    <input type="date" wire:model.lazy="tanggal_pemesanan" id="tanggalPemesanan"
+                        class="form-control @error('tanggal_pemesanan') is-invalid @enderror">
+                    @error('tanggal_pemesanan')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <div class="text-end mt-4">
+    <div class="text-end mt-4" >
         <div class="d-flex flex-wrap gap-2 justify-content-start">
-            <button type="submit" class="btn btn-primary px-4">
+            <button wire:click='submit' class="btn btn-primary px-4">
                 <i class="bi bi-check-circle me-1"></i> Selesai
             </button>
         </div>
     </div>
-
 </div>
+
 
 <script>
     function formatRupiah(el) {

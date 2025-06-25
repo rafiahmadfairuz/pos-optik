@@ -47,6 +47,9 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/pembelian/{id}/retur', [\App\Http\Controllers\PembelianController::class, 'retur'])->name('pembelian.retur');
 
     Route::get('/transferBarang', [GudangUtamaController::class, 'transferBarangKeCabang'])->name('transfer.barang');
+    Route::get('/listTransferBarang', [GudangUtamaController::class, 'listTransferBarangKeCabang'])->name('list.transfer.barang');
+    Route::get('/listTransferBarang/{id}', [GudangUtamaController::class, 'detailListTransferBarangKeCabang'])->name('detail.transfer.barang');
+    Route::patch('/listTransferBarang/{id}/retur', [GudangUtamaController::class, 'retur'])->name('transfer.retur');
     Route::get('/beliBarang', [GudangUtamaController::class, 'beliBarang'])->name('beli.barang');
 
     Route::resource('/staff', StaffController::class)->except(['create', 'show', 'edit'])->middleware("admin");
@@ -57,6 +60,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/report', [ReportController::class, 'index'])->name('report.index');
     Route::get('/report/export', [ReportController::class, 'exportExcel'])->name('report.export');
+
+    Route::get('/cetak-nota/{id}', [OrderanController::class, 'cetakNota'])->name('cetak.nota');
+
 
 
     Route::get('/ditolak', function () {

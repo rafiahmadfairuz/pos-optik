@@ -13,18 +13,34 @@ class SoftlensController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $search = $request->input('search');
 
+        $query = Softlen::query();
+
+        // Filter berdasarkan cabang
         if ($user->role === 'gudang_utama') {
-            $softlens = Softlen::whereNull('cabang_id')->get();
+            $query->whereNull('cabang_id');
         } else {
-            $softlens = Softlen::where('cabang_id', session('cabang_id'))->get();
+            $query->where('cabang_id', session('cabang_id'));
         }
 
-        return view("Inventory.softlens", compact("softlens"));
+        // Filter search berdasarkan merk, tipe, atau warna
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('merk', 'like', "%{$search}%")
+                    ->orWhere('tipe', 'like', "%{$search}%")
+                    ->orWhere('warna', 'like', "%{$search}%");
+            });
+        }
+
+        $softlens = $query->get();
+
+        return view('Inventory.softlens', compact('softlens'));
     }
+
 
 
     /**
@@ -42,6 +58,7 @@ class SoftlensController extends Controller
     {
         try {
             $validated = $request->validate([
+                'sku' => 'required|string|max:50|unique:softlens,sku',
                 'merk' => 'required|string|max:50',
                 'tipe' => 'required|string|max:50',
                 'warna' => 'required|string|max:50',
@@ -70,6 +87,7 @@ class SoftlensController extends Controller
         }
     }
 
+
     /**
      * Display the specified resource.
      */
@@ -91,7 +109,10 @@ class SoftlensController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $softlens = Softlen::findOrFail($id);
+
         $rules = [
+            'sku' => 'required|string|max:50|unique:softlens,sku,' . $softlens->id,
             'merk' => 'required|string|max:50',
             'tipe' => 'required|string|max:50',
             'warna' => 'required|string|max:50',
@@ -99,15 +120,14 @@ class SoftlensController extends Controller
             'stok' => 'required|integer|min:0',
         ];
 
-        if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+        if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang' || Auth::user()->role === 'gudang_utama') {
             $rules['harga_beli'] = 'required|numeric|min:0';
         }
 
         $validated = $request->validate($rules);
 
         try {
-            $softlens = Softlen::findOrFail($id);
-
+            $softlens->sku = $validated['sku'];
             $softlens->merk = $validated['merk'];
             $softlens->tipe = $validated['tipe'];
             $softlens->warna = $validated['warna'];
@@ -115,11 +135,10 @@ class SoftlensController extends Controller
             $softlens->stok = $validated['stok'];
             $softlens->cabang_id = session('cabang_id');
 
-            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
+            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang' || Auth::user()->role === 'gudang_utama') {
                 $softlens->harga_beli = $validated['harga_beli'];
                 $softlens->laba = $validated['harga'] - $validated['harga_beli'];
             } else {
-                // Gunakan harga_beli dari database jika tidak boleh mengedit
                 $softlens->laba = $validated['harga'] - $softlens->harga_beli;
             }
 

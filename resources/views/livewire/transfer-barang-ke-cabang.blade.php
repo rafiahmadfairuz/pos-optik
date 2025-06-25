@@ -1,15 +1,4 @@
-<style>
-    .card-scroll {
-        max-height: 300px;
-        overflow-y: auto;
-    }
 
-    .table thead th {
-        position: sticky;
-        top: 0;
-        background: #fff;
-    }
-</style>
 <div class="container-fluid py-3">
     <h2 class="fw-bold "><i class="bi bi-cash-stack me-2"></i>Transfer Barang</h2>
 
@@ -58,7 +47,7 @@
                     <div class="card-body p-3 position-relative">
 
 
-                        <div wire:loading.class="opacity-50" wire:target="selectedSupplier"
+                        <div wire:loading.class="opacity-50" wire:target="selectCabang"
                             class="table-responsive card-scroll">
                             <table class="table table-sm align-middle mb-0">
                                 <thead class="table-light">
@@ -74,7 +63,7 @@
                                             <td>{{ $cabang->nama }}</td>
                                             <td>{{ $cabang->alamat }}</td>
                                             <td>
-                                                <button wire:click="selectSupplier({{ $cabang->id }})" class="btn"
+                                                <button wire:click="selectCabang({{ $cabang->id }})" class="btn"
                                                     wire:loading.attr="disabled">
                                                     +
                                                 </button>
@@ -87,9 +76,7 @@
                                     @endforelse
                                 </tbody>
                             </table>
-                            <div class="mt-3 d-flex justify-content-end">
-                                {{ $cabangs->links() }}
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -231,11 +218,8 @@
             </div>
         </div>
     </div>
-    <div class="text-end mt-4">
-        <div class="d-flex flex-wrap gap-2 justify-content-start">
-            <button type="submit" class="btn btn-primary px-4">
-                <i class="bi bi-check-circle me-1"></i> Kirim Barang
-            </button>
-        </div>
-    </div>
+    <button type="button" class="btn btn-primary px-4" wire:click="transfer">
+        <i class="bi bi-check-circle me-1"></i> Kirim Barang
+    </button>
+
 </div>

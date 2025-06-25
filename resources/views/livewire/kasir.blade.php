@@ -71,10 +71,6 @@
         <livewire:transaction-detail />
         <livewire:bill-order />
     </div>
-
-
-
-
 </div>
 
 <script>

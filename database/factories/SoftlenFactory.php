@@ -1,5 +1,7 @@
 <?php
+
 namespace Database\Factories;
+
 use App\Models\Softlen;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -9,11 +11,12 @@ class SoftlenFactory extends Factory
 
     public function definition(): array
     {
-        $hargaBeli = $this->faker->randomFloat(2, 100000, 250000);
-        $hargaJual = $this->faker->randomFloat(2, $hargaBeli + 5000, $hargaBeli + 100000);
+        $hargaBeli = $this->faker->numberBetween(100000, 250000);
+        $hargaJual = $this->faker->numberBetween($hargaBeli + 5000, $hargaBeli + 100000);
         $laba = $hargaJual - $hargaBeli;
 
         return [
+            'sku' => strtoupper('SFT-' . $this->faker->unique()->bothify('??##')),
             'merk' => ucfirst($this->faker->word()),
             'tipe' => ucfirst($this->faker->word()),
             'warna' => $this->faker->safeColorName(),

@@ -15,8 +15,16 @@ class Transfer extends Model
     {
         return $this->morphTo();
     }
-     public function supplier()
+    public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+    public function cabang()
+    {
+        return $this->belongsTo(Cabang::class, 'cabang_id');
+    }
+    public function items()
+    {
+        return $this->hasMany(TransferItem::class);
     }
 }

@@ -3,7 +3,7 @@
     <div class="container-fluid py-4">
         <div class="page-header">
             <div class="page-title">
-                <h1 class="fw-bold">Data User</h1>
+                <h1 class="fw-bold">Detail Supplier</h1>
             </div>
         </div>
 
@@ -14,7 +14,7 @@
                         <i class="bi bi-person-fill text-primary fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">Nama</div>
-                            <div class="fw-bold">{{ $customer->name }}</div>
+                            <div class="fw-bold">{{ $supplier->name }}</div>
                         </div>
                     </div>
                 </div>
@@ -25,7 +25,7 @@
                         <i class="bi bi-envelope-fill text-success fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">Email</div>
-                            <div class="fw-bold">{{ $customer->email }}</div>
+                            <div class="fw-bold">{{ $supplier->email }}</div>
                         </div>
                     </div>
                 </div>
@@ -36,64 +36,56 @@
                         <i class="bi bi-telephone-fill text-danger fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">No Telp</div>
-                            <div class="fw-bold">{{ $customer->phone }}</div>
+                            <div class="fw-bold">{{ $supplier->phone }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="fw-bold mb-4">Orderan</h5>
-                <!-- Table -->
+                <h5 class="fw-bold mb-4">Data Pembelian</h5>
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
-                                <th>Tanggal Order</th>
+                                <th>Tanggal</th>
                                 <th>Total</th>
-                                <th>Status</th>
+                                <th>Retur</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="transactionTable">
-                            @foreach ($orderan as $item)
-                                <tr data-status="{{ strtolower($item->payment_status) }}">
+                        <tbody>
+                            @foreach ($pembelian as $item)
+                                <tr>
                                     <td>{{ $item->id }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($item->order_date)->format('d-m-Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
                                     <td>{{ number_format($item->total, 0, ',', '.') }}</td>
                                     <td>
-                                        <div class="d-flex gap-1 flex-wrap">
-                                            @if ($item->order_status === 'pending')
-                                                <span class="badge bg-warning">Pending</span>
-                                            @elseif ($item->order_status === 'complete')
-                                                <span class="badge bg-success">Complete</span>
-                                            @else
-                                                <span class="badge bg-secondary">Unknown</span>
-                                            @endif
-
-                                            @if ($item->payment_status === 'paid')
-                                                <span class="badge bg-success-subtle text-success">Paid</span>
-                                            @else
-                                                <span class="badge bg-danger-subtle text-danger">Unpaid</span>
-                                            @endif
-                                        </div>
+                                        @if ($item->retur)
+                                            <span class="badge bg-danger">Retur</span>
+                                        @else
+                                            <span class="badge bg-success">Tidak Retur</span>
+                                        @endif
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('orderan.detail', $item->id) }}" class="text-primary me-2">
+                                        <a href="{{ route('detail.pembelian', $item->id) }}" class="text-primary me-2">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     </td>
                                 </tr>
                             @endforeach
+                            @if ($pembelian->isEmpty())
+                                <tr>
+                                    <td colspan="5" class="text-center">Belum ada pembelian dari supplier ini.</td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
     </div>
-
-
 </x-app>

@@ -32,7 +32,10 @@ class PembelianItemFactory extends Factory
         $product = $collection->isNotEmpty() ? $collection->random() : null;
 
         $quantity = $this->faker->numberBetween(1, 3);
-        $price = $product ? ($product->harga ?? $this->faker->randomFloat(2, 50000, 300000)) : $this->faker->randomFloat(2, 50000, 300000);
+
+        $price = $product
+            ? ($product->harga ?? $this->faker->numberBetween(50000, 300000))
+            : $this->faker->numberBetween(50000, 300000);
 
         return [
             'itemable_id' => $product ? $product->id : 1,

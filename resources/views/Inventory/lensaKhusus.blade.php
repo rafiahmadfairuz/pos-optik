@@ -13,13 +13,12 @@
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">List Lensa Khusus</h5>
                     @auth
-                        @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                        @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                             <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddLensa">
                                 Tambah Data
                             </button>
                         @endif
                     @endauth
-
                 </div>
 
                 <div id="formContainer" class="card mb-4 {{ $errors->any() ? '' : 'd-none' }}">
@@ -27,97 +26,118 @@
                         <form id="lensaForm" action="" method="POST">
                             @csrf
                             <input type="hidden" name="lensa_id" id="lensaId" value="">
+                            <div class="col-md-6">
+                                <label for="sku" class="form-label">SKU <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('sku') is-invalid @enderror"
+                                    id="sku" name="sku" value="{{ old('sku') }}" required>
+                                @error('sku')
+                                    <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                        <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                    </div>
+                                @enderror
+                            </div>
 
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="merk" class="form-label">Merk <span
-                                            class="text-danger">*</span></label>
+                                    <label class="form-label">Merk <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('merk') is-invalid @enderror"
                                         id="merk" name="merk" value="{{ old('merk') }}" required>
                                     @error('merk')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
-                                        </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label for="desain" class="form-label">Desain</label>
+                                    <label class="form-label">Desain</label>
                                     <input type="text" class="form-control @error('desain') is-invalid @enderror"
                                         id="desain" name="desain" value="{{ old('desain') }}">
                                     @error('desain')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
-                                        </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label for="tipe" class="form-label">Tipe</label>
+                                    <label class="form-label">Tipe</label>
                                     <input type="text" class="form-control @error('tipe') is-invalid @enderror"
                                         id="tipe" name="tipe" value="{{ old('tipe') }}">
                                     @error('tipe')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
-                                        </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label for="sph" class="form-label">SPH</label>
+                                    <label class="form-label">SPH</label>
                                     <input type="text" class="form-control @error('sph') is-invalid @enderror"
                                         id="sph" name="sph" value="{{ old('sph') }}">
                                     @error('sph')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
-                                        </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label for="cyl" class="form-label">CYL</label>
+                                    <label class="form-label">CYL</label>
                                     <input type="text" class="form-control @error('cyl') is-invalid @enderror"
                                         id="cyl" name="cyl" value="{{ old('cyl') }}">
                                     @error('cyl')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
-                                        </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label for="add" class="form-label">ADD</label>
+                                    <label class="form-label">ADD</label>
                                     <input type="text" class="form-control @error('add') is-invalid @enderror"
                                         id="add" name="add" value="{{ old('add') }}">
                                     @error('add')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
-                                        </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label for="estimasi_selesai_hari" class="form-label">Estimasi Selesai</label>
+                                    <label class="form-label">Stok</label>
+                                    <input type="number" class="form-control @error('stok') is-invalid @enderror"
+                                        id="stok" name="stok" value="{{ old('stok') }}">
+                                    @error('stok')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+
+
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                    <div class="col-md-3">
+                                        <label class="form-label">Harga Beli</label>
+                                        <input type="number" step="any"
+                                            class="form-control @error('harga_beli') is-invalid @enderror"
+                                            id="harga_beli" name="harga_beli" value="{{ old('harga_beli') }}">
+                                        @error('harga_beli')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                @endif
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Harga Jual</label>
+                                    <input type="number" step="any"
+                                        class="form-control @error('harga') is-invalid @enderror" id="harga"
+                                        name="harga" value="{{ old('harga') }}">
+                                    @error('harga')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Estimasi Selesai (Hari)</label>
                                     <input type="text"
                                         class="form-control @error('estimasi_selesai_hari') is-invalid @enderror"
                                         id="estimasi_selesai_hari" name="estimasi_selesai_hari"
                                         value="{{ old('estimasi_selesai_hari') }}">
                                     @error('estimasi_selesai_hari')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
-                                        </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label for="status_pesanan" class="form-label">Status Pesanan</label>
+                                    <label class="form-label">Status Pesanan</label>
                                     <select class="form-select @error('status_pesanan') is-invalid @enderror"
                                         id="status_pesanan" name="status_pesanan">
                                         <option value="">-- Pilih Status --</option>
@@ -130,13 +150,9 @@
                                             {{ old('status_pesanan') == 'selesai' ? 'selected' : '' }}>Selesai</option>
                                     </select>
                                     @error('status_pesanan')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
-                                        </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
                             </div>
 
                             <div class="mt-4 d-flex justify-content-end gap-2">
@@ -150,62 +166,92 @@
                 <hr class="mb-4 mt-0" style="border-top: 2px solid #dee2e6;">
 
                 <div class="table-responsive mt-3">
+                    <form method="GET" action="{{ route('lensaKhusus.index') }}" class="input-group mb-4">
+                        <input type="text" class="form-control" name="search"
+                            placeholder="Search by merk, tipe or Desain..." value="{{ request('search') }}"
+                            autocomplete="off">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <a href="{{ route('lensaKhusus.index') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    </form>
                     <table class="table table-borderless align-middle" id="lensaTable">
                         <thead class="table-light">
                             <tr>
+                                <th>SKU</th>
                                 <th>Merk</th>
                                 <th>Desain</th>
                                 <th>Type</th>
                                 <th>SPH</th>
                                 <th>CYL</th>
                                 <th>ADD</th>
+                                <th>Stok</th>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                    <th>Harga Beli</th>
+                                @endif
+                                <th>Harga Jual</th>
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                    <th>Laba</th>
+                                @endif
                                 <th>Estimasi Selesai</th>
                                 <th>Status Pesanan</th>
-                                @auth
-                                        <th>Aksi</th>
-                                @endauth
-
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                    <th>Aksi</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($lensaKhusus as $item)
-                                <tr data-id="{{ $item->id }}" data-merk="{{ $item->merk }}"
-                                    data-desain="{{ $item->desain }}" data-type="{{ $item->tipe }}"
-                                    data-sph="{{ $item->sph }}" data-cyl="{{ $item->cyl }}"
-                                    data-add="{{ $item->add }}"
+                                <tr data-id="{{ $item->id }}" data-sku="{{ $item->sku }}"
+                                    data-merk="{{ $item->merk }}" data-desain="{{ $item->desain }}"
+                                    data-tipe="{{ $item->tipe }}" data-sph="{{ $item->sph }}"
+                                    data-cyl="{{ $item->cyl }}" data-add="{{ $item->add }}"
+                                    data-stok="{{ $item->stok }}" data-harga="{{ $item->harga }}"
                                     data-estimasi_selesai_hari="{{ $item->estimasi_selesai_hari }}"
-                                    data-status_pesanan="{{ $item->status_pesanan }}">
+                                    data-status_pesanan="{{ $item->status_pesanan }}"
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama'])) data-harga_beli="{{ $item->harga_beli }}" @endif>
+                                    <td>{{ $item->sku }}</td>
                                     <td>{{ $item->merk }}</td>
                                     <td>{{ $item->desain }}</td>
                                     <td>{{ $item->tipe }}</td>
                                     <td>{{ $item->sph }}</td>
                                     <td>{{ $item->cyl }}</td>
                                     <td>{{ $item->add }}</td>
+                                    <td>{{ $item->stok }}</td>
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                        <td>Rp {{ number_format($item->harga_beli, 0, ',', '.') }}</td>
+                                    @endif
+                                    <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                        <td>Rp {{ number_format($item->laba, 0, ',', '.') }}</td>
+                                    @endif
                                     <td>{{ $item->estimasi_selesai_hari }} Hari</td>
-                                    <td>{{ $item->status_pesanan }}</td>
-                                    @auth
-                                            <td>
-                                                <button class="btn btn-sm btn-edit-lensa-khusus"
-                                                    title="Edit Lensa Khusus">
-                                                    <i class="bi bi-pencil-fill"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-delete-lensa-khusus text-danger"
-                                                    data-bs-toggle="modal" data-bs-target="#deleteLensaKhususForm">
-                                                    <i class="bi bi-trash-fill"></i>
-                                                </button>
-                                            </td>
-                                    @endauth
-
+                                    <td>{{ ucfirst($item->status_pesanan) }}</td>
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                                        <td>
+                                            <button class="btn btn-sm btn-edit-lensa-khusus" title="Edit">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-delete-lensa-khusus text-danger"
+                                                data-bs-toggle="modal" data-bs-target="#deleteLensaKhususForm">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </td>
+                                    @endif
                                 </tr>
                             @endforeach
-
                         </tbody>
                     </table>
+
                 </div>
 
             </div>
         </div>
     </div>
+
+
 
     <div class="modal fade" id="deleteLensaKhususForm" tabindex="-1" aria-labelledby="deleteLensaKhususForm"
         aria-hidden="true">
@@ -253,7 +299,7 @@
                 methodInput.value = method;
             }
 
-            if(btnAdd){
+            if (btnAdd) {
                 btnAdd.addEventListener('click', () => {
                     form.action = "{{ route('lensaKhusus.store') }}";
                     form.querySelector('input[name="_method"]')?.remove();
@@ -279,12 +325,16 @@
                     form.action = `/lensaKhusus/${id}`;
                     setFormMethod(form, 'PUT');
                     idInput.value = id;
+                    form.sku.value = tr.dataset.sku;
                     form.merk.value = tr.dataset.merk;
                     form.desain.value = tr.dataset.desain;
                     form.tipe.value = tr.dataset.tipe;
                     form.sph.value = tr.dataset.sph;
                     form.cyl.value = tr.dataset.cyl;
                     form.add.value = tr.dataset.add;
+                    form.harga.value = tr.dataset.harga;
+                    form.harga_beli.value = tr.dataset.harga_beli;
+                    form.stok.value = tr.dataset.stok;
                     form.estimasi_selesai_hari.value = tr.dataset.estimasi_selesai_hari;
                     form.status_pesanan.value = tr.dataset.status_pesanan;
                     formContainer.classList.remove('d-none');

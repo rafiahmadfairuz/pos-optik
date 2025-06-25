@@ -20,11 +20,11 @@ class OrderItemSeeder extends Seeder
     public function run(): void
     {
         $groups = [
-            'frame' => Frame::all(),
-            'lensa_finish' => LensaFinish::all(),
-            'lensa_khusus' => LensaKhusus::all(),
-            'accessory' => Accessories::all(),
-            'softlens' => Softlen::all(),
+            'frame'         => Frame::all(),
+            'lensa_finish'  => LensaFinish::all(),
+            'lensa_khusus'  => LensaKhusus::all(),
+            'accessory'     => Accessories::all(),
+            'softlens'      => Softlen::all(),
         ];
 
         foreach (Orderan::all() as $order) {
@@ -32,7 +32,15 @@ class OrderItemSeeder extends Seeder
 
             foreach (range(1, rand(1, 5)) as $_) {
                 $type = array_rand($groups);
-                $product = $groups[$type]->random();
+                $collection = $groups[$type];
+
+                // Pastikan collection tidak kosong
+                if ($collection->isEmpty()) {
+                    continue; // Lewati kalau kosong
+                }
+
+                $product = $collection->random();
+
                 $quantity = rand(1, 3);
                 $price = $product->harga ?? 100000;
                 $subtotal = $quantity * $price;
@@ -43,12 +51,12 @@ class OrderItemSeeder extends Seeder
                 $totalLaba += $laba;
 
                 OrderItems::create([
-                    'order_id' => $order->id,
-                    'itemable_id' => $product->id,
+                    'order_id'      => $order->id,
+                    'itemable_id'   => $product->id,
                     'itemable_type' => $type,
-                    'quantity' => $quantity,
-                    'price' => $price,
-                    'subtotal' => $subtotal,
+                    'quantity'      => $quantity,
+                    'price'         => $price,
+                    'subtotal'      => $subtotal,
                 ]);
             }
 

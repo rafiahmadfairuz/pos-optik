@@ -11,11 +11,12 @@ class FrameFactory extends Factory
 
     public function definition(): array
     {
-        $hargaBeli = $this->faker->randomFloat(2, 100000, 400000);
-        $hargaJual = $this->faker->randomFloat(2, $hargaBeli + 10000, $hargaBeli + 150000);
+        $hargaBeli = $this->faker->numberBetween(100000, 400000);
+        $hargaJual = $this->faker->numberBetween($hargaBeli + 10000, $hargaBeli + 150000);
         $laba = $hargaJual - $hargaBeli;
 
         return [
+            'sku' => strtoupper('FRM-' . $this->faker->unique()->bothify('??##')),
             'merk' => ucfirst($this->faker->word()),
             'tipe' => ucfirst($this->faker->word()),
             'warna' => $this->faker->safeColorName(),
