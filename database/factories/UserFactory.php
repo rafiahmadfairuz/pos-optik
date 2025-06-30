@@ -15,6 +15,9 @@ class UserFactory extends Factory
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(),
+            'alamat' => $this->faker->address(),
+            'umur' => $this->faker->numberBetween(4, 60),
+            'gender' => $this->faker->randomElement(['male', 'female', 'other']),
             'cabang_id' => \App\Models\Cabang::factory(),
         ];
     }

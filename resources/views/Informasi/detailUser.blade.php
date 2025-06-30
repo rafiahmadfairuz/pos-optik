@@ -8,7 +8,7 @@
         </div>
 
         <div class="row g-3 mb-4">
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <div class="card shadow-sm border-0">
                     <div class="card-body d-flex align-items-center">
                         <i class="bi bi-person-fill text-primary fs-3 me-3"></i>
@@ -19,7 +19,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <div class="card shadow-sm border-0">
                     <div class="card-body d-flex align-items-center">
                         <i class="bi bi-envelope-fill text-success fs-3 me-3"></i>
@@ -30,7 +30,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <div class="card shadow-sm border-0">
                     <div class="card-body d-flex align-items-center">
                         <i class="bi bi-telephone-fill text-danger fs-3 me-3"></i>
@@ -41,7 +41,47 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Alamat -->
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-geo-alt-fill text-warning fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">Alamat</div>
+                            <div class="fw-bold">{{ $customer->alamat }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Umur -->
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-calendar-fill text-info fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">Umur</div>
+                            <div class="fw-bold">{{ $customer->umur }} tahun</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-gender-ambiguous text-secondary fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">Gender</div>
+                            <div class="fw-bold">{{ ucfirst($customer->gender) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="fw-bold mb-4">Orderan</h5>

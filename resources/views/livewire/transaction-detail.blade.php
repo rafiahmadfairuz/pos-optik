@@ -1,4 +1,4 @@
-<div class="col-md-8">
+<div class="col-md-12">
     <form wire:submit.prevent="submit">
 
         <div class="card mb-4">
@@ -28,25 +28,40 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <!-- ROW JARAK JAUH -->
                                     <tr>
                                         <td>D</td>
-                                        <!-- LEFT SIDE -->
+
+                                        <!-- SPH LEFT -->
                                         <td>
-                                            <input type="number" step="0.25" min="-20" max="20"
-                                                placeholder="SPH Contoh: -2.00" wire:model.lazy="left_sph_d"
+                                            <select wire:model.lazy="left_sph_d"
                                                 class="form-control @error('left_sph_d') is-invalid @enderror">
+                                                @for ($i = -20; $i <= 20; $i += 0.25)
+                                                    <option value="{{ number_format($i, 2) }}">
+                                                        {{ number_format($i, 2) }}</option>
+                                                @endfor
+                                            </select>
                                             @error('left_sph_d')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+                                        <!-- CYL LEFT -->
                                         <td>
-                                            <input type="number" step="0.25" min="-6" max="6"
-                                                placeholder="CYL Contoh: -1.25" wire:model.lazy="left_cyl_d"
+                                            <select wire:model.lazy="left_cyl_d"
                                                 class="form-control @error('left_cyl_d') is-invalid @enderror">
+                                                <option value="0.00">0.00</option>
+                                                @for ($i = -0.25; $i >= -6; $i -= 0.25)
+                                                    <option value="{{ number_format($i, 2) }}">
+                                                        {{ number_format($i, 2) }}</option>
+                                                @endfor
+                                            </select>
                                             @error('left_cyl_d')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+                                        <!-- AXIS LEFT -->
                                         <td>
                                             <input type="number" step="1" min="0" max="180"
                                                 placeholder="Axis Contoh: 90" wire:model.lazy="left_axis_d"
@@ -55,6 +70,8 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+                                        <!-- VA LEFT -->
                                         <td>
                                             <input type="text" placeholder="VA (misal 6/6 atau 20/20)"
                                                 wire:model.lazy="left_va_d"
@@ -63,23 +80,37 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
-                                        <!-- RIGHT SIDE -->
+
+                                        <!-- SPH RIGHT -->
                                         <td>
-                                            <input type="number" step="0.25" min="-20" max="20"
-                                                placeholder="SPH Contoh: -2.00" wire:model.lazy="right_sph_d"
+                                            <select wire:model.lazy="right_sph_d"
                                                 class="form-control @error('right_sph_d') is-invalid @enderror">
+                                                @for ($i = -20; $i <= 20; $i += 0.25)
+                                                    <option value="{{ number_format($i, 2) }}">
+                                                        {{ number_format($i, 2) }}</option>
+                                                @endfor
+                                            </select>
                                             @error('right_sph_d')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+                                        <!-- CYL RIGHT -->
                                         <td>
-                                            <input type="number" step="0.25" min="-6" max="6"
-                                                placeholder="CYL Contoh: -1.25" wire:model.lazy="right_cyl_d"
+                                            <select wire:model.lazy="right_cyl_d"
                                                 class="form-control @error('right_cyl_d') is-invalid @enderror">
+                                                <option value="0.00">0.00</option>
+                                                @for ($i = -0.25; $i >= -6; $i -= 0.25)
+                                                    <option value="{{ number_format($i, 2) }}">
+                                                        {{ number_format($i, 2) }}</option>
+                                                @endfor
+                                            </select>
                                             @error('right_cyl_d')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+                                        <!-- AXIS RIGHT -->
                                         <td>
                                             <input type="number" step="1" min="0" max="180"
                                                 placeholder="Axis Contoh: 90" wire:model.lazy="right_axis_d"
@@ -88,6 +119,8 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+                                        <!-- VA RIGHT -->
                                         <td>
                                             <input type="text" placeholder="VA (misal 6/6 atau 20/20)"
                                                 wire:model.lazy="right_va_d"
@@ -98,30 +131,42 @@
                                         </td>
                                     </tr>
 
+                                    <!-- ROW ADD -->
                                     <tr>
                                         <td>ADD</td>
-                                        <!-- LEFT THEN RIGHT -->
+                                        <!-- LEFT -->
                                         <td colspan="4">
-                                            <input type="number" step="0.25" min="0.75" max="3.5"
-                                                placeholder="ADD Contoh: +1.00" wire:model.lazy="add_left"
+                                            <select wire:model.lazy="add_left"
                                                 class="form-control @error('add_left') is-invalid @enderror">
+                                                @for ($i = 0.75; $i <= 3.5; $i += 0.25)
+                                                    <option value="{{ number_format($i, 2) }}">
+                                                        {{ number_format($i, 2) }}</option>
+                                                @endfor
+                                            </select>
                                             @error('add_left')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+                                        <!-- RIGHT -->
                                         <td colspan="4">
-                                            <input type="number" step="0.25" min="0.75" max="3.5"
-                                                placeholder="ADD Contoh: +1.00" wire:model.lazy="add_right"
+                                            <select wire:model.lazy="add_right"
                                                 class="form-control @error('add_right') is-invalid @enderror">
+                                                @for ($i = 0.75; $i <= 3.5; $i += 0.25)
+                                                    <option value="{{ number_format($i, 2) }}">
+                                                        {{ number_format($i, 2) }}</option>
+                                                @endfor
+                                            </select>
                                             @error('add_right')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
                                     </tr>
 
+                                    <!-- ROW PD -->
                                     <tr>
                                         <td>PD</td>
-                                        <!-- LEFT THEN RIGHT -->
+                                        <!-- LEFT -->
                                         <td colspan="4">
                                             <input type="number" step="0.5" min="25" max="40"
                                                 placeholder="PD Left Contoh: 32" wire:model.lazy="pd_left"
@@ -130,6 +175,8 @@
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </td>
+
+                                        <!-- RIGHT -->
                                         <td colspan="4">
                                             <input type="number" step="0.5" min="25" max="40"
                                                 placeholder="PD Right Contoh: 32" wire:model.lazy="pd_right"
@@ -139,46 +186,11 @@
                                             @enderror
                                         </td>
                                     </tr>
-
                                 </tbody>
+
                             </table>
                         </div>
                     </div>
-                    {{-- Umur --}}
-                    <div class="col-md-6 mb-3">
-                        <label for="umur" class="form-label">Umur</label>
-                        <input type="number" wire:model.lazy="umur" id="umur"
-                            class="form-control @error('umur') is-invalid @enderror">
-                        @error('umur')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    {{-- Gender --}}
-                    <div class="col-md-6 mb-3">
-                        <label for="gender" class="form-label">Gender</label>
-                        <select wire:model.lazy="gender" id="gender"
-                            class="form-select @error('gender') is-invalid @enderror">
-                            <option value="">Pilih Jenis Kelamin</option>
-                            <option value="male">Laki-laki</option>
-                            <option value="female">Perempuan</option>
-                            <option value="other">Lainnya</option>
-                        </select>
-                        @error('gender')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    {{-- Alamat --}}
-                    <div class="col-12 mb-3">
-                        <label for="alamat" class="form-label">Alamat</label>
-                        <textarea wire:model.lazy="alamat" id="alamat" class="form-control @error('alamat') is-invalid @enderror"
-                            rows="3"></textarea>
-                        @error('alamat')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-
 
                     <div class="col-md-12">
                         <label class="form-label">Extra Notes</label>
@@ -327,8 +339,8 @@
             </div>
         </div>
 
-        <div class="text-end mt-4">
-            <div class="d-flex flex-wrap gap-2 justify-content-start">
+        <div class="text-end mt-4" style="position: fixed; bottom: 20px; left: 300px; z-index: 999;">
+            <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary px-4">
                     <i class="bi bi-check-circle me-1"></i> Selesai
                 </button>

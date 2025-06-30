@@ -1,4 +1,4 @@
-<div class="card mt-3 col-lg-4 col-md-6 col-sm-12 shadow rounded-4">
+<div class="card mt-3 col-lg-12 col-md-12 col-sm-12 shadow rounded-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <span class="fw-bold text-decoration-underline">
             <i class="bi bi-receipt-cutoff me-2"></i>Bill Summary

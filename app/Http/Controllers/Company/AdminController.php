@@ -15,6 +15,12 @@ class AdminController extends Controller
     }
     public function setCabang($id, Request $request)
     {
+        if ($id === 'gudang_utama') {
+            session()->forget('cabang_id');
+            return redirect()->route('transfer.barang')
+                ->with('success', 'Masuk sebagai Gudang Utama');
+        }
+
         $cabang = Cabang::find($id);
 
         if (!$cabang) {
@@ -22,6 +28,7 @@ class AdminController extends Controller
         }
 
         session(['cabang_id' => $cabang->id]);
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard')
+            ->with('success', 'Masuk ke cabang ' . $cabang->nama);
     }
 }

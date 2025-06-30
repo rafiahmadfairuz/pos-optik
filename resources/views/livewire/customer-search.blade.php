@@ -39,6 +39,9 @@
                             <th>Name</th>
                             <th>Phone</th>
                             <th>Email</th>
+                            <th>Umur</th>
+                            <th>Gender</th>
+                            <th>Alamat</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -48,6 +51,11 @@
                                 <td>{{ $customer->name }}</td>
                                 <td>{{ $customer->phone }}</td>
                                 <td>{{ $customer->email }}</td>
+                                <td>{{ $customer->umur }}</td>
+                                <td>{{ ucfirst($customer->gender) }}</td>
+                                <td class="text-truncate" style="max-width: 150px;" title="{{ $customer->alamat }}">
+                                    {{ $customer->alamat }}
+                                </td>
                                 <td>
                                     <button wire:click="selectCustomer({{ $customer->id }})" class="btn"
                                         wire:loading.attr="disabled">
@@ -57,11 +65,12 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center">Tidak ada pelanggan ditemukan.</td>
+                                <td colspan="7" class="text-center">Tidak ada pelanggan ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+
                 <div class="mt-3 d-flex justify-content-end">
                     {{ $customers->links() }}
                 </div>

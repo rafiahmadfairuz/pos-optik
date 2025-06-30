@@ -29,7 +29,7 @@
                             <div class="col-md-6">
                                 <label for="sku" class="form-label">SKU <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('sku') is-invalid @enderror"
-                                    id="sku" name="sku" value="{{ old('sku') }}" required>
+                                    id="accessoriesSku" name="sku" value="{{ old('sku') }}" required>
                                 @error('sku')
                                     <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
                                         <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
@@ -226,6 +226,7 @@
             const deleteAccessoriesForm = document.getElementById('deleteAccessoriesForm');
 
             const accessoriesName = document.getElementById('accessoriesName');
+            const accessoriesSku = document.getElementById('accessoriesSku');
             const accessoriesJenis = document.getElementById('accessoriesjenis');
             const accessoriesHarga = document.getElementById('accessoriesHarga');
             const accessoriesStok = document.getElementById('accessoriesStok');
@@ -270,7 +271,7 @@
                     setFormMethod(accessoriesForm, 'PUT');
 
                     accessoriesId.value = id;
-                    accessoriesId.sku.value = tr.dataset.sku;
+                    accessoriesSku.value = tr.dataset.sku;
                     accessoriesName.value = tr.dataset.nama;
                     accessoriesJenis.value = tr.dataset.jenis;
                     if (accessoriesHargaBeli) accessoriesHargaBeli.value = tr.dataset.harga_beli;

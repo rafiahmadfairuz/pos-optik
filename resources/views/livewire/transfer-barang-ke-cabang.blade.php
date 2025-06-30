@@ -1,4 +1,3 @@
-
 <div class="container-fluid py-3">
     <h2 class="fw-bold "><i class="bi bi-cash-stack me-2"></i>Transfer Barang</h2>
 
@@ -88,7 +87,8 @@
                 <div class="card-body p-2">
 
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control" placeholder="Search products by name..."
+                        <input type="text" class="form-control"
+                            placeholder="Cari produk berdasarkan merk, tipe, warna, desain, SPH, CYL, ADD, atau AXIS (bila ada)..."
                             wire:model.defer="searchInput" autocomplete="off">
                         <button class="btn btn-primary" wire:click="runSearch">
                             <i class="bi bi-search"></i>
@@ -99,43 +99,86 @@
                     </div>
 
                     <div class="table-responsive card-scroll" style="max-height: 300px;">
-                        <table class="table table-sm mb-0">
+                        <table class="table table-sm table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th>Nama Produk</th>
-                                    <th>Harga Jual</th>
+                                    <th class="">Nama Produk</th>
+                                    <th class="text-center">Harga Jual</th>
                                     @if (in_array(Auth::user()->role, ['admin', 'gudang']))
-                                        <th>Laba</th>
+                                        <th class="text-center">Laba</th>
                                     @endif
-                                    <th>Stok</th>
-                                    <th>Tipe</th>
-                                    <th>Action</th>
+                                    <th class="text-center">Stok</th>
+                                    <th class="text-center">Desain</th>
+                                    <th class="text-center">Tipe</th>
+                                    <th class="text-center">Jenis</th>
+                                    <th class="text-center">Warna</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($products as $product)
                                     <tr>
-                                        <td>{{ $product['name'] }}</td>
-                                        <td>Rp. {{ number_format($product['price'], 0, ',', '.') }}</td>
+                                        <td class="">
+                                            {{ $product['name'] }}
+
+                                            {{-- Info tambahan untuk lensa --}}
+                                            @if (in_array($product['type'], ['lensa_finish', 'lensa_khusus']))
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ $product['desain'] ?? 'N/A' }} |
+                                                    SPH: {{ $product['sph'] ?? 'N/A' }} |
+                                                    CYL: {{ $product['cyl'] ?? 'N/A' }} |
+                                                    ADD: {{ $product['add'] ?? 'N/A' }}
+                                                </small>
+                                            @endif
+                                        </td>
+
+                                        <td class="text-center">
+                                            Rp. {{ number_format($product['price'], 0, ',', '.') }}
+                                        </td>
+
                                         @if (in_array(Auth::user()->role, ['admin', 'gudang']))
-                                            <td>Rp. {{ number_format($product['laba'], 0, ',', '.') }}</td>
+                                            <td class="text-center">
+                                                Rp. {{ number_format($product['laba'], 0, ',', '.') }}
+                                            </td>
                                         @endif
-                                        <td>{{ $product['stock'] }}</td>
-                                        <td>{{ ucfirst(str_replace('_', ' ', $product['type'])) }}</td>
-                                        <td>
-                                            <button class="btn"
-                                                wire:click="selectProduct({{ $product['id'] }}, '{{ $product['type'] }}')">+</button>
+
+                                        <td class="text-center">
+                                            {{ $product['stock'] }}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{ $product['desain'] ?? 'N/A' }}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{ $product['tipe'] ?? 'N/A' }}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ $product['type'] ?? 'N/A' }}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{ $product['warna'] ?? 'N/A' }}
+                                        </td>
+
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-primary"
+                                                wire:click="selectProduct({{ $product['id'] }}, '{{ $product['type'] }}')">
+                                                +
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">No products found.</td>
+                                        <td colspan="8" class="text-center">Tidak ada produk ditemukan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
 
                     </div>
+
                     <div class="mt-2 d-flex justify-content-center">
                         @if ($products->hasPages())
                             <nav>

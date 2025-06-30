@@ -135,12 +135,12 @@ class TransferBarangKeCabang extends Component
             ->map(fn($item) => array_merge(
                 $item->toArray(),
                 [
-                    'id' => $item->id,
-                    'name' => $item->merk,
+                    'id'    => $item->id,
+                    'name'  => $item->merk,
                     'price' => $item->harga,
-                    'laba' => $item->laba,
+                    'laba'  => $item->laba,
                     'stock' => $item->stok,
-                    'type' => 'frame',
+                    'type'  => 'frame',
                 ]
             ));
     }
@@ -150,19 +150,63 @@ class TransferBarangKeCabang extends Component
         return LensaFinish::where(function ($q) {
             $q->where('merk', 'like', "%{$this->search}%")
                 ->orWhere('desain', 'like', "%{$this->search}%")
-                ->orWhere('tipe', 'like', "%{$this->search}%");
+                ->orWhere('tipe', 'like', "%{$this->search}%")
+                ->orWhere('sph', 'like', "%{$this->search}%")
+                ->orWhere('cyl', 'like', "%{$this->search}%")
+                ->orWhere('add', 'like', "%{$this->search}%");
         })
             ->whereNull('cabang_id')
             ->get()
             ->map(fn($item) => array_merge(
                 $item->toArray(),
                 [
-                    'id' => $item->id,
-                    'name' => $item->merk,
-                    'price' => $item->harga,
-                    'laba' => $item->laba,
-                    'stock' => $item->stok,
-                    'type' => 'lensa_finish',
+                    'id'            => $item->id,
+                    'name'          => $item->merk,
+                    'display_name'  => trim(
+                        "{$item->merk} " .
+                            ($item->tipe ? "Tipe:{$item->tipe} " : "") .
+                            ($item->desain ? "Desain:{$item->desain} " : "") .
+                            ($item->sph ? "SPH:{$item->sph} " : "") .
+                            ($item->cyl ? "CYL:{$item->cyl} " : "") .
+                            ($item->add ? "ADD:{$item->add}" : "")
+                    ),
+                    'price'         => $item->harga,
+                    'laba'          => $item->laba,
+                    'stock'         => $item->stok,
+                    'type'          => 'lensa_finish',
+                ]
+            ));
+    }
+
+    protected function queryLensaKhusus()
+    {
+        return LensaKhusus::where(function ($q) {
+            $q->where('merk', 'like', "%{$this->search}%")
+                ->orWhere('desain', 'like', "%{$this->search}%")
+                ->orWhere('tipe', 'like', "%{$this->search}%")
+                ->orWhere('sph', 'like', "%{$this->search}%")
+                ->orWhere('cyl', 'like', "%{$this->search}%")
+                ->orWhere('add', 'like', "%{$this->search}%");
+        })
+            ->whereNull('cabang_id')
+            ->get()
+            ->map(fn($item) => array_merge(
+                $item->toArray(),
+                [
+                    'id'            => $item->id,
+                    'name'          => $item->merk,
+                    'display_name'  => trim(
+                        "{$item->merk} " .
+                            ($item->tipe ? "Tipe:{$item->tipe} " : "") .
+                            ($item->desain ? "Desain:{$item->desain} " : "") .
+                            ($item->sph ? "SPH:{$item->sph} " : "") .
+                            ($item->cyl ? "CYL:{$item->cyl} " : "") .
+                            ($item->add ? "ADD:{$item->add}" : "")
+                    ),
+                    'price'         => $item->harga,
+                    'laba'          => $item->laba,
+                    'stock'         => $item->stok,
+                    'type'          => 'lensa_khusus',
                 ]
             ));
     }
@@ -179,12 +223,12 @@ class TransferBarangKeCabang extends Component
             ->map(fn($item) => array_merge(
                 $item->toArray(),
                 [
-                    'id' => $item->id,
-                    'name' => $item->merk,
+                    'id'    => $item->id,
+                    'name'  => $item->merk,
                     'price' => $item->harga,
-                    'laba' => $item->laba,
+                    'laba'  => $item->laba,
                     'stock' => $item->stok,
-                    'type' => 'softlens',
+                    'type'  => 'softlens',
                 ]
             ));
     }
@@ -200,37 +244,16 @@ class TransferBarangKeCabang extends Component
             ->map(fn($item) => array_merge(
                 $item->toArray(),
                 [
-                    'id' => $item->id,
-                    'name' => $item->nama,
+                    'id'    => $item->id,
+                    'name'  => $item->nama,
                     'price' => $item->harga,
-                    'laba' => $item->laba,
+                    'laba'  => $item->laba,
                     'stock' => $item->stok,
-                    'type' => 'accessory',
+                    'type'  => 'accessory',
                 ]
             ));
     }
 
-    protected function queryLensaKhusus()
-    {
-        return LensaKhusus::where(function ($q) {
-            $q->where('merk', 'like', "%{$this->search}%")
-                ->orWhere('desain', 'like', "%{$this->search}%")
-                ->orWhere('tipe', 'like', "%{$this->search}%");
-        })
-            ->whereNull('cabang_id')
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id' => $item->id,
-                    'name' => $item->merk,
-                    'price' => $item->harga,
-                    'laba' => $item->laba,
-                    'stock' => $item->stok,
-                    'type' => 'lensa_khusus',
-                ]
-            ));
-    }
 
     protected function paginateCollection(Collection $items, $perPage, $page = null, $options = [])
     {
@@ -352,7 +375,7 @@ class TransferBarangKeCabang extends Component
         }
 
         if (Auth::user()->role === 'admin') {
-            return redirect()->route('dashboard');
+            return redirect()->route('frame.index');
         }
 
         return redirect()->route('frame.index');

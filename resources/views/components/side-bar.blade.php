@@ -1,10 +1,15 @@
+@php
+    $isGudangUtama = !session('cabang_id');
+@endphp
+
 <x-header :showToggle="false"></x-header>
 <div class="sidebar" id="sidebar">
     <div class="sidebar-inner slimscroll">
         <div id="sidebar-menu" class="sidebar-menu">
             <ul class="my-3">
 
-                @if (in_array(Auth::user()->role, ['admin', 'cabang', 'gudang_cabang']))
+                {{-- NAVIGATION --}}
+                @if (in_array(Auth::user()->role, ['admin', 'cabang', 'gudang_cabang']) && !$isGudangUtama)
                     <li class="menu-title fw-bold">NAVIGATION</li>
                     <li class="{{ Request::is('/') ? 'active' : '' }}">
                         <a href="{{ url('/') }}">
@@ -21,7 +26,8 @@
                 @endif
 
 
-                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+                {{-- PEMBELIAN & TRANSFER --}}
+                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']) && $isGudangUtama)
                     <li class="menu-title fw-bold">PEMBELIAN & TRANSFER</li>
 
                     <li class="{{ Request::is('transferBarang') ? 'active' : '' }}">
@@ -41,6 +47,8 @@
                     </li>
                 @endif
 
+
+                {{-- List Transfer --}}
                 @if (in_array(Auth::user()->role, ['admin', 'gudang_utama', 'gudang_cabang']))
                     <li class="{{ Request::is('listTransferBarang') ? 'active' : '' }}">
                         <a href="{{ url('listTransferBarang') }}">
@@ -49,7 +57,9 @@
                     </li>
                 @endif
 
-                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
+
+                {{-- Supplier --}}
+                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']) && $isGudangUtama)
                     <li class="{{ Request::is('supplier') ? 'active' : '' }}">
                         <a href="{{ url('supplier') }}">
                             <i class="bi bi-person-lines-fill"></i><span>Supplier</span>
@@ -58,9 +68,9 @@
                 @endif
 
 
+                {{-- FRONT DESK --}}
                 @auth
-                    @if (in_array(Auth::user()->role, ['admin', 'cabang']))
-                        <!-- FRONT DESK Section -->
+                    @if (in_array(Auth::user()->role, ['admin', 'cabang']) && !$isGudangUtama)
                         <li class="menu-title fw-bold">FRONT DESK</li>
                         <li class="{{ Request::is('kasir') ? 'active' : '' }}">
                             <a href="{{ url('kasir') }}">
@@ -90,7 +100,7 @@
                 @endauth
 
 
-                <!-- INVENTORY Section -->
+                {{-- INVENTORY --}}
                 <li class="menu-title fw-bold">INVENTORY</li>
                 <li class="{{ Request::is('frame') ? 'active' : '' }}">
                     <a href="{{ url('frame') }}">
@@ -112,12 +122,14 @@
                         <i class="bi bi-eye-fill"></i><span> Softlens</span>
                     </a>
                 </li>
-                <li class="{{ Request::is('accesories') ? 'active' : '' }}">
+                <li class="{{ Request::is('accessories') ? 'active' : '' }}">
                     <a href="{{ url('accessories') }}">
                         <i class="bi bi-bag-fill"></i><span> Accessories</span>
                     </a>
                 </li>
 
+
+                {{-- COMPANY --}}
                 @auth
                     @if (Auth::user()->role === 'admin')
                         <li class="menu-title fw-bold">COMPANY</li>
@@ -129,7 +141,6 @@
                         </li>
                     @endif
                 @endauth
-
 
             </ul>
         </div>

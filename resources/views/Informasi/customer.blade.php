@@ -18,7 +18,9 @@
             <form id="customerForm" action="" method="POST">
                 @csrf
                 <input type="hidden" name="customer_id" id="customerId" value="">
+
                 <div class="row g-3">
+                    <!-- Name -->
                     <div class="col-md-6">
                         <label for="customerName" class="form-label">Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" id="customerName"
@@ -30,6 +32,7 @@
                         @enderror
                     </div>
 
+                    <!-- Email -->
                     <div class="col-md-6">
                         <label for="customerEmail" class="form-label">Email</label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror"
@@ -41,6 +44,7 @@
                         @enderror
                     </div>
 
+                    <!-- Phone -->
                     <div class="col-md-6">
                         <label for="customerPhone" class="form-label">Phone</label>
                         <input type="text" class="form-control @error('phone') is-invalid @enderror"
@@ -51,13 +55,56 @@
                             </div>
                         @enderror
                     </div>
+
+                    <!-- Alamat -->
+                    <div class="col-md-6">
+                        <label for="customerAlamat" class="form-label">Alamat</label>
+                        <input type="text" class="form-control @error('alamat') is-invalid @enderror"
+                            id="customerAlamat" name="alamat" value="{{ old('alamat') }}">
+                        @error('alamat')
+                            <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
+
+                    <!-- Umur -->
+                    <div class="col-md-6">
+                        <label for="customerUmur" class="form-label">Umur</label>
+                        <input type="number" class="form-control @error('umur') is-invalid @enderror" id="customerUmur"
+                            name="umur" value="{{ old('umur') }}" min="1">
+                        @error('umur')
+                            <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="col-md-6">
+                        <label for="customerGender" class="form-label">Gender</label>
+                        <select class="form-select @error('gender') is-invalid @enderror" id="customerGender"
+                            name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                        @error('gender')
+                            <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
                 </div>
 
+                <!-- Button -->
                 <div class="mt-4 d-flex justify-content-end gap-2">
                     <button type="button" id="btnCancel" class="btn btn-secondary px-4">Cancel</button>
                     <button type="submit" class="btn btn-primary px-4">Save</button>
                 </div>
             </form>
+
         </div>
     </div>
 
@@ -70,26 +117,33 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
+                            <th>Alamat</th>
+                            <th>Umur</th>
+                            <th>Gender</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($customers as $customer)
                             <tr data-id="{{ $customer->id }}" data-name="{{ $customer->name }}"
-                                data-email="{{ $customer->email }}" data-phone="{{ $customer->phone }}">
+                                data-email="{{ $customer->email }}" data-phone="{{ $customer->phone }}"
+                                data-alamat="{{ $customer->alamat }}" data-umur="{{ $customer->umur }}"
+                                data-gender="{{ $customer->gender }}">
                                 <td>{{ $customer->name }}</td>
                                 <td>{{ $customer->email }}</td>
                                 <td>{{ $customer->phone }}</td>
+                                <td>{{ $customer->alamat }}</td>
+                                <td>{{ $customer->umur }}</td>
+                                <td>{{ ucfirst($customer->gender) }}</td>
                                 <td>
                                     <a class="me-2" href="{{ route('customer.show', $customer->id) }}">
                                         <i class="bi bi-person fs-4 align-middle"></i>
-
                                     </a>
                                     <button class="btn btn-sm btn-edit" title="Edit Customer">
                                         <img src="assets/img/icons/edit.svg" alt="edit">
                                     </button>
-                                    <button class="btn btn-sm btn-delete" title="Delete Customer" data-bs-toggle="modal"
-                                        data-bs-target="#deleteCustomerModal">
+                                    <button class="btn btn-sm btn-delete" title="Delete Customer"
+                                        data-bs-toggle="modal" data-bs-target="#deleteCustomerModal">
                                         <img src="assets/img/icons/delete.svg" alt="delete">
                                     </button>
                                 </td>
@@ -97,6 +151,7 @@
                         @endforeach
                     </tbody>
                 </table>
+
             </div>
         </div>
     </div>
@@ -110,7 +165,8 @@
                 <div class="modal-content rounded-4 shadow-sm border-0">
                     <div class="modal-header border-0 pb-0">
                         <h5 class="modal-title fw-semibold " id="deleteCustomerModalLabel">Confirm Delete</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body fs-5 pt-2 pb-3 text-center">
                         Are you sure you want to delete this customer?
@@ -130,11 +186,16 @@
             const formContainer = document.getElementById('formContainer');
             const btnAddCustomer = document.getElementById('btnAddCustomer');
             const btnCancel = document.getElementById('btnCancel');
+
             const customerForm = document.getElementById('customerForm');
             const customerIdInput = document.getElementById('customerId');
             const customerNameInput = document.getElementById('customerName');
             const customerEmailInput = document.getElementById('customerEmail');
             const customerPhoneInput = document.getElementById('customerPhone');
+            const customerAlamatInput = document.getElementById('customerAlamat');
+            const customerUmurInput = document.getElementById('customerUmur');
+            const customerGenderInput = document.getElementById('customerGender');
+
 
             function setFormMethod(form, method) {
                 let methodInput = form.querySelector('input[name="_method"]');
@@ -170,15 +231,21 @@
                     const name = tr.dataset.name;
                     const email = tr.dataset.email;
                     const phone = tr.dataset.phone;
+                    const alamat = tr.dataset.alamat;
+                    const umur = tr.dataset.umur;
+                    const gender = tr.dataset.gender;
 
                     customerForm.action = "{{ url('customer') }}/" + id;
-
                     setFormMethod(customerForm, 'PUT');
 
                     customerIdInput.value = id;
                     customerNameInput.value = name;
                     customerEmailInput.value = email;
                     customerPhoneInput.value = phone;
+                    customerAlamatInput.value = alamat;
+                    customerUmurInput.value = umur;
+                    customerGenderInput.value = gender;
+
 
                     formContainer.classList.remove('d-none');
                     customerNameInput.focus();

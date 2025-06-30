@@ -32,10 +32,6 @@ return new class extends Migration
 
             $table->text('notes')->nullable();
 
-            $table->unsignedInteger('umur')->nullable(); 
-            $table->enum('gender', ['male', 'female', 'other'])->nullable();
-            $table->text('alamat')->nullable();
-
             $table->timestamps();
         });
     }

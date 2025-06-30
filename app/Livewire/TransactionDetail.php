@@ -13,7 +13,7 @@ class TransactionDetail extends Component
     public $right_sph_d, $right_cyl_d, $right_axis_d, $right_va_d;
     public $left_sph_d, $left_cyl_d, $left_axis_d, $left_va_d;
     public $add_right, $add_left;
-    public $pd_right, $pd_left, $alamat, $gender, $umur, $notes;
+    public $pd_right, $pd_left, $notes;
 
     public $order_status, $order_date, $complete_date;
     public $payment_type, $optometrist_id, $diskon, $customer_paying;
@@ -93,9 +93,6 @@ class TransactionDetail extends Component
             'pd_left' => 'nullable|numeric|between:25,40',
 
             'notes' => 'nullable|max:2000',
-            'umur' => 'nullable|integer|min:0|max:120',
-            'gender' => 'nullable|in:male,female,other',
-            'alamat' => 'nullable|max:1000',
         ];
     }
 
@@ -183,9 +180,6 @@ class TransactionDetail extends Component
                 'add_left' => $this->add_left,
                 'pd_right' => $this->pd_right,
                 'pd_left' => $this->pd_left,
-                'alamat' => $this->alamat,
-                'umur' => $this->umur,
-                'gender' => $this->gender,
                 'notes' => $this->notes,
             ],
             'customer_data' => $this->customerData,

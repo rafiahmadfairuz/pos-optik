@@ -80,42 +80,65 @@
 
                                 <div class="col-md-3">
                                     <label for="sph" class="form-label">SPH</label>
-                                    <input type="text" class="form-control @error('sph') is-invalid @enderror"
-                                        id="sph" name="sph" value="{{ old('sph') }}">
+                                    <select class="form-select @error('sph') is-invalid @enderror" id="sph"
+                                        name="sph">
+                                        <option value="">Pilih SPH</option>
+                                        @for ($i = -20; $i <= 20; $i += 0.25)
+                                            <option value="{{ number_format($i, 2) }}"
+                                                {{ old('sph') == number_format($i, 2) ? 'selected' : '' }}>
+                                                {{ number_format($i, 2) }}
+                                            </option>
+                                        @endfor
+                                    </select>
                                     @error('sph')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1"
-                                            style="display: block;">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1">
+                                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                            <span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
+
                                 <div class="col-md-3">
                                     <label for="cyl" class="form-label">CYL</label>
-                                    <input type="text" class="form-control @error('cyl') is-invalid @enderror"
-                                        id="cyl" name="cyl" value="{{ old('cyl') }}">
+                                    <select class="form-select @error('cyl') is-invalid @enderror" id="cyl"
+                                        name="cyl">
+                                        <option value="">Pilih CYL</option>
+                                        @for ($i = -8; $i <= 0; $i += 0.25)
+                                            <option value="{{ number_format($i, 2) }}"
+                                                {{ old('cyl') == number_format($i, 2) ? 'selected' : '' }}>
+                                                {{ number_format($i, 2) }}
+                                            </option>
+                                        @endfor
+                                    </select>
                                     @error('cyl')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1"
-                                            style="display: block;">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1">
+                                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                            <span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
 
                                 <div class="col-md-3">
                                     <label for="add" class="form-label">ADD</label>
-                                    <input type="text" class="form-control @error('add') is-invalid @enderror"
-                                        id="add" name="add" value="{{ old('add') }}">
+                                    <select class="form-select @error('add') is-invalid @enderror" id="add"
+                                        name="add">
+                                        <option value="">Pilih ADD</option>
+                                        @for ($i = 0.75; $i <= 3.5; $i += 0.25)
+                                            <option value="{{ number_format($i, 2) }}"
+                                                {{ old('add') == number_format($i, 2) ? 'selected' : '' }}>
+                                                {{ number_format($i, 2) }}
+                                            </option>
+                                        @endfor
+                                    </select>
                                     @error('add')
-                                        <div class="invalid-feedback d-flex align-items-center mt-1"
-                                            style="display: block;">
-                                            <i
-                                                class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                                        <div class="invalid-feedback d-flex align-items-center mt-1">
+                                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                            <span>{{ $message }}</span>
                                         </div>
                                     @enderror
                                 </div>
+
 
                                 <div class="col-md-3">
                                     <label for="stok" class="form-label">Stok</label>

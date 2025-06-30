@@ -179,7 +179,7 @@ class BeliBarang extends Component
 
             $user = Auth::user();
             if ($user->role === 'admin') {
-                return redirect()->route('dashboard');
+                return redirect()->route('frame.index');
             } elseif ($user->role === 'gudang_utama') {
                 return redirect()->route('frame.index');
             }
@@ -200,88 +200,136 @@ class BeliBarang extends Component
             ->concat($this->queryLensaKhusus());
     }
 
-    protected function queryLensaKhusus()
-    {
-        return LensaKhusus::where('merk', 'like', "%{$this->searchProduk}%")
-            ->whereNull('cabang_id')
-            ->get()
-            ->map(fn($item) => [
-                'id' => $item->id,
-                'name' => $item->merk,
-                'price' => $item->harga,
-                'laba' => $item->laba,
-                'stock' => $item->stok,
-                'type' => 'lensa_khusus',
-            ]);
-    }
-
 
     protected function queryFrames()
     {
-        return Frame::where('merk', 'like', "%{$this->searchProduk}%")
+        return Frame::where(function ($q) {
+            $q->where('merk', 'like', "%{$this->search}%")
+                ->orWhere('tipe', 'like', "%{$this->search}%")
+                ->orWhere('warna', 'like', "%{$this->search}%");
+        })
             ->whereNull('cabang_id')
             ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->merk,
+            ->map(fn($item) => array_merge(
+                $item->toArray(),
+                [
+                    'id'    => $item->id,
+                    'name'  => $item->merk,
                     'price' => $item->harga,
-                    'laba' => $item->laba,
+                    'laba'  => $item->laba,
                     'stock' => $item->stok,
-                    'type' => 'frame',
-                ];
-            });
+                    'type'  => 'frame',
+                ]
+            ));
     }
 
     protected function queryLensaFinish()
     {
-        return LensaFinish::where('merk', 'like', "%{$this->searchProduk}%")
+        return LensaFinish::where(function ($q) {
+            $q->where('merk', 'like', "%{$this->search}%")
+                ->orWhere('desain', 'like', "%{$this->search}%")
+                ->orWhere('tipe', 'like', "%{$this->search}%")
+                ->orWhere('sph', 'like', "%{$this->search}%")
+                ->orWhere('cyl', 'like', "%{$this->search}%")
+                ->orWhere('add', 'like', "%{$this->search}%");
+        })
             ->whereNull('cabang_id')
             ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->merk,
-                    'price' => $item->harga,
-                    'laba' => $item->laba,
-                    'stock' => $item->stok,
-                    'type' => 'lensa_finish',
-                ];
-            });
+            ->map(fn($item) => array_merge(
+                $item->toArray(),
+                [
+                    'id'            => $item->id,
+                    'name'          => $item->merk,
+                    'display_name'  => trim(
+                        "{$item->merk} " .
+                            ($item->tipe ? "Tipe:{$item->tipe} " : "") .
+                            ($item->desain ? "Desain:{$item->desain} " : "") .
+                            ($item->sph ? "SPH:{$item->sph} " : "") .
+                            ($item->cyl ? "CYL:{$item->cyl} " : "") .
+                            ($item->add ? "ADD:{$item->add}" : "")
+                    ),
+                    'price'         => $item->harga,
+                    'laba'          => $item->laba,
+                    'stock'         => $item->stok,
+                    'type'          => 'lensa_finish',
+                ]
+            ));
+    }
+
+    protected function queryLensaKhusus()
+    {
+        return LensaKhusus::where(function ($q) {
+            $q->where('merk', 'like', "%{$this->search}%")
+                ->orWhere('desain', 'like', "%{$this->search}%")
+                ->orWhere('tipe', 'like', "%{$this->search}%")
+                ->orWhere('sph', 'like', "%{$this->search}%")
+                ->orWhere('cyl', 'like', "%{$this->search}%")
+                ->orWhere('add', 'like', "%{$this->search}%");
+        })
+            ->whereNull('cabang_id')
+            ->get()
+            ->map(fn($item) => array_merge(
+                $item->toArray(),
+                [
+                    'id'            => $item->id,
+                    'name'          => $item->merk,
+                    'display_name'  => trim(
+                        "{$item->merk} " .
+                            ($item->tipe ? "Tipe:{$item->tipe} " : "") .
+                            ($item->desain ? "Desain:{$item->desain} " : "") .
+                            ($item->sph ? "SPH:{$item->sph} " : "") .
+                            ($item->cyl ? "CYL:{$item->cyl} " : "") .
+                            ($item->add ? "ADD:{$item->add}" : "")
+                    ),
+                    'price'         => $item->harga,
+                    'laba'          => $item->laba,
+                    'stock'         => $item->stok,
+                    'type'          => 'lensa_khusus',
+                ]
+            ));
     }
 
     protected function querySoftlens()
     {
-        return Softlen::where('merk', 'like', "%{$this->searchProduk}%")
+        return Softlen::where(function ($q) {
+            $q->where('merk', 'like', "%{$this->search}%")
+                ->orWhere('tipe', 'like', "%{$this->search}%")
+                ->orWhere('warna', 'like', "%{$this->search}%");
+        })
             ->whereNull('cabang_id')
             ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->merk,
+            ->map(fn($item) => array_merge(
+                $item->toArray(),
+                [
+                    'id'    => $item->id,
+                    'name'  => $item->merk,
                     'price' => $item->harga,
-                    'laba' => $item->laba,
+                    'laba'  => $item->laba,
                     'stock' => $item->stok,
-                    'type' => 'softlens',
-                ];
-            });
+                    'type'  => 'softlens',
+                ]
+            ));
     }
 
     protected function queryAccessories()
     {
-        return Accessories::where('nama', 'like', "%{$this->searchProduk}%")
+        return Accessories::where(function ($q) {
+            $q->where('nama', 'like', "%{$this->search}%")
+                ->orWhere('jenis', 'like', "%{$this->search}%");
+        })
             ->whereNull('cabang_id')
             ->get()
-            ->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'name' => $item->nama,
+            ->map(fn($item) => array_merge(
+                $item->toArray(),
+                [
+                    'id'    => $item->id,
+                    'name'  => $item->nama,
                     'price' => $item->harga,
-                    'laba' => $item->laba,
+                    'laba'  => $item->laba,
                     'stock' => $item->stok,
-                    'type' => 'accessory',
-                ];
-            });
+                    'type'  => 'accessory',
+                ]
+            ));
     }
 
     protected function paginateCollection(Collection $items, $perPage, $page = null, $options = [])

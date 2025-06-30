@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('name');
             $table->string("phone", 20);
+            $table->unsignedInteger('umur')->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
+            $table->text('alamat')->nullable();
             $table->timestamps();
         });
 

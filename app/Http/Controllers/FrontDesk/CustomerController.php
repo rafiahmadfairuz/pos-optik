@@ -35,9 +35,14 @@ class CustomerController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:100',
-                'email' => 'required|email|max:100|unique:users,email',
+                'email' => 'nullable|email|max:100|unique:users,email',
                 'phone' => 'required|regex:/^[0-9+\-\s()]*$/|max:20',
+
+                'alamat' => 'nullable|string|max:255',
+                'umur' => 'nullable|integer|min:1|max:120',
+                'gender' => 'nullable|in:male,female,other',
             ]);
+
 
             User::create([
                 ...$validated,
@@ -81,15 +86,23 @@ class CustomerController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:100',
-                'email' => 'required|email|max:100|unique:users,email,' . $id,
+                'email' => 'nullable|email|max:100|unique:users,email,' . $id,
                 'phone' => 'required|regex:/^[0-9+\-\s()]*$/|max:20',
+
+                'alamat' => 'nullable|string|max:255',
+                'umur' => 'nullable|integer|min:1|max:120',
+                'gender' => 'nullable|in:male,female,other',
             ]);
+
 
             $customer = User::findOrFail($id);
 
             $customer->name = $validated['name'];
             $customer->email = $validated['email'];
             $customer->phone = $validated['phone'] ?? null;
+            $customer->alamat = $validated['alamat'] ?? null;
+            $customer->umur = $validated['umur'] ?? null;
+            $customer->gender = $validated['gender'] ?? null;
             $customer->cabang_id = session('cabang_id');
 
             $customer->save();
@@ -103,7 +116,7 @@ class CustomerController extends Controller
             return back()->with('error', 'Customer tidak ditemukan.');
         } catch (\Exception $e) {
             Log::error('Update customer gagal: ' . $e->getMessage());
-            return back()->with('error', 'Gagal memperbarui Customer.');
+            return back()->with('error', 'Gagal memperbarui Customer.' . $e->getMessage());
         }
     }
 

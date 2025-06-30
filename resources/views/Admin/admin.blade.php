@@ -35,6 +35,10 @@
                     </div>
 
                     <div class="row w-100 justify-content-center g-4">
+
+
+
+                        {{-- Loop cabang --}}
                         @foreach ($cabangs as $cabang)
                             <div class="col-12 col-sm-6 col-lg-3">
                                 <a href="{{ url('/pilihCabang/' . $cabang->id) }}" class="text-decoration-none">
@@ -44,12 +48,30 @@
                                             <i class="bi bi-shop-window" style="font-size: 3rem; color: #0d6efd;"></i>
                                         </div>
                                         <h5 class="fw-semibold text-dark">Cabang {{ $cabang->nama }}</h5>
-                                        <p class="text-muted mb-0">Lihat data dan laporan cabang {{ $cabang->nama }}.</p>
+                                        <p class="text-muted mb-0">Lihat data dan laporan cabang {{ $cabang->nama }}.
+                                        </p>
                                     </div>
                                 </a>
                             </div>
                         @endforeach
+
+                        {{-- Gudang Utama --}}
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <a href="{{ url('/pilihCabang/gudang_utama') }}" class="text-decoration-none">
+                                <div class="card border-0 shadow-lg rounded-4 text-center p-4 branch-card h-100"
+                                    role="button">
+                                    <div class="mb-3">
+                                        <i class="bi bi-box-seam" style="font-size: 3rem; color: #dc3545;"></i>
+                                    </div>
+                                    <h5 class="fw-semibold text-dark">Gudang Utama</h5>
+                                    <p class="text-muted mb-0">Lihat data dan laporan Gudang Utama.</p>
+                                </div>
+                            </a>
+                        </div>
+
+
                     </div>
+
 
                 </div>
 
