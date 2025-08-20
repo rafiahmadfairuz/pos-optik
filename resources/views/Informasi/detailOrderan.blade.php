@@ -21,7 +21,96 @@
     @endphp
 
     <div class="container-fluid py-3">
-        <h2 class="fw-bold"><i class="bi bi-card-list me-2"></i>Detail Orderan</h2>
+        <h2 class="fw-bold">
+            <i class="bi bi-card-list me-2"></i>
+            Detail Orderan
+            @if ($order->is_returned)
+                <span class="text-danger">ORDERAN TELAH DIRETUR</span>
+            @endif
+        </h2>
+
+
+        <div class="page-header">
+            <div class="page-title">
+                <h1 class="fw-bold">Data User</h1>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-person-fill text-primary fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">Nama</div>
+                            <div class="fw-bold">{{ $order->user->name }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-envelope-fill text-success fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">Email</div>
+                            <div class="fw-bold">{{ $order->user->email }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-telephone-fill text-danger fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">No Telp</div>
+                            <div class="fw-bold">{{ $order->user->phone }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alamat -->
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-geo-alt-fill text-warning fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">Alamat</div>
+                            <div class="fw-bold">{{ $order->user->alamat }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Umur -->
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-calendar-fill text-info fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">Umur</div>
+                            <div class="fw-bold">{{ $order->user->umur }} tahun</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="col-12 col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="bi bi-gender-ambiguous text-secondary fs-3 me-3"></i>
+                        <div>
+                            <div class="fw-semibold text-muted small">Gender</div>
+                            <div class="fw-bold">{{ ucfirst($order->user->gender) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <div class="row g-3">
             {{-- Formulir utama untuk semua input yang dapat diupdate --}}
@@ -261,47 +350,12 @@
                                         </table>
                                     </div>
                                 </div>
-                                {{-- Umur --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Umur</label>
-                                    <input type="number" name="umur"
-                                        class="form-control @error('umur') is-invalid @enderror"
-                                        value="{{ old('umur', $order->resep?->umur) }}"
-                                        {{ $isDisabled ? 'disabled' : '' }}>
-                                    @error('umur')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
 
-                                {{-- Gender --}}
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">Gender</label>
-                                    <select name="gender" class="form-select @error('gender') is-invalid @enderror"
-                                        {{ $isDisabled ? 'disabled' : '' }}>
-                                        <option value="">Pilih Jenis Kelamin</option>
-                                        <option value="male"
-                                            {{ old('gender', $order->resep?->gender) == 'male' ? 'selected' : '' }}>
-                                            Laki-laki</option>
-                                        <option value="female"
-                                            {{ old('gender', $order->resep?->gender) == 'female' ? 'selected' : '' }}>
-                                            Perempuan</option>
-                                        <option value="other"
-                                            {{ old('gender', $order->resep?->gender) == 'other' ? 'selected' : '' }}>
-                                            Lainnya</option>
-                                    </select>
-                                    @error('gender')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                {{-- Alamat --}}
-                                <div class="col-12 mb-3">
-                                    <label class="form-label">Alamat</label>
-                                    <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3"
-                                        {{ $isDisabled ? 'disabled' : '' }}>{{ old('alamat', $order->resep?->alamat) }}</textarea>
-                                    @error('alamat')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
+                                <div class="col-md-12">
+                                    <label class="form-label"><i class="bi bi-pencil-square me-1"></i>Tanggal
+                                        Pemeriksaan</label>
+                                    <input type="date" name="tanggal_pemeriksaan" class="form-control"
+                                        value={{ $order->resep?->tanggal_pemeriksaan }}>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label"><i class="bi bi-pencil-square me-1"></i>Catatan
@@ -575,13 +629,20 @@
 
 
                 {{-- Tombol submit tunggal di akhir formulir --}}
-                <div class="col-md-4 d-flex justify-content-start  align-items-start mt-3">
+                <div class="col-md-4 gap-3 d-flex justify-content-start  align-items-start mt-3">
                     @if (($order->order_status ?? 'pending') == 'pending' || (Auth::user()->role ?? '') == 'admin')
                         <button type="submit" class="btn btn-primary px-4" {{ $isDisabled ? 'disabled' : '' }}>
                             <i class="bi bi-check-circle me-1"></i>
                             {{ ($order->order_status ?? 'pending') == 'pending' ? 'Selesai' : 'Simpan Perubahan' }}
                         </button>
                     @endif
+                    @if (($order->order_status ?? 'complete') == 'complete')
+                        <a href="{{ route('retur.orderan', $order->id) }}" class="btn btn-danger"
+                            {{ $isDisabled ? 'disabled' : '' }}>
+                            Retur Barang
+                        </a>
+                    @endif
+
                 </div>
             </form>
         </div>

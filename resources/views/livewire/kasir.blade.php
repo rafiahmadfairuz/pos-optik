@@ -51,6 +51,47 @@
                             </div>
                         @enderror
                     </div>
+
+                              <!-- Alamat -->
+                    <div class="col-md-6">
+                        <label for="customerAlamat" class="form-label">Alamat</label>
+                        <input type="text" class="form-control @error('alamat') is-invalid @enderror"
+                            id="customerAlamat" name="alamat" value="{{ old('alamat') }}">
+                        @error('alamat')
+                            <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
+
+                    <!-- Umur -->
+                    <div class="col-md-6">
+                        <label for="customerUmur" class="form-label">Tanggal Lahir</label>
+                        <input type="date" class="form-control @error('umur') is-invalid @enderror" id="customerUmur"
+                            name="umur" value="{{ old('umur') }}" min="1">
+                        @error('umur')
+                            <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="col-md-6">
+                        <label for="customerGender" class="form-label">Gender</label>
+                        <select class="form-select @error('gender') is-invalid @enderror" id="customerGender"
+                            name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                        @error('gender')
+                            <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
+                                <i class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mt-4 d-flex justify-content-end gap-2">

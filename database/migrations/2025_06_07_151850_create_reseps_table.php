@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string('pd_right')->nullable();
             $table->string('pd_left')->nullable();
 
+            $table->date('tanggal_pemeriksaan')->nullable();
             $table->text('notes')->nullable();
 
             $table->timestamps();

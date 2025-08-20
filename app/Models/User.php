@@ -41,4 +41,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function getUmurAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value)->age;
+    }
 }

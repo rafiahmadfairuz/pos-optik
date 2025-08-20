@@ -16,7 +16,7 @@ class UserFactory extends Factory
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(),
             'alamat' => $this->faker->address(),
-            'umur' => $this->faker->numberBetween(4, 60),
+            'umur' => $this->faker->dateTimeBetween('-60 years', '-4 years')->format('Y-m-d'),
             'gender' => $this->faker->randomElement(['male', 'female', 'other']),
             'cabang_id' => \App\Models\Cabang::factory(),
         ];

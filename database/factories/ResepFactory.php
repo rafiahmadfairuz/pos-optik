@@ -25,6 +25,7 @@ class ResepFactory extends Factory
             'add_left' => $this->faker->optional()->randomFloat(2, 0, 3),
             'pd_right' => $this->faker->optional()->randomFloat(2, 50, 70),
             'pd_left' => $this->faker->optional()->randomFloat(2, 50, 70),
+            'tanggal_pemeriksaan' => $this->faker->dateTimeBetween('-60 years', '-4 years')->format('Y-m-d'),
             'notes' => $this->faker->optional()->sentence(),
         ];
     }

@@ -14,18 +14,21 @@
                 <!-- Tabs -->
                 <ul class="nav border-bottom mb-4" id="transactionTabs">
                     <li class="nav-item">
-                        <a class="nav-link active border-0 border-bottom border-primary fw-semibold" href="#" data-status="all">
+                        <a class="nav-link active border-0 border-bottom border-primary fw-semibold" href="#"
+                            data-status="all">
                             All <span class="text-muted">{{ count($orderans) }}</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link border-0" href="#" data-status="complete">
-                            Selesai <span class="text-muted">{{ $orderans->where('order_status', 'complete')->count() }}</span>
+                            Selesai <span
+                                class="text-muted">{{ $orderans->where('order_status', 'complete')->count() }}</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link border-0" href="#" data-status="pending">
-                            Belum Selesai <span class="text-muted">{{ $orderans->where('order_status', 'pending')->count() }}</span>
+                            Belum Selesai <span
+                                class="text-muted">{{ $orderans->where('order_status', 'pending')->count() }}</span>
                         </a>
                     </li>
                 </ul>
@@ -55,6 +58,7 @@
                                     <td>Rp. {{ number_format($orderan->total, 0, ',', '.') }}</td>
                                     <td>
                                         <div class="d-flex gap-1 flex-wrap">
+                                            {{-- Status order --}}
                                             @if ($orderan->order_status === 'pending')
                                                 <span class="badge bg-warning">Pending</span>
                                             @elseif ($orderan->order_status === 'complete')
@@ -63,15 +67,24 @@
                                                 <span class="badge bg-secondary">Unknown</span>
                                             @endif
 
+                                            {{-- Status pembayaran --}}
                                             @if ($orderan->payment_status === 'paid')
                                                 <span class="badge bg-success-subtle text-success">Paid</span>
                                             @else
                                                 <span class="badge bg-danger-subtle text-danger">Unpaid</span>
                                             @endif
+
+                                            {{-- Status retur --}}
+                                            @if ($orderan->is_returned)
+                                                <span class="badge bg-danger">Retur</span>
+                                            @else
+                                                <span class="badge bg-primary">Tidak Retur</span>
+                                            @endif
                                         </div>
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('orderan.detail', $orderan->id) }}" class="text-primary me-2">
+                                        <a href="{{ route('orderan.detail', $orderan->id) }}"
+                                            class="text-primary me-2">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     </td>
@@ -90,7 +103,7 @@
         const rows = document.querySelectorAll('#transactionTable tr');
 
         tabs.forEach(tab => {
-            tab.addEventListener('click', function (e) {
+            tab.addEventListener('click', function(e) {
                 e.preventDefault();
 
                 tabs.forEach(t => {

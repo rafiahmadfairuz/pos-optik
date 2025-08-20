@@ -13,7 +13,7 @@ class TransactionDetail extends Component
     public $right_sph_d, $right_cyl_d, $right_axis_d, $right_va_d;
     public $left_sph_d, $left_cyl_d, $left_axis_d, $left_va_d;
     public $add_right, $add_left;
-    public $pd_right, $pd_left, $notes;
+    public $pd_right, $pd_left,$tanggal_pemeriksaan, $notes;
 
     public $order_status, $order_date, $complete_date;
     public $payment_type, $optometrist_id, $diskon, $customer_paying;
@@ -92,6 +92,7 @@ class TransactionDetail extends Component
             'pd_right' => 'nullable|numeric|between:25,40',
             'pd_left' => 'nullable|numeric|between:25,40',
 
+            'tanggal_pemeriksaan' => 'nullable',
             'notes' => 'nullable|max:2000',
         ];
     }
@@ -180,6 +181,7 @@ class TransactionDetail extends Component
                 'add_left' => $this->add_left,
                 'pd_right' => $this->pd_right,
                 'pd_left' => $this->pd_left,
+                'tanggal_pemeriksaan' => $this->tanggal_pemeriksaan,
                 'notes' => $this->notes,
             ],
             'customer_data' => $this->customerData,

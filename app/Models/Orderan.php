@@ -9,6 +9,10 @@ class Orderan extends Model
 {
     use HasFactory;
     protected $guarded = ["id"];
+     public function itemable()
+    {
+        return $this->morphTo();
+    }
     public function user()
     {
         return $this->belongsTo(User::class);

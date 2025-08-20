@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transfer;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -108,6 +109,105 @@ class GudangUtamaController extends Controller
             return back()->with('success', 'Transfer berhasil diretur.');
         } catch (\Exception $e) {
             return back()->with('error', 'Retur gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function transferKeCabangLain(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'target_cabang_id' => 'required|integer|exists:cabangs,id',
+        ]);
+        $targetCabangId = (int) $validated['target_cabang_id'];
+
+        $transfer = Transfer::with(['items.itemable'])->findOrFail($id);
+        $sourceCabangId = (int) $transfer->cabang_id;
+
+        if ($targetCabangId === $sourceCabangId) {
+            return back()->with('warning', 'Cabang tujuan sama dengan cabang saat ini.');
+        }
+
+        try {
+            DB::transaction(function () use ($transfer, $sourceCabangId, $targetCabangId) {
+
+                foreach ($transfer->items as $ti) {
+                    $modelClass = $ti->itemable_type;   // contoh: App\Models\Frame / Lensa / dst
+                    $template   = $ti->itemable;        // produk di GUDANG (dipakai sbg template atribut)
+
+                    if (!$template) {
+                        throw new \Exception("Produk acuan (gudang) tidak ditemukan untuk item #{$ti->id}.");
+                    }
+
+                    $model   = new $modelClass;
+                    $columns = Schema::getColumnListing($model->getTable());
+                    $match   = ['sku', 'merk', 'tipe', 'warna', 'desain', 'nama', 'jenis', 'sph', 'cyl', 'add'];
+
+                    // 1) Cari produk di CABANG SUMBER (harus ada, karena pernah ditransfer)
+                    $qSource = $modelClass::query()->where('cabang_id', $sourceCabangId);
+                    foreach ($match as $col) {
+                        if (in_array($col, $columns) && isset($template->$col)) {
+                            $qSource->where($col, $template->$col);
+                        }
+                    }
+                    $produkSource = $qSource->first();
+                    if (!$produkSource) {
+                        throw new \Exception("Produk tidak ditemukan di cabang sumber (#{$sourceCabangId}) untuk item #{$ti->id}.");
+                    }
+
+                    $qty = (int) $ti->quantity;
+                    if ((int)$produkSource->stok < $qty) {
+                        $name = $template->nama ?? $template->merk ?? $template->sku ?? 'Produk';
+                        throw new \Exception("Stok cabang sumber tidak cukup untuk {$name} (butuh {$qty}, ada {$produkSource->stok}).");
+                    }
+
+                    // Kurangi stok cabang sumber
+                    $produkSource->decrement('stok', $qty);
+
+                    // 2) Tambahkan ke CABANG TUJUAN (buat baru jika belum ada)
+                    $qTarget = $modelClass::query()->where('cabang_id', $targetCabangId);
+                    foreach ($match as $col) {
+                        if (in_array($col, $columns) && isset($template->$col)) {
+                            $qTarget->where($col, $template->$col);
+                        }
+                    }
+                    $produkTarget = $qTarget->first();
+
+                    if ($produkTarget) {
+                        $produkTarget->increment('stok', $qty);
+                    } else {
+                        // clone field dari template (produk gudang) → cabang tujuan
+                        $dataBaru = [
+                            'cabang_id' => $targetCabangId,
+                            'stok'      => $qty,
+                        ];
+
+                        $copyable = array_diff(
+                            $columns,
+                            ['id', 'created_at', 'updated_at', 'stok', 'cabang_id', 'status_pesanan', 'estimasi_selesai_hari']
+                        );
+                        foreach ($copyable as $col) {
+                            if (isset($template->$col)) {
+                                $dataBaru[$col] = $template->$col;
+                            }
+                        }
+
+                        $modelClass::create($dataBaru);
+                    }
+
+                    // Logging ringkas
+                    $skuLog = $template->sku ?? ($template->nama ?? 'unknown');
+                    Log::info("[CABANG→CABANG] Transfer #{$transfer->kode} | Item #{$ti->id} ({$skuLog}) | {$sourceCabangId} -> {$targetCabangId} | qty {$qty}");
+                }
+
+                // 3) Update header transfer (tanpa ubah struktur DB)
+                $transfer->update([
+                    'cabang_id' => $targetCabangId,
+                    'tanggal'   => now()->toDateString(), // kolom bertipe DATE
+                ]);
+            });
+
+            return back()->with('success', 'Transfer antar cabang berhasil diproses & data header diperbarui.');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal memproses transfer: ' . $e->getMessage());
         }
     }
 }

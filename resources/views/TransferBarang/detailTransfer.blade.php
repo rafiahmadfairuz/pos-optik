@@ -100,6 +100,28 @@
                             Utama
                         </button>
                     </form>
+
+                    <form action="{{ route('transfer.ke.cabang', $transfer->id) }}" method="POST" class="">
+                        @csrf
+                        @method('PATCH')
+
+                        <div class="mb-3 col-2 mt-2">
+                            <label for="target_cabang_id" class="form-label">ID Cabang Tujuan</label>
+                            <input type="number" name="target_cabang_id" id="target_cabang_id" class="form-control"
+                                placeholder="Masukkan ID Cabang" required min="1" max="4" step="1">
+                            @error('target_cabang_id')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary ">
+                            Transfer Ke Cabang Lainnya
+                        </button>
+                    </form>
+
+
+
+
                 </div>
             @endif
         </div>

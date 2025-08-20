@@ -193,6 +193,14 @@
                     </div>
 
                     <div class="col-md-12">
+                        <label class="form-label"><i class="bi bi-pencil-square me-1"></i>Tanggal Pemeriksaan</label>
+                        <input type="date" wire:model.lazy="tanggal_pemeriksaan" name="tanggal_pemeriksaan" class="form-control @error('tanggal_pemeriksaan') is-invalid @enderror">
+                    </div>
+                    @error('tanggal_pemeriksaan')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+
+                    <div class="col-md-12">
                         <label class="form-label">Extra Notes</label>
                         <textarea wire:model.lazy="notes" class="form-control @error('notes') is-invalid @enderror"></textarea>
                         @error('notes')

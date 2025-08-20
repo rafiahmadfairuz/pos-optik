@@ -30,6 +30,8 @@ return new class extends Migration
             $table->foreignId('asuransi_id')->nullable()->constrained('asuransis')->onDelete('cascade');
             $table->bigInteger('total');
             $table->bigInteger('laba_total')->default(0);
+            $table->boolean('is_returned')->default(false);
+            $table->timestamp('returned_at')->nullable();
             $table->timestamps();
         });
     }

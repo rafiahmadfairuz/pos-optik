@@ -19,6 +19,7 @@ use App\Http\Controllers\Navigation\ReportController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\SupplierController;
 use App\Livewire\Kasir;
+use App\Models\Orderan;
 
 Route::get('/login', [AuthController::class, "showLogin"])->name('login');
 Route::post('/login', [AuthController::class, "processLogin"])->name("login.process");
@@ -50,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/listTransferBarang', [GudangUtamaController::class, 'listTransferBarangKeCabang'])->name('list.transfer.barang');
     Route::get('/listTransferBarang/{id}', [GudangUtamaController::class, 'detailListTransferBarangKeCabang'])->name('detail.transfer.barang');
     Route::patch('/listTransferBarang/{id}/retur', [GudangUtamaController::class, 'retur'])->name('transfer.retur');
+    Route::patch('/listTransferBarang/{id}/transferKeCabangLain', [GudangUtamaController::class, 'transferKeCabangLain'])->name('transfer.ke.cabang');
     Route::get('/beliBarang', [GudangUtamaController::class, 'beliBarang'])->name('beli.barang');
 
     Route::resource('/staff', StaffController::class)->except(['create', 'show', 'edit'])->middleware("admin");
@@ -63,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/cetak-nota/{id}', [OrderanController::class, 'cetakNota'])->name('cetak.nota');
 
+    Route::get('/orderan/{id}/retur', [OrderanController::class, 'returOrderan'])->name('retur.orderan');
 
 
     Route::get('/ditolak', function () {

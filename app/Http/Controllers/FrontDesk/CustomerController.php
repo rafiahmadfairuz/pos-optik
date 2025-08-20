@@ -13,9 +13,21 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $customers = User::where('cabang_id', session('cabang_id'))->get();
+        $search = $request->input('search');
+
+        $query =  User::where('cabang_id', session('cabang_id'));
+
+          if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        $customers = $query->get();
+
         return view("Informasi.customer", compact("customers"));
     }
 
@@ -39,7 +51,7 @@ class CustomerController extends Controller
                 'phone' => 'required|regex:/^[0-9+\-\s()]*$/|max:20',
 
                 'alamat' => 'nullable|string|max:255',
-                'umur' => 'nullable|integer|min:1|max:120',
+                'umur' => 'nullable',
                 'gender' => 'nullable|in:male,female,other',
             ]);
 
@@ -90,7 +102,7 @@ class CustomerController extends Controller
                 'phone' => 'required|regex:/^[0-9+\-\s()]*$/|max:20',
 
                 'alamat' => 'nullable|string|max:255',
-                'umur' => 'nullable|integer|min:1|max:120',
+                'umur' => 'nullable',
                 'gender' => 'nullable|in:male,female,other',
             ]);
 

@@ -70,8 +70,8 @@
 
                     <!-- Umur -->
                     <div class="col-md-6">
-                        <label for="customerUmur" class="form-label">Umur</label>
-                        <input type="number" class="form-control @error('umur') is-invalid @enderror" id="customerUmur"
+                        <label for="customerUmur" class="form-label">Tanggal Lahir</label>
+                        <input type="date" class="form-control @error('umur') is-invalid @enderror" id="customerUmur"
                             name="umur" value="{{ old('umur') }}" min="1">
                         @error('umur')
                             <div class="invalid-feedback d-flex align-items-center mt-1" style="display: block;">
@@ -110,7 +110,21 @@
 
     <div class="card">
         <div class="card-body">
+
             <div class="table-responsive">
+
+                   <form method="GET" action="{{ route('customer.index') }}" class="input-group mb-4">
+                        <input type="text" class="form-control" name="search"
+                            placeholder="Search by Name or No Hp..." value="{{ request('search') }}"
+                            autocomplete="off">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <a href="{{ route('customer.index') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    </form>
+
                 <table class="table align-middle">
                     <thead>
                         <tr>
@@ -118,12 +132,13 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Alamat</th>
-                            <th>Umur</th>
+                            <th>Usia</th>
                             <th>Gender</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
+
                         @foreach ($customers as $customer)
                             <tr data-id="{{ $customer->id }}" data-name="{{ $customer->name }}"
                                 data-email="{{ $customer->email }}" data-phone="{{ $customer->phone }}"

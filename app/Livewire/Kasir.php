@@ -148,6 +148,7 @@ class Kasir extends Component
                     'add_left'      => $this->resepData['add_left'] ?? null,
                     'pd_right'      => $this->resepData['pd_right'] ?? null,
                     'pd_left'       => $this->resepData['pd_left'] ?? null,
+                    'tanggal_pemeriksaan' => $this->resepData['tanggal_pemeriksaan'] ?? null,
                     'notes'         => $this->resepData['notes'] ?? null,
                 ]);
             }
