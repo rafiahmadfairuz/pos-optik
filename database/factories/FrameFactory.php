@@ -11,20 +11,44 @@ class FrameFactory extends Factory
 
     public function definition(): array
     {
-        $hargaBeli = $this->faker->numberBetween(100000, 400000);
-        $hargaJual = $this->faker->numberBetween($hargaBeli + 10000, $hargaBeli + 150000);
+        $merk = $this->faker->randomElement([
+            'Ray-Ban',
+            'Oakley',
+            'Gucci',
+            'Dior',
+            'Police',
+            'Levi’s'
+        ]);
+
+        $tipe = $this->faker->randomElement([
+            'Aviator',
+            'Wayfarer',
+            'Round',
+            'Rectangle',
+            'Cat Eye'
+        ]);
+
+        $warna = $this->faker->randomElement([
+            'Hitam',
+            'Cokelat',
+            'Silver',
+            'Gold',
+            'Transparan'
+        ]);
+
+        $hargaBeli = $this->faker->numberBetween(300000, 1000000);
+        $hargaJual = $hargaBeli + $this->faker->numberBetween(100000, 500000);
         $laba = $hargaJual - $hargaBeli;
 
         return [
             'sku' => strtoupper('FRM-' . $this->faker->unique()->bothify('??##')),
-            'merk' => ucfirst($this->faker->word()),
-            'tipe' => ucfirst($this->faker->word()),
-            'warna' => $this->faker->safeColorName(),
+            'merk' => $merk,
+            'tipe' => $tipe,
+            'warna' => $warna,
             'harga_beli' => $hargaBeli,
             'harga' => $hargaJual,
             'laba' => $laba,
-            'stok' => rand(1, 50),
-            'cabang_id' => null,
+            'stok' => $this->faker->numberBetween(10, 100), // stok awal gudang utama
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Models\Frame;
+use App\Models\ProdukCabang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -18,28 +19,52 @@ class FrameController extends Controller
         $user = Auth::user();
         $search = $request->input('search');
 
-        $query = Frame::query();
-
         if ($user->role === 'gudang_utama') {
-            $query->whereNull('cabang_id');
-        } else {
-            $query->where('cabang_id', session('cabang_id'));
-        }
+            // Gudang utama -> lihat stok master
+            $query = Frame::query();
 
-        // Filter search berdasarkan merk atau tipe
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('merk', 'like', "%{$search}%")
-                    ->orWhere('tipe', 'like', "%{$search}%");
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('merk', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%")
+                        ->orWhere('tipe', 'like', "%{$search}%");
+                });
+            }
+
+            $frame = $query->get();
+        } else {
+            // Cabang -> ambil stok dari produk_cabangs
+            $cabangId = session('cabang_id');
+
+            $query = ProdukCabang::where('cabang_id', $cabangId)
+                ->where('itemable_type', 'frame')
+                ->with('itemable');
+
+            if ($search) {
+                $query->whereHasMorph('itemable', [\App\Models\Frame::class], function ($q) use ($search) {
+                    $q->where('merk', 'like', "%{$search}%")
+                        ->orWhere('tipe', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            }
+
+            $frame = $query->get()->map(function ($stok) {
+                return (object) [
+                    'id' => $stok->itemable->id,
+                    'sku' => $stok->itemable->sku,
+                    'merk' => $stok->itemable->merk,
+                    'tipe' => $stok->itemable->tipe,
+                    'warna' => $stok->itemable->warna,
+                    'harga' => $stok->itemable->harga,
+                    'harga_beli' => $stok->itemable->harga_beli,
+                    'laba' => $stok->itemable->laba,
+                    'stok' => $stok->stok, // stok cabang
+                ];
             });
         }
 
-        $frame = $query->get();
-
         return view('Inventory.frame', compact('frame'));
     }
-
-
 
     /**
      * Store a newly created resource in storage.
@@ -47,9 +72,13 @@ class FrameController extends Controller
     public function store(Request $request)
     {
         try {
+            if (Auth::user()->role !== 'gudang_utama') {
+                return back()->with('error', 'Hanya gudang utama yang bisa menambahkan produk baru.');
+            }
+
             $validated = $request->validate([
                 'sku' => 'required|string|max:50|unique:frames,sku',
-                'merk' => 'required|string|max:50',
+                'merk' => 'required|string|max:100',
                 'tipe' => 'required|string|max:50',
                 'warna' => 'required|string|max:50',
                 'harga_beli' => 'required|numeric|min:0',
@@ -57,27 +86,16 @@ class FrameController extends Controller
                 'stok' => 'required|integer|min:0',
             ]);
 
-            // Hitung laba otomatis
             $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
-            Frame::create([
-                ...$validated,
-                'cabang_id' => session('cabang_id'),
-            ]);
+            Frame::create($validated);
 
             return redirect()->route('frame.index')->with('success', 'Frame berhasil ditambahkan.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Create frame validation failed: ' . $e->getMessage());
-
-            return back()->with('error', 'Validasi gagal: ' . $e->getMessage())->withInput();
         } catch (\Exception $e) {
             Log::error('Create frame failed: ' . $e->getMessage());
-
             return back()->with('error', 'Gagal menambahkan frame. ' . $e->getMessage())->withInput();
         }
     }
-
-
 
     /**
      * Update the specified resource in storage.
@@ -85,54 +103,48 @@ class FrameController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            $rules = [
-                'sku' => 'required|string|max:50|unique:frames,sku,' . $id,
-                'merk' => 'required|string|max:50',
-                'tipe' => 'required|string|max:50',
-                'warna' => 'required|string|max:50',
-                'harga' => 'required|numeric|min:0',
-                'stok' => 'required|integer|min:0',
-            ];
-
-            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
-                $rules['harga_beli'] = 'required|numeric|min:0';
-            }
-
-            $validated = $request->validate($rules);
-
             $frame = Frame::findOrFail($id);
 
-            $frame->sku = $validated['sku'];
-            $frame->merk = $validated['merk'];
-            $frame->tipe = $validated['tipe'];
-            $frame->warna = $validated['warna'];
-            $frame->harga = $validated['harga'];
-            $frame->stok = $validated['stok'];
-            $frame->cabang_id = session('cabang_id');
+            if (Auth::user()->role === 'gudang_utama') {
+                // Gudang utama update master
+                $validated = $request->validate([
+                    'sku' => 'required|string|max:50|unique:frames,sku,' . $id,
+                    'merk' => 'required|string|max:100',
+                    'tipe' => 'required|string|max:50',
+                    'warna' => 'required|string|max:50',
+                    'harga_beli' => 'required|numeric|min:0',
+                    'harga' => 'required|numeric|min:0',
+                    'stok' => 'required|integer|min:0',
+                ]);
 
-            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
-                $frame->harga_beli = $validated['harga_beli'];
-                $frame->laba = $validated['harga'] - $validated['harga_beli'];
+                $frame->update([
+                    ...$validated,
+                    'laba' => $validated['harga'] - $validated['harga_beli'],
+                ]);
             } else {
-                $frame->laba = $validated['harga'] - $frame->harga_beli;
+                // Cabang hanya update stok di produk_cabangs
+                $validated = $request->validate([
+                    'stok' => 'required|integer|min:0',
+                ]);
+
+                $cabangId = session('cabang_id');
+
+                $stokCabang = ProdukCabang::firstOrNew([
+                    'itemable_id' => $frame->id,
+                    'itemable_type' => Frame::class,
+                    'cabang_id' => $cabangId,
+                ]);
+
+                $stokCabang->qty = $validated['stok'];
+                $stokCabang->save();
             }
 
-            $frame->save();
-
             return back()->with('success', 'Frame berhasil diperbarui!');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Update frame validation failed: ' . $e->getMessage());
-            return back()->with('error', 'Validasi gagal: ' . $e->getMessage())->withInput();
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Update frame failed - not found: ' . $e->getMessage());
-            return back()->with('error', 'Frame tidak ditemukan.')->withInput();
         } catch (\Exception $e) {
             Log::error('Update frame failed: ' . $e->getMessage());
             return back()->with('error', 'Gagal memperbarui frame.')->withInput();
         }
     }
-
-
 
     /**
      * Remove the specified resource from storage.
@@ -140,17 +152,22 @@ class FrameController extends Controller
     public function destroy(string $id)
     {
         try {
+            if (Auth::user()->role !== 'gudang_utama') {
+                return back()->with('error', 'Hanya gudang utama yang bisa menghapus produk.');
+            }
+
             $frame = Frame::findOrFail($id);
+
+            // Hapus stok cabang terkait
+            ProdukCabang::where('itemable_id', $id)
+                ->where('itemable_type', 'frame')
+                ->delete();
+
             $frame->delete();
 
             return back()->with('success', 'Frame berhasil dihapus.');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Delete frame failed - not found: ' . $e->getMessage());
-
-            return back()->with('error', 'Frame tidak ditemukan.');
         } catch (\Exception $e) {
             Log::error('Delete frame failed: ' . $e->getMessage());
-
             return back()->with('error', 'Gagal menghapus frame.');
         }
     }

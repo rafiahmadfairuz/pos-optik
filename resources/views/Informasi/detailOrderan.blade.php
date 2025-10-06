@@ -138,7 +138,7 @@
                                         <td>
                                             @php
                                                 $type = class_basename($item->itemable_type ?? ''); // Safely get class_basename
-                                                $merk = $item->itemable->merk ?? 'Merk Tidak Diketahui';
+                                                $merk = $item->itemable->merk ?? 'Merk Tidak Diketahui / Barang Telah Dihapus';
                                                 $tipeProduk = $item->itemable->type ?? null;
                                             @endphp
 

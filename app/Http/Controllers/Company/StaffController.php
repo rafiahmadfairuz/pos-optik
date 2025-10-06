@@ -36,13 +36,12 @@ class StaffController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:50|regex:/^[a-zA-Z\s]+$/',
-                'email' => 'required|email:rfc|unique:staff,email|max:255',
+                'name' => 'required|string|max:50',
+                'email' => 'required|unique:staff,email|max:255',
                 'password' => 'required|string|min:4',
                 'role' => 'required|in:gudang_cabang,gudang_utama,cabang',
                 'cabang' => in_array($request->role, ['cabang', 'gudang_cabang']) ? 'required|exists:cabangs,id' : 'nullable',
             ]);
-
             $newDataStaff = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -58,6 +57,8 @@ class StaffController extends Controller
 
             return back()->with('success', 'Staff berhasil ditambahkan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
+dd($request->all());
+
             Log::error('Create staff failed (validation): ' . $e->getMessage());
             return back()->with('error', 'Validasi gagal.')->withInput();
         } catch (\Exception $e) {

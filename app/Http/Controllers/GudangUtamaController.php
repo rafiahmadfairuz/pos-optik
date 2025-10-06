@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transfer;
+use App\Models\ProdukCabang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class GudangUtamaController extends Controller
 {
@@ -49,46 +51,46 @@ class GudangUtamaController extends Controller
         try {
             DB::transaction(function () use ($transfer) {
                 foreach ($transfer->items as $item) {
-                    $modelClass = $item->itemable_type;
-                    $model = new $modelClass;
-                    $columns = Schema::getColumnListing($model->getTable());
-
-                    $matchableFields = ['sku', 'merk', 'tipe', 'warna', 'desain', 'nama', 'jenis', 'sph', 'cyl', 'add'];
-
-                    $queryCabang = $modelClass::query();
-                    foreach ($matchableFields as $field) {
-                        if (in_array($field, $columns) && isset($item->itemable->$field)) {
-                            $queryCabang->where($field, $item->itemable->$field);
-                        }
+                    $aliasType = $item->itemable_type; // 🧠 alias morphMap ('frame', 'accessory', dst)
+                    $modelClass = Relation::getMorphedModel($aliasType); // dapetin class asli
+                    if (!$modelClass) {
+                        throw new \Exception("Tipe produk tidak dikenali: {$aliasType}");
                     }
-                    $queryCabang->where('cabang_id', $transfer->cabang_id);
-                    $produkCabang = $queryCabang->first();
 
-                    $queryGudang = $modelClass::query();
-                    foreach ($matchableFields as $field) {
-                        if (in_array($field, $columns) && isset($item->itemable->$field)) {
-                            $queryGudang->where($field, $item->itemable->$field);
-                        }
+                    // 🔍 Ambil produk dari gudang utama
+                    $produkGudang = $modelClass::find($item->itemable_id);
+                    if (!$produkGudang) {
+                        throw new \Exception("Produk tidak ditemukan di gudang utama.");
                     }
-                    $queryGudang->whereNull('cabang_id');
-                    $produkGudang = $queryGudang->first();
 
-                    if (!$produkCabang || !$produkGudang) {
-                        throw new \Exception("Produk tidak ditemukan di cabang atau gudang.");
+                    // 🔍 Ambil stok di cabang dari tabel produk_cabangs
+                    $produkCabang = ProdukCabang::where('cabang_id', $transfer->cabang_id)
+                        ->where('itemable_id', $item->itemable_id)
+                        ->where('itemable_type', $aliasType)
+                        ->first();
+
+                    if (!$produkCabang) {
+                        throw new \Exception("Produk tidak ditemukan di cabang {$transfer->cabang_id}.");
                     }
 
                     $qty = $item->quantity;
+
+                    // 🚫 Validasi stok cabang cukup
+                    if ($produkCabang->stok < $qty) {
+                        throw new \Exception("Stok cabang tidak cukup untuk retur produk: " . ($produkGudang->sku ?? $produkGudang->merk ?? ''));
+                    }
+
                     $stokCabangSebelum = $produkCabang->stok;
                     $stokGudangSebelum = $produkGudang->stok;
 
-                    if ($stokCabangSebelum < $qty) {
-                        throw new \Exception("Stok cabang tidak cukup untuk retur.");
-                    }
-
+                    // 🔻 Kurangi stok di cabang
                     $produkCabang->decrement('stok', $qty);
+
+                    // 🔺 Tambah stok di gudang utama
                     $produkGudang->increment('stok', $qty);
 
-                    Log::info("=== RETUR Transfer ID {$transfer->id} - Produk: {$item->itemable->sku} ===");
+                    // 🧾 Logging detail
+                    Log::info("=== RETUR Transfer ID {$transfer->id} - Produk: {$produkGudang->sku} ===");
                     Log::info("Cabang:");
                     Log::info("  - cabang_id: {$produkCabang->cabang_id}");
                     Log::info("  - stok sebelum: {$stokCabangSebelum}");
@@ -102,12 +104,14 @@ class GudangUtamaController extends Controller
                     Log::info("Produk sudah selesai diretur.\n");
                 }
 
+                // ✅ Tandai retur
                 $transfer->update(['retur' => true]);
                 Log::info("=== RETUR BERHASIL - Transfer #{$transfer->id} ditandai retur ===");
             });
 
             return back()->with('success', 'Transfer berhasil diretur.');
         } catch (\Exception $e) {
+            Log::error("[RETUR GAGAL] {$e->getMessage()}");
             return back()->with('error', 'Retur gagal: ' . $e->getMessage());
         }
     }
@@ -117,96 +121,86 @@ class GudangUtamaController extends Controller
         $validated = $request->validate([
             'target_cabang_id' => 'required|integer|exists:cabangs,id',
         ]);
+
         $targetCabangId = (int) $validated['target_cabang_id'];
 
+        // 🔍 Ambil transfer utama dan semua item
         $transfer = Transfer::with(['items.itemable'])->findOrFail($id);
         $sourceCabangId = (int) $transfer->cabang_id;
 
         if ($targetCabangId === $sourceCabangId) {
-            return back()->with('warning', 'Cabang tujuan sama dengan cabang saat ini.');
+            return back()->with('warning', 'Cabang tujuan sama dengan cabang sumber.');
         }
 
         try {
             DB::transaction(function () use ($transfer, $sourceCabangId, $targetCabangId) {
-
                 foreach ($transfer->items as $ti) {
-                    $modelClass = $ti->itemable_type;   // contoh: App\Models\Frame / Lensa / dst
-                    $template   = $ti->itemable;        // produk di GUDANG (dipakai sbg template atribut)
+                    $aliasType = $ti->itemable_type; // contoh: 'frame', 'softlens', 'accessory'
+                    $modelClass = Relation::getMorphedModel($aliasType); // ambil class aslinya
+                    if (!$modelClass) {
+                        throw new \Exception("Tipe produk tidak dikenali: {$aliasType}");
+                    }
 
+                    // 🔍 Produk acuan (template) di gudang utama
+                    $template = $modelClass::find($ti->itemable_id);
                     if (!$template) {
-                        throw new \Exception("Produk acuan (gudang) tidak ditemukan untuk item #{$ti->id}.");
+                        throw new \Exception("Produk acuan tidak ditemukan untuk item #{$ti->id}.");
                     }
 
-                    $model   = new $modelClass;
-                    $columns = Schema::getColumnListing($model->getTable());
-                    $match   = ['sku', 'merk', 'tipe', 'warna', 'desain', 'nama', 'jenis', 'sph', 'cyl', 'add'];
+                    // 🔍 Ambil stok di cabang sumber
+                    $produkSource = ProdukCabang::where('itemable_id', $ti->itemable_id)
+                        ->where('itemable_type', $aliasType)
+                        ->where('cabang_id', $sourceCabangId)
+                        ->first();
 
-                    // 1) Cari produk di CABANG SUMBER (harus ada, karena pernah ditransfer)
-                    $qSource = $modelClass::query()->where('cabang_id', $sourceCabangId);
-                    foreach ($match as $col) {
-                        if (in_array($col, $columns) && isset($template->$col)) {
-                            $qSource->where($col, $template->$col);
-                        }
-                    }
-                    $produkSource = $qSource->first();
                     if (!$produkSource) {
-                        throw new \Exception("Produk tidak ditemukan di cabang sumber (#{$sourceCabangId}) untuk item #{$ti->id}.");
+                        throw new \Exception("Produk tidak ditemukan di cabang sumber (#{$sourceCabangId}).");
                     }
 
                     $qty = (int) $ti->quantity;
-                    if ((int)$produkSource->stok < $qty) {
-                        $name = $template->nama ?? $template->merk ?? $template->sku ?? 'Produk';
-                        throw new \Exception("Stok cabang sumber tidak cukup untuk {$name} (butuh {$qty}, ada {$produkSource->stok}).");
+
+                    if ($produkSource->stok < $qty) {
+                        $nama = $template->nama ?? $template->merk ?? $template->sku ?? 'Produk';
+                        throw new \Exception("Stok cabang sumber tidak cukup untuk {$nama} (butuh {$qty}, ada {$produkSource->stok}).");
                     }
 
-                    // Kurangi stok cabang sumber
+                    // 🔻 Kurangi stok di cabang sumber
                     $produkSource->decrement('stok', $qty);
 
-                    // 2) Tambahkan ke CABANG TUJUAN (buat baru jika belum ada)
-                    $qTarget = $modelClass::query()->where('cabang_id', $targetCabangId);
-                    foreach ($match as $col) {
-                        if (in_array($col, $columns) && isset($template->$col)) {
-                            $qTarget->where($col, $template->$col);
-                        }
-                    }
-                    $produkTarget = $qTarget->first();
+                    // 🔍 Ambil stok di cabang tujuan
+                    $produkTarget = ProdukCabang::where('itemable_id', $ti->itemable_id)
+                        ->where('itemable_type', $aliasType)
+                        ->where('cabang_id', $targetCabangId)
+                        ->first();
 
                     if ($produkTarget) {
+                        // 🔁 Produk sudah ada → tambahkan stok
                         $produkTarget->increment('stok', $qty);
                     } else {
-                        // clone field dari template (produk gudang) → cabang tujuan
-                        $dataBaru = [
-                            'cabang_id' => $targetCabangId,
-                            'stok'      => $qty,
-                        ];
-
-                        $copyable = array_diff(
-                            $columns,
-                            ['id', 'created_at', 'updated_at', 'stok', 'cabang_id', 'status_pesanan', 'estimasi_selesai_hari']
-                        );
-                        foreach ($copyable as $col) {
-                            if (isset($template->$col)) {
-                                $dataBaru[$col] = $template->$col;
-                            }
-                        }
-
-                        $modelClass::create($dataBaru);
+                        // 🆕 Belum ada → buat record baru
+                        ProdukCabang::create([
+                            'itemable_id'   => $ti->itemable_id,
+                            'itemable_type' => $aliasType,
+                            'cabang_id'     => $targetCabangId,
+                            'stok'          => $qty,
+                        ]);
                     }
 
-                    // Logging ringkas
+                    // 🧾 Logging detail
                     $skuLog = $template->sku ?? ($template->nama ?? 'unknown');
                     Log::info("[CABANG→CABANG] Transfer #{$transfer->kode} | Item #{$ti->id} ({$skuLog}) | {$sourceCabangId} -> {$targetCabangId} | qty {$qty}");
                 }
 
-                // 3) Update header transfer (tanpa ubah struktur DB)
+                // ✅ Update header transfer (pindah cabang)
                 $transfer->update([
                     'cabang_id' => $targetCabangId,
-                    'tanggal'   => now()->toDateString(), // kolom bertipe DATE
+                    'tanggal'   => now()->toDateString(),
                 ]);
             });
 
-            return back()->with('success', 'Transfer antar cabang berhasil diproses & data header diperbarui.');
+            return back()->with('success', 'Transfer antar cabang berhasil diproses.');
         } catch (\Throwable $e) {
+            Log::error("[TRANSFER CABANG GAGAL] {$e->getMessage()}");
             return back()->with('error', 'Gagal memproses transfer: ' . $e->getMessage());
         }
     }

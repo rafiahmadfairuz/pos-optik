@@ -16,7 +16,7 @@ class OrderItemsFactory extends Factory
 
         return [
             'order_id' => \App\Models\Orderan::factory(),
-            'itemable_id' => 1, // override manual
+            'itemable_id' => 1, 
             'itemable_type' => 'frame',
             'quantity' => $quantity,
             'price' => $price,

@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('accessories', function (Blueprint $table) {
+        Schema::create('produk_cabangs', function (Blueprint $table) {
             $table->id();
-            $table->string('sku');
-            $table->string('nama', 100);
-            $table->string('jenis', 50);
-            $table->bigInteger('harga');
-            $table->bigInteger('harga_beli');
-            $table->bigInteger('laba');
-            $table->unsignedInteger('stok');
+            $table->morphs('itemable');
+            $table->foreignId('cabang_id')->references('id')->on('cabangs')->onDelete('cascade');
+            $table->integer('stok');
+            // $table->bigInteger('harga_jual')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accessories');
+        Schema::dropIfExists('produk_cabangs');
     }
 };

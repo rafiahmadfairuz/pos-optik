@@ -34,7 +34,6 @@ class OrderItemSeeder extends Seeder
                 $type = array_rand($groups);
                 $collection = $groups[$type];
 
-                // Pastikan collection tidak kosong
                 if ($collection->isEmpty()) {
                     continue; // Lewati kalau kosong
                 }

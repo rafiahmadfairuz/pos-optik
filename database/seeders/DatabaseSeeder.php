@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ProdukCabang;
 use App\Models\Supplier;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UserSeeder;

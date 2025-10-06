@@ -36,6 +36,7 @@
                                         <td>
                                             <select wire:model.lazy="left_sph_d"
                                                 class="form-control @error('left_sph_d') is-invalid @enderror">
+                                                <option value="0.00">0.00</option>
                                                 @for ($i = -20; $i <= 20; $i += 0.25)
                                                     <option value="{{ number_format($i, 2) }}">
                                                         {{ number_format($i, 2) }}</option>
@@ -85,6 +86,8 @@
                                         <td>
                                             <select wire:model.lazy="right_sph_d"
                                                 class="form-control @error('right_sph_d') is-invalid @enderror">
+                                                <option value="0.00">0.00</option>
+
                                                 @for ($i = -20; $i <= 20; $i += 0.25)
                                                     <option value="{{ number_format($i, 2) }}">
                                                         {{ number_format($i, 2) }}</option>
@@ -134,13 +137,19 @@
                                     <!-- ROW ADD -->
                                     <tr>
                                         <td>ADD</td>
+
                                         <!-- LEFT -->
                                         <td colspan="4">
                                             <select wire:model.lazy="add_left"
                                                 class="form-control @error('add_left') is-invalid @enderror">
+                                                {{-- Default option 0.00 --}}
+                                                <option value="0.00" selected>0.00</option>
+
+                                                {{-- Loop dari 0.75 s/d 3.50 --}}
                                                 @for ($i = 0.75; $i <= 3.5; $i += 0.25)
                                                     <option value="{{ number_format($i, 2) }}">
-                                                        {{ number_format($i, 2) }}</option>
+                                                        {{ number_format($i, 2) }}
+                                                    </option>
                                                 @endfor
                                             </select>
                                             @error('add_left')
@@ -152,9 +161,14 @@
                                         <td colspan="4">
                                             <select wire:model.lazy="add_right"
                                                 class="form-control @error('add_right') is-invalid @enderror">
+                                                {{-- Default option 0.00 --}}
+                                                <option value="0.00" selected>0.00</option>
+
+                                                {{-- Loop dari 0.75 s/d 3.50 --}}
                                                 @for ($i = 0.75; $i <= 3.5; $i += 0.25)
                                                     <option value="{{ number_format($i, 2) }}">
-                                                        {{ number_format($i, 2) }}</option>
+                                                        {{ number_format($i, 2) }}
+                                                    </option>
                                                 @endfor
                                             </select>
                                             @error('add_right')
@@ -162,6 +176,7 @@
                                             @enderror
                                         </td>
                                     </tr>
+
 
                                     <!-- ROW PD -->
                                     <tr>
@@ -194,7 +209,8 @@
 
                     <div class="col-md-12">
                         <label class="form-label"><i class="bi bi-pencil-square me-1"></i>Tanggal Pemeriksaan</label>
-                        <input type="date" wire:model.lazy="tanggal_pemeriksaan" name="tanggal_pemeriksaan" class="form-control @error('tanggal_pemeriksaan') is-invalid @enderror">
+                        <input type="date" wire:model.lazy="tanggal_pemeriksaan" name="tanggal_pemeriksaan"
+                            class="form-control @error('tanggal_pemeriksaan') is-invalid @enderror">
                     </div>
                     @error('tanggal_pemeriksaan')
                         <span class="text-danger">{{ $message }}</span>

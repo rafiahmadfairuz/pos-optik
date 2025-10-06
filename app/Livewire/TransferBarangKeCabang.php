@@ -11,6 +11,7 @@ use App\Models\Accessories;
 use App\Models\LensaFinish;
 use App\Models\LensaKhusus;
 use Illuminate\Support\Str;
+use App\Models\ProdukCabang;
 use App\Models\TransferItem;
 use Livewire\WithPagination;
 use Illuminate\Support\Collection;
@@ -125,134 +126,175 @@ class TransferBarangKeCabang extends Component
 
     protected function queryFrames()
     {
-        return Frame::where(function ($q) {
+        $isGudangUtama = Auth::user()->role === 'gudang_utama';
+        $cabangId = session('cabang_id');
+
+        $frames = Frame::where(function ($q) {
             $q->where('merk', 'like', "%{$this->search}%")
                 ->orWhere('tipe', 'like', "%{$this->search}%")
                 ->orWhere('warna', 'like', "%{$this->search}%");
-        })
-            ->whereNull('cabang_id')
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'    => $item->id,
-                    'name'  => $item->merk,
-                    'price' => $item->harga,
-                    'laba'  => $item->laba,
-                    'stock' => $item->stok,
-                    'type'  => 'frame',
-                ]
-            ));
+        })->get();
+
+        return $frames->map(function ($item) use ($isGudangUtama, $cabangId) {
+            $stok = $isGudangUtama
+                ? $item->stok
+                : (ProdukCabang::where('itemable_id', $item->id)
+                    ->where('itemable_type', 'frame')
+                    ->where('cabang_id', $cabangId)
+                    ->value('stok') ?? 0);
+
+            return array_merge($item->toArray(), [
+                'id'    => $item->id,
+                'name'  => $item->merk,
+                'price' => $item->harga,
+                'laba'  => $item->laba,
+                'stock' => $stok,
+                'type'  => 'frame',
+            ]);
+        });
     }
 
     protected function queryLensaFinish()
     {
-        return LensaFinish::where(function ($q) {
+        $isGudangUtama = Auth::user()->role === 'gudang_utama';
+        $cabangId = session('cabang_id');
+
+        $items = LensaFinish::where(function ($q) {
             $q->where('merk', 'like', "%{$this->search}%")
                 ->orWhere('desain', 'like', "%{$this->search}%")
                 ->orWhere('tipe', 'like', "%{$this->search}%")
                 ->orWhere('sph', 'like', "%{$this->search}%")
                 ->orWhere('cyl', 'like', "%{$this->search}%")
                 ->orWhere('add', 'like', "%{$this->search}%");
-        })
-            ->whereNull('cabang_id')
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'            => $item->id,
-                    'name'          => $item->merk,
-                    'display_name'  => trim(
-                        "{$item->merk} " .
-                            ($item->tipe ? "Tipe:{$item->tipe} " : "") .
-                            ($item->desain ? "Desain:{$item->desain} " : "") .
-                            ($item->sph ? "SPH:{$item->sph} " : "") .
-                            ($item->cyl ? "CYL:{$item->cyl} " : "") .
-                            ($item->add ? "ADD:{$item->add}" : "")
-                    ),
-                    'price'         => $item->harga,
-                    'laba'          => $item->laba,
-                    'stock'         => $item->stok,
-                    'type'          => 'lensa_finish',
-                ]
-            ));
+        })->get();
+
+        return $items->map(function ($item) use ($isGudangUtama, $cabangId) {
+            $stok = $isGudangUtama
+                ? $item->stok
+                : (ProdukCabang::where('itemable_id', $item->id)
+                    ->where('itemable_type', 'lensa_finish')
+                    ->where('cabang_id', $cabangId)
+                    ->value('stok') ?? 0);
+
+            return array_merge($item->toArray(), [
+                'id'            => $item->id,
+                'name'          => $item->merk,
+                'display_name'  => trim(
+                    "{$item->merk} " .
+                        ($item->tipe ? "Tipe:{$item->tipe} " : "") .
+                        ($item->desain ? "Desain:{$item->desain} " : "") .
+                        ($item->sph ? "SPH:{$item->sph} " : "") .
+                        ($item->cyl ? "CYL:{$item->cyl} " : "") .
+                        ($item->add ? "ADD:{$item->add}" : "")
+                ),
+                'price'         => $item->harga,
+                'laba'          => $item->laba,
+                'stock'         => $stok,
+                'type'          => 'lensa_finish',
+            ]);
+        });
     }
 
     protected function queryLensaKhusus()
     {
-        return LensaKhusus::where(function ($q) {
+        $isGudangUtama = Auth::user()->role === 'gudang_utama';
+        $cabangId = session('cabang_id');
+
+        $items = LensaKhusus::where(function ($q) {
             $q->where('merk', 'like', "%{$this->search}%")
                 ->orWhere('desain', 'like', "%{$this->search}%")
                 ->orWhere('tipe', 'like', "%{$this->search}%")
                 ->orWhere('sph', 'like', "%{$this->search}%")
                 ->orWhere('cyl', 'like', "%{$this->search}%")
                 ->orWhere('add', 'like', "%{$this->search}%");
-        })
-            ->whereNull('cabang_id')
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'            => $item->id,
-                    'name'          => $item->merk,
-                    'display_name'  => trim(
-                        "{$item->merk} " .
-                            ($item->tipe ? "Tipe:{$item->tipe} " : "") .
-                            ($item->desain ? "Desain:{$item->desain} " : "") .
-                            ($item->sph ? "SPH:{$item->sph} " : "") .
-                            ($item->cyl ? "CYL:{$item->cyl} " : "") .
-                            ($item->add ? "ADD:{$item->add}" : "")
-                    ),
-                    'price'         => $item->harga,
-                    'laba'          => $item->laba,
-                    'stock'         => $item->stok,
-                    'type'          => 'lensa_khusus',
-                ]
-            ));
+        })->get();
+
+        return $items->map(function ($item) use ($isGudangUtama, $cabangId) {
+            $stok = $isGudangUtama
+                ? $item->stok
+                : (ProdukCabang::where('itemable_id', $item->id)
+                    ->where('itemable_type', 'lensa_khusus')
+                    ->where('cabang_id', $cabangId)
+                    ->value('stok') ?? 0);
+
+            return array_merge($item->toArray(), [
+                'id'            => $item->id,
+                'name'          => $item->merk,
+                'display_name'  => trim(
+                    "{$item->merk} " .
+                        ($item->tipe ? "Tipe:{$item->tipe} " : "") .
+                        ($item->desain ? "Desain:{$item->desain} " : "") .
+                        ($item->sph ? "SPH:{$item->sph} " : "") .
+                        ($item->cyl ? "CYL:{$item->cyl} " : "") .
+                        ($item->add ? "ADD:{$item->add}" : "")
+                ),
+                'price'         => $item->harga,
+                'laba'          => $item->laba,
+                'stock'         => $stok,
+                'type'          => 'lensa_khusus',
+            ]);
+        });
     }
 
     protected function querySoftlens()
     {
-        return Softlen::where(function ($q) {
+        $isGudangUtama = Auth::user()->role === 'gudang_utama';
+        $cabangId = session('cabang_id');
+
+        $items = Softlen::where(function ($q) {
             $q->where('merk', 'like', "%{$this->search}%")
                 ->orWhere('tipe', 'like', "%{$this->search}%")
                 ->orWhere('warna', 'like', "%{$this->search}%");
-        })
-            ->whereNull('cabang_id')
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'    => $item->id,
-                    'name'  => $item->merk,
-                    'price' => $item->harga,
-                    'laba'  => $item->laba,
-                    'stock' => $item->stok,
-                    'type'  => 'softlens',
-                ]
-            ));
+        })->get();
+
+        return $items->map(function ($item) use ($isGudangUtama, $cabangId) {
+            $stok = $isGudangUtama
+                ? $item->stok
+                : (ProdukCabang::where('itemable_id', $item->id)
+                    ->where('itemable_type', 'softlens')
+                    ->where('cabang_id', $cabangId)
+                    ->value('stok') ?? 0);
+
+            return array_merge($item->toArray(), [
+                'id'    => $item->id,
+                'name'  => $item->merk,
+                'price' => $item->harga,
+                'laba'  => $item->laba,
+                'stock' => $stok,
+                'type'  => 'softlens',
+            ]);
+        });
     }
 
     protected function queryAccessories()
     {
-        return Accessories::where(function ($q) {
+        $isGudangUtama = Auth::user()->role === 'gudang_utama';
+        $cabangId = session('cabang_id');
+
+        $items = Accessories::where(function ($q) {
             $q->where('nama', 'like', "%{$this->search}%")
                 ->orWhere('jenis', 'like', "%{$this->search}%");
-        })
-            ->whereNull('cabang_id')
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'    => $item->id,
-                    'name'  => $item->nama,
-                    'price' => $item->harga,
-                    'laba'  => $item->laba,
-                    'stock' => $item->stok,
-                    'type'  => 'accessory',
-                ]
-            ));
+        })->get();
+
+        return $items->map(function ($item) use ($isGudangUtama, $cabangId) {
+            $stok = $isGudangUtama
+                ? $item->stok
+                : (ProdukCabang::where('itemable_id', $item->id)
+                    ->where('itemable_type', 'accessory')
+                    ->where('cabang_id', $cabangId)
+                    ->value('stok') ?? 0);
+
+            return array_merge($item->toArray(), [
+                'id'    => $item->id,
+                'name'  => $item->nama,
+                'price' => $item->harga,
+                'laba'  => $item->laba,
+                'stock' => $stok,
+                'type'  => 'accessory',
+            ]);
+        });
     }
+
 
 
     protected function paginateCollection(Collection $items, $perPage, $page = null, $options = [])
@@ -285,7 +327,6 @@ class TransferBarangKeCabang extends Component
             $this->validate([
                 'selectedCabangId' => 'required|exists:cabangs,id',
             ]);
-            logger()->info('[TRANSFER] Validasi berhasil');
 
             DB::beginTransaction();
             logger()->info('[TRANSFER] Transaksi dimulai');
@@ -296,17 +337,15 @@ class TransferBarangKeCabang extends Component
                 'kode' => $this->kodeTransfer,
                 'retur' => false,
             ]);
-            logger()->info('[TRANSFER] Transfer baru dibuat', ['kode' => $transfer->kode]);
 
             foreach ($this->cart as $item) {
-                logger()->info('[TRANSFER] Memproses item', $item);
-
                 $modelClass = $this->resolveModelClass($item['type']);
                 if (!$modelClass) {
                     throw new \Exception('Tipe produk tidak valid.');
                 }
 
-                $produk = $modelClass::where('id', $item['id'])->whereNull('cabang_id')->first();
+                // 🔹 Ambil produk dari gudang utama (tanpa cabang_id)
+                $produk = $modelClass::find($item['id']);
                 if (!$produk) {
                     throw new \Exception('Produk tidak ditemukan di gudang utama.');
                 }
@@ -315,54 +354,46 @@ class TransferBarangKeCabang extends Component
                     throw new \Exception('Stok tidak cukup untuk produk: ' . ($produk->nama ?? $produk->merk ?? ''));
                 }
 
+                // 🔻 Kurangi stok di gudang utama
                 $produk->decrement('stok', $item['quantity']);
 
-                $columns = Schema::getColumnListing((new $modelClass)->getTable());
+                // 🔹 Cek stok cabang di produk_cabangs
+                $produkCabang = ProdukCabang::where('cabang_id', $this->selectedCabangId)
+                    ->where('itemable_id', $produk->id)
+                    ->where('itemable_type', $item['type'])
+                    ->first();
 
-                $query = $modelClass::query();
-
-                $cekKolom = ['sku', 'merk', 'tipe', 'warna', 'desain', 'nama', 'jenis', 'sph', 'cyl', 'add'];
-
-                foreach ($cekKolom as $kolom) {
-                    if (in_array($kolom, $columns) && isset($produk->$kolom)) {
-                        $query->where($kolom, $produk->$kolom);
-                    }
-                }
-
-                $query->where('cabang_id', $this->selectedCabangId);
-
-                $existing = $query->first();
-
-                if ($existing) {
-                    $existing->increment('stok', $item['quantity']);
+                if ($produkCabang) {
+                    $produkCabang->increment('stok', $item['quantity']);
+                    logger()->info('[TRANSFER] Tambah stok di cabang', [
+                        'produk' => $produk->sku ?? $produk->merk,
+                        'stok_baru' => $produkCabang->stok,
+                    ]);
                 } else {
-                    $data = [
-                        'stok' => $item['quantity'],
+                    ProdukCabang::create([
                         'cabang_id' => $this->selectedCabangId,
-                    ];
-
-                    $kolomIsi = array_diff($columns, ['id', 'created_at', 'updated_at', 'stok', 'cabang_id', 'status_pesanan', 'estimasi_selesai_hari']);
-
-                    foreach ($kolomIsi as $field) {
-                        if (isset($produk->$field)) {
-                            $data[$field] = $produk->$field;
-                        }
-                    }
-
-                    $modelClass::create($data);
+                        'itemable_id' => $produk->id,
+                        'itemable_type' => $item['type'],
+                        'stok' => $item['quantity'],
+                    ]);
+                    logger()->info('[TRANSFER] Produk baru dibuat di cabang', [
+                        'produk' => $produk->sku ?? $produk->merk,
+                        'qty' => $item['quantity'],
+                    ]);
                 }
 
+                // 🔹 Simpan item transfer
                 TransferItem::create([
                     'transfer_id' => $transfer->id,
                     'itemable_id' => $produk->id,
-                    'itemable_type' => $modelClass,
+                    'itemable_type' => $item['type'], // alias morphMap
                     'quantity' => $item['quantity'],
                     'price' => $produk->harga,
                 ]);
             }
 
             DB::commit();
-            session()->flash('success', 'Transfer berhasil');
+            session()->flash('success', 'Transfer berhasil.');
             $this->reset(['cart']);
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -372,10 +403,6 @@ class TransferBarangKeCabang extends Component
                 'line' => $e->getLine(),
             ]);
             session()->flash('error', $e->getMessage());
-        }
-
-        if (Auth::user()->role === 'admin') {
-            return redirect()->route('frame.index');
         }
 
         return redirect()->route('frame.index');

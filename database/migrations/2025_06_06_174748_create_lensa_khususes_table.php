@@ -26,7 +26,6 @@ return new class extends Migration
             $table->unsignedInteger('stok');
             $table->unsignedTinyInteger('estimasi_selesai_hari')->nullable();
             $table->enum('status_pesanan', ['menunggu', 'proses', 'selesai'])->default('menunggu');
-            $table->foreignId('cabang_id')->nullable()->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();
         });
     }

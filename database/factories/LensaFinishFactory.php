@@ -11,23 +11,45 @@ class LensaFinishFactory extends Factory
 
     public function definition(): array
     {
-        $hargaBeli = $this->faker->numberBetween(100000, 500000);
-        $hargaJual = $this->faker->numberBetween($hargaBeli + 10000, $hargaBeli + 150000);
+        $merk = $this->faker->randomElement([
+            'Essilor',
+            'Hoya',
+            'Zeiss',
+            'Kodak Lens',
+            'Nikon Lens'
+        ]);
+
+        $desain = $this->faker->randomElement([
+            'Single Vision',
+            'Progressive',
+            'Bifocal',
+            'Photochromic',
+            'Blue Light Filter'
+        ]);
+
+        $tipe = $this->faker->randomElement([
+            'Clear',
+            'Photochromic',
+            'Polarized',
+            'Hi-Index'
+        ]);
+
+        $hargaBeli = $this->faker->numberBetween(200000, 800000);
+        $hargaJual = $hargaBeli + $this->faker->numberBetween(100000, 500000);
         $laba = $hargaJual - $hargaBeli;
 
         return [
             'sku' => strtoupper('LEN-' . $this->faker->unique()->bothify('??##')),
-            'merk' => ucfirst($this->faker->word()),
-            'desain' => ucfirst($this->faker->word()),
-            'tipe' => ucfirst($this->faker->word()),
+            'merk' => $merk,
+            'desain' => $desain,
+            'tipe' => $tipe,
             'sph' => $this->faker->randomFloat(2, -10, 10),
-            'cyl' => $this->faker->randomFloat(2, -5, 5),
+            'cyl' => $this->faker->randomFloat(2, -6, 6),
             'add' => $this->faker->randomFloat(2, 0, 3),
             'harga_beli' => $hargaBeli,
             'harga' => $hargaJual,
             'laba' => $laba,
-            'stok' => rand(1, 50),
-            'cabang_id' => \App\Models\Cabang::inRandomOrder()->first()->id,
+            'stok' => $this->faker->numberBetween(5, 50), // stok gudang utama
         ];
     }
 }

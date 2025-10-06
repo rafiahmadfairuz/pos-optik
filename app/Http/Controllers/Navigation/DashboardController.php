@@ -16,17 +16,25 @@ class DashboardController extends Controller
     {
         $cabangId = session('cabang_id');
 
-        $leastStockProducts = DB::select("
-        SELECT id, merk AS nama_produk, stok, 'frame' AS kategori FROM frames WHERE cabang_id = ?
-        UNION ALL
-        SELECT id, merk AS nama_produk, stok, 'lensa_finish' AS kategori FROM lensa_finishes WHERE cabang_id = ?
-        UNION ALL
-        SELECT id, nama AS nama_produk, stok, 'accessories' AS kategori FROM accessories WHERE cabang_id = ?
-        UNION ALL
-        SELECT id, merk AS nama_produk, stok, 'softlens' AS kategori FROM softlens WHERE cabang_id = ?
-        ORDER BY stok ASC
-        LIMIT 20
-    ", [$cabangId, $cabangId, $cabangId, $cabangId]);
+        $leastStockProducts = DB::table('produk_cabangs')
+            ->where('cabang_id', $cabangId)
+            ->select('produk_cabangs.id', 'produk_cabangs.stok as stok', 'produk_cabangs.itemable_type', 'produk_cabangs.itemable_id')
+            ->orderBy('stok', 'asc')
+            ->limit(20)
+            ->get()
+            ->map(function ($item) {
+              
+                $modelClass = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($item->itemable_type);
+                $model = $modelClass ? app($modelClass)::find($item->itemable_id) : null;
+
+                return (object) [
+                    'id' => $item->id,
+                    'nama_produk' => $model->merk ?? $model->nama ?? 'Produk Tidak Dikenal',
+                    'stok' => $item->stok,
+                    'kategori' => class_basename($modelClass),
+                ];
+            });
+
 
         $pendingOrders = Orderan::with('user')
             ->where('cabang_id', $cabangId)
@@ -38,16 +46,13 @@ class DashboardController extends Controller
         $chartData = Orderan::selectRaw("DATE(order_date) as tanggal, SUM(total) as total_penjualan")
             ->where('cabang_id', $cabangId)
             ->where('order_status', 'complete')
-            ->whereBetween('order_date', [
-                now()->subDays(14)->toDateString(),
-                now()->toDateString()
-            ])
+            ->whereBetween('order_date', [now()->subDays(14)->toDateString(), now()->toDateString()])
             ->groupBy('tanggal')
             ->orderBy('tanggal')
             ->get()
             ->map(function ($item) {
                 return [
-                    'label' => Carbon::parse($item->tanggal)->translatedFormat('d M'),
+                    'label' => \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M'),
                     'total' => (int) $item->total_penjualan
                 ];
             });
@@ -56,11 +61,7 @@ class DashboardController extends Controller
             ->join('orderans', 'order_items.order_id', '=', 'orderans.id')
             ->where('orderans.order_status', 'complete')
             ->where('orderans.cabang_id', $cabangId)
-            ->select(
-                'order_items.itemable_id',
-                'order_items.itemable_type',
-                DB::raw('SUM(order_items.quantity) as total_terjual')
-            )
+            ->select('order_items.itemable_id', 'order_items.itemable_type', DB::raw('SUM(order_items.quantity) as total_terjual'))
             ->groupBy('order_items.itemable_id', 'order_items.itemable_type')
             ->orderByDesc('total_terjual')
             ->limit(6)
@@ -70,15 +71,10 @@ class DashboardController extends Controller
         $produkValues = [];
 
         foreach ($produkTerlaris as $item) {
-            $modelClass = Relation::getMorphedModel($item->itemable_type); 
 
-            if (!$modelClass) {
-                $produkLabels[] = 'Tipe tidak dikenal';
-                $produkValues[] = (int) $item->total_terjual;
-                continue;
-            }
 
-            $model = app($modelClass)::find($item->itemable_id);
+            $modelClass = \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($item->itemable_type);
+            $model = $modelClass ? app($modelClass)::find($item->itemable_id) : null;
 
             if ($model) {
                 $nama = $model->merk ?? $model->nama ?? 'Produk Tidak Dikenal';
@@ -86,6 +82,7 @@ class DashboardController extends Controller
                 $produkValues[] = (int) $item->total_terjual;
             }
         }
+
         return view('Dashboard.dashboard', compact(
             'leastStockProducts',
             'pendingOrders',

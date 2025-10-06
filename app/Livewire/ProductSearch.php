@@ -11,6 +11,7 @@ use App\Models\Softlen;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\ProdukCabang;
 
 class ProductSearch extends Component
 {
@@ -18,137 +19,117 @@ class ProductSearch extends Component
     public $perPage = 5;
     public $page = 1;
     public $searchInput = '';
-    protected function queryFrames()
-    {
-        return Frame::where(function ($q) {
-            $q->where('merk', 'like', "%{$this->search}%")
-                ->orWhere('tipe', 'like', "%{$this->search}%")
-                ->orWhere('warna', 'like', "%{$this->search}%");
-        })
-            ->where('cabang_id', session('cabang_id'))
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'    => $item->id,
-                    'name'  => $item->merk,
-                    'price' => $item->harga,
-                    'laba'  => $item->laba,
-                    'stock' => $item->stok,
-                    'type'  => 'frame',
-                ]
-            ));
-    }
+   
 
-    protected function queryLensaFinish()
-    {
-        return LensaFinish::where(function ($q) {
+protected function queryFrames()
+{
+    return ProdukCabang::with('itemable')
+        ->where('cabang_id', session('cabang_id'))
+        ->where('itemable_type', 'frame')
+        ->whereHasMorph('itemable', [\App\Models\Frame::class], function ($q) {
             $q->where('merk', 'like', "%{$this->search}%")
-                ->orWhere('desain', 'like', "%{$this->search}%")
-                ->orWhere('tipe', 'like', "%{$this->search}%")
-                ->orWhere('sph', 'like', "%{$this->search}%")
-                ->orWhere('cyl', 'like', "%{$this->search}%")
-                ->orWhere('add', 'like', "%{$this->search}%");
+              ->orWhere('tipe', 'like', "%{$this->search}%")
+              ->orWhere('warna', 'like', "%{$this->search}%");
         })
-            ->where('cabang_id', session('cabang_id'))
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'            => $item->id,
-                    'name'          => $item->merk,
-                    'display_name'  => trim(
-                        "{$item->merk} " .
-                            ($item->tipe ? "Tipe:{$item->tipe} " : "") .
-                            ($item->desain ? "Desain:{$item->desain} " : "") .
-                            ($item->sph ? "SPH:{$item->sph} " : "") .
-                            ($item->cyl ? "CYL:{$item->cyl} " : "") .
-                            ($item->add ? "ADD:{$item->add}" : "")
-                    ),
-                    'price'         => $item->harga,
-                    'laba'          => $item->laba,
-                    'stock'         => $item->stok,
-                    'type'          => 'lensa_finish',
-                ]
-            ));
-    }
+        ->get()
+        ->map(fn($pc) => [
+            'id'    => $pc->itemable_id,
+            'name'  => $pc->itemable->merk ?? '-',
+            'price' => $pc->itemable->harga,
+            'laba'  => $pc->itemable->laba,
+            'stock' => $pc->stok,
+            'type'  => 'frame',
+        ]);
+}
 
-    protected function queryLensaKhusus()
-    {
-        return LensaKhusus::where(function ($q) {
+protected function queryLensaFinish()
+{
+    return ProdukCabang::with('itemable')
+        ->where('cabang_id', session('cabang_id'))
+        ->where('itemable_type', 'lensa_finish')
+        ->whereHasMorph('itemable', [\App\Models\LensaFinish::class], function ($q) {
             $q->where('merk', 'like', "%{$this->search}%")
-                ->orWhere('desain', 'like', "%{$this->search}%")
-                ->orWhere('tipe', 'like', "%{$this->search}%")
-                ->orWhere('sph', 'like', "%{$this->search}%")
-                ->orWhere('cyl', 'like', "%{$this->search}%")
-                ->orWhere('add', 'like', "%{$this->search}%");
+              ->orWhere('desain', 'like', "%{$this->search}%")
+              ->orWhere('tipe', 'like', "%{$this->search}%")
+              ->orWhere('sph', 'like', "%{$this->search}%")
+              ->orWhere('cyl', 'like', "%{$this->search}%")
+              ->orWhere('add', 'like', "%{$this->search}%");
         })
-            ->where('cabang_id', session('cabang_id'))
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'            => $item->id,
-                    'name'          => $item->merk,
-                    'display_name'  => trim(
-                        "{$item->merk} " .
-                            ($item->tipe ? "Tipe:{$item->tipe} " : "") .
-                            ($item->desain ? "Desain:{$item->desain} " : "") .
-                            ($item->sph ? "SPH:{$item->sph} " : "") .
-                            ($item->cyl ? "CYL:{$item->cyl} " : "") .
-                            ($item->add ? "ADD:{$item->add}" : "")
-                    ),
-                    'price'         => $item->harga,
-                    'laba'          => $item->laba,
-                    'stock'         => $item->stok,
-                    'type'          => 'lensa_khusus',
-                ]
-            ));
-    }
+        ->get()
+        ->map(fn($pc) => [
+            'id'    => $pc->itemable_id,
+            'name'  => $pc->itemable->merk ?? '-',
+            'price' => $pc->itemable->harga,
+            'laba'  => $pc->itemable->laba,
+            'stock' => $pc->stok,
+            'type'  => 'lensa_finish',
+        ]);
+}
 
-    protected function querySoftlens()
-    {
-        return Softlen::where(function ($q) {
+protected function queryLensaKhusus()
+{
+    return ProdukCabang::with('itemable')
+        ->where('cabang_id', session('cabang_id'))
+        ->where('itemable_type', 'lensa_khusus')
+        ->whereHasMorph('itemable', [\App\Models\LensaKhusus::class], function ($q) {
             $q->where('merk', 'like', "%{$this->search}%")
-                ->orWhere('tipe', 'like', "%{$this->search}%")
-                ->orWhere('warna', 'like', "%{$this->search}%");
+              ->orWhere('desain', 'like', "%{$this->search}%")
+              ->orWhere('tipe', 'like', "%{$this->search}%")
+              ->orWhere('sph', 'like', "%{$this->search}%")
+              ->orWhere('cyl', 'like', "%{$this->search}%")
+              ->orWhere('add', 'like', "%{$this->search}%");
         })
-            ->where('cabang_id', session('cabang_id'))
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'    => $item->id,
-                    'name'  => $item->merk,
-                    'price' => $item->harga,
-                    'laba'  => $item->laba,
-                    'stock' => $item->stok,
-                    'type'  => 'softlens',
-                ]
-            ));
-    }
+        ->get()
+        ->map(fn($pc) => [
+            'id'    => $pc->itemable_id,
+            'name'  => $pc->itemable->merk ?? '-',
+            'price' => $pc->itemable->harga,
+            'laba'  => $pc->itemable->laba,
+            'stock' => $pc->stok,
+            'type'  => 'lensa_khusus',
+        ]);
+}
 
-    protected function queryAccessories()
-    {
-        return Accessories::where(function ($q) {
+protected function querySoftlens()
+{
+    return ProdukCabang::with('itemable')
+        ->where('cabang_id', session('cabang_id'))
+        ->where('itemable_type', 'softlens')
+        ->whereHasMorph('itemable', [\App\Models\Softlen::class], function ($q) {
+            $q->where('merk', 'like', "%{$this->search}%")
+              ->orWhere('tipe', 'like', "%{$this->search}%")
+              ->orWhere('warna', 'like', "%{$this->search}%");
+        })
+        ->get()
+        ->map(fn($pc) => [
+            'id'    => $pc->itemable_id,
+            'name'  => $pc->itemable->merk ?? '-',
+            'price' => $pc->itemable->harga,
+            'laba'  => $pc->itemable->laba,
+            'stock' => $pc->stok,
+            'type'  => 'softlens',
+        ]);
+}
+
+protected function queryAccessories()
+{
+    return ProdukCabang::with('itemable')
+        ->where('cabang_id', session('cabang_id'))
+        ->where('itemable_type', 'accessory')
+        ->whereHasMorph('itemable', [\App\Models\Accessories::class], function ($q) {
             $q->where('nama', 'like', "%{$this->search}%")
-                ->orWhere('jenis', 'like', "%{$this->search}%");
+              ->orWhere('jenis', 'like', "%{$this->search}%");
         })
-            ->where('cabang_id', session('cabang_id'))
-            ->get()
-            ->map(fn($item) => array_merge(
-                $item->toArray(),
-                [
-                    'id'    => $item->id,
-                    'name'  => $item->nama,
-                    'price' => $item->harga,
-                    'laba'  => $item->laba,
-                    'stock' => $item->stok,
-                    'type'  => 'accessory',
-                ]
-            ));
-    }
-
+        ->get()
+        ->map(fn($pc) => [
+            'id'    => $pc->itemable_id,
+            'name'  => $pc->itemable->nama ?? '-',
+            'price' => $pc->itemable->harga,
+            'laba'  => $pc->itemable->laba,
+            'stock' => $pc->stok,
+            'type'  => 'accessory',
+        ]);
+}
 
     protected function getAllProducts(): Collection
     {

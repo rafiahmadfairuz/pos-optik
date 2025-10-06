@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Cabang;
 use App\Models\Accessories;
+use App\Models\ProdukCabang;
 use Illuminate\Database\Seeder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class AccessoriesSeeder extends Seeder
@@ -14,13 +16,27 @@ class AccessoriesSeeder extends Seeder
      */
     public function run(): void
     {
-        $cabangs = Cabang::all();
+        $accessories = Accessories::factory(30)->create();
 
-        foreach ($cabangs as $cabang) {
-            Accessories::factory(2)->create(['cabang_id' => $cabang->id]);
+        foreach ($accessories as $acc) {
+            $stokGudang = $acc->stok;
+            $totalCabang = 0;
+
+            foreach (Cabang::all() as $cabang) {
+
+                $qty = rand(0, 10);
+                $totalCabang += $qty;
+
+                ProdukCabang::create([
+                    'itemable_id' => $acc->id,
+                    'itemable_type' => array_search(Accessories::class, Relation::morphMap()),
+                    'cabang_id' => $cabang->id,
+                    'stok' => $qty,
+                ]);
+            }
+            $acc->update([
+                'stok' => max(0, $stokGudang - $totalCabang),
+            ]);
         }
-
-        Accessories::factory(2)->create(['cabang_id' => $cabangs->random()->id]);
-        Accessories::factory(30)->create(['cabang_id' => null]);
     }
 }

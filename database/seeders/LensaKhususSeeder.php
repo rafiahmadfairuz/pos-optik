@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Cabang;
 use App\Models\LensaKhusus;
+use App\Models\ProdukCabang;
 use Illuminate\Database\Seeder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class LensaKhususSeeder extends Seeder
@@ -14,13 +16,27 @@ class LensaKhususSeeder extends Seeder
      */
     public function run(): void
     {
-        $cabangs = Cabang::all();
+        $lensas = LensaKhusus::factory(30)->create();
 
-        foreach ($cabangs as $cabang) {
-            LensaKhusus::factory(2)->create(['cabang_id' => $cabang->id]);
+        foreach ($lensas as $lensa) {
+            $stokGudang = $lensa->stok;
+            $totalCabang = 0;
+
+            foreach (Cabang::all() as $cabang) {
+                $qty = rand(0, 5);
+                $totalCabang += $qty;
+
+                ProdukCabang::create([
+                    'itemable_id' => $lensa->id,
+                    'itemable_type' => array_search(LensaKhusus::class, Relation::morphMap()),
+                    'cabang_id' => $cabang->id,
+                    'stok' => $qty,
+                ]);
+            }
+
+            $lensa->update([
+                'stok' => max(0, $stokGudang - $totalCabang),
+            ]);
         }
-
-        LensaKhusus::factory(2)->create(['cabang_id' => $cabangs->random()->id]);
-        LensaKhusus::factory(30)->create(['cabang_id' => null]);
     }
 }

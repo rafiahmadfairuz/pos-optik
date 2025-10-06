@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Models\Accessories;
+use App\Models\ProdukCabang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
@@ -18,34 +19,46 @@ class AccessoriesController extends Controller
         $user = Auth::user();
         $search = $request->input('search');
 
-        $query = Accessories::query();
-
-        // Filter berdasarkan cabang
         if ($user->role === 'gudang_utama') {
-            $query->whereNull('cabang_id');
+            $query = Accessories::query();
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%")
+                        ->orWhere('jenis', 'like', "%{$search}%");
+                });
+            }
+            $accessories = $query->get();
         } else {
-            $query->where('cabang_id', session('cabang_id'));
-        }
 
-        // Filter search berdasarkan nama atau jenis
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('jenis', 'like', "%{$search}%");
+            $cabangId = session('cabang_id');
+              $query = ProdukCabang::where('cabang_id', $cabangId)
+                ->where('itemable_type', 'accessory')
+                ->with('itemable');
+
+            if ($search) {
+                $query->whereHasMorph('itemable', [\App\Models\Accessories::class], function ($q) use ($search) {
+                    $q->where('nama', 'like', "%{$search}%")
+                        ->orWhere('jenis', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            }
+
+            $accessories = $query->get()->map(function ($stok) {
+                return (object) [
+                    'id' => $stok->itemable->id,
+                    'sku' => $stok->itemable->sku,
+                    'nama' => $stok->itemable->nama,
+                    'jenis' => $stok->itemable->jenis,
+                    'harga' => $stok->itemable->harga,
+                    'harga_beli' => $stok->itemable->harga_beli,
+                    'laba' => $stok->itemable->laba,
+                    'stok' => $stok->stok,
+                ];
             });
         }
 
-        $accessories = $query->get();
-
         return view('Inventory.accesories', compact('accessories'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -54,6 +67,10 @@ class AccessoriesController extends Controller
     public function store(Request $request)
     {
         try {
+            if (Auth::user()->role !== 'gudang_utama') {
+                return back()->with('error', 'Hanya gudang utama yang bisa menambahkan produk baru.');
+            }
+
             $validated = $request->validate([
                 'sku' => 'required|string|max:50|unique:accessories,sku',
                 'nama' => 'required|string|max:100',
@@ -63,40 +80,15 @@ class AccessoriesController extends Controller
                 'stok' => 'required|integer|min:0',
             ]);
 
-            // Hitung laba otomatis
             $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
-            Accessories::create([
-                ...$validated,
-                'cabang_id' => session('cabang_id'),
-            ]);
+            Accessories::create($validated);
 
             return back()->with('success', 'Aksesori berhasil ditambahkan.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Create accessory failed (validation): ' . $e->getMessage());
-            return back()->with('error', 'Validasi gagal.')->withInput();
         } catch (\Exception $e) {
             Log::error('Create accessory failed: ' . $e->getMessage());
             return back()->with('error', $e->getMessage())->withInput();
         }
-    }
-
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**
@@ -105,51 +97,47 @@ class AccessoriesController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            $rules = [
-                'sku' => 'required|string|max:50|unique:accessories,sku,' . $id,
-                'nama' => 'required|string|max:100',
-                'jenis' => 'required|string|max:50',
-                'harga' => 'required|numeric|min:0',
-                'stok' => 'required|integer|min:0',
-            ];
-
-            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
-                $rules['harga_beli'] = 'required|numeric|min:0';
-            }
-
-            $validated = $request->validate($rules);
-
             $accessory = Accessories::findOrFail($id);
 
-            $accessory->sku = $validated['sku'];
-            $accessory->nama = $validated['nama'];
-            $accessory->jenis = $validated['jenis'];
-            $accessory->harga = $validated['harga'];
-            $accessory->stok = $validated['stok'];
-            $accessory->cabang_id = session('cabang_id');
+            if (Auth::user()->role === 'gudang_utama') {
+                // Gudang utama update master
+                $validated = $request->validate([
+                    'sku' => 'required|string|max:50|unique:accessories,sku,' . $id,
+                    'nama' => 'required|string|max:100',
+                    'jenis' => 'required|string|max:50',
+                    'harga_beli' => 'required|numeric|min:0',
+                    'harga' => 'required|numeric|min:0',
+                    'stok' => 'required|integer|min:0',
+                ]);
 
-            if (Auth::user()->role === 'admin' || Auth::user()->role === 'gudang') {
-                $accessory->harga_beli = $validated['harga_beli'];
-                $accessory->laba = $validated['harga'] - $validated['harga_beli'];
+                $accessory->update([
+                    ...$validated,
+                    'laba' => $validated['harga'] - $validated['harga_beli'],
+                ]);
             } else {
-                $accessory->laba = $validated['harga'] - $accessory->harga_beli;
+                // Cabang hanya boleh update stok di produk_cabangs
+                $validated = $request->validate([
+                    'stok' => 'required|integer|min:0',
+                ]);
+
+                $cabangId = session('cabang_id');
+
+                $stokCabang = ProdukCabang::firstOrNew([
+                    'itemable_id' => $accessory->id,
+                    'itemable_type' => Accessories::class,
+                    'cabang_id' => $cabangId,
+                ]);
+
+                $stokCabang->qty = $validated['stok'];
+                $stokCabang->save();
             }
 
-            $accessory->save();
-
             return back()->with('success', 'Aksesori berhasil diperbarui!');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Update accessory validation failed: ' . $e->getMessage());
-            return back()->with('error', 'Validasi gagal: ' . $e->getMessage())->withInput();
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Update accessory failed - not found: ' . $e->getMessage());
-            return back()->with('error', 'Aksesori tidak ditemukan.')->withInput();
         } catch (\Exception $e) {
             Log::error('Update accessory failed: ' . $e->getMessage());
             return back()->with('error', 'Gagal memperbarui aksesori.')->withInput();
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -157,13 +145,20 @@ class AccessoriesController extends Controller
     public function destroy(string $id)
     {
         try {
+            if (Auth::user()->role !== 'gudang_utama') {
+                return back()->with('error', 'Hanya gudang utama yang bisa menghapus produk.');
+            }
+
             $accessory = Accessories::findOrFail($id);
+
+            // Hapus stok cabang terkait
+            ProdukCabang::where('itemable_id', $id)
+                ->where('itemable_type', 'accessory')
+                ->delete();
+
             $accessory->delete();
 
             return back()->with('success', 'Aksesori berhasil dihapus.');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Delete accessory failed - not found: ' . $e->getMessage());
-            return back()->with('error', 'Aksesori tidak ditemukan.')->withInput();
         } catch (\Exception $e) {
             Log::error('Delete accessory failed: ' . $e->getMessage());
             return back()->with('error', 'Gagal menghapus aksesori.')->withInput();

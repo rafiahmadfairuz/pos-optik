@@ -6,6 +6,7 @@ use App\Models\Staff;
 use App\Models\Cabang;
 use App\Models\Orderan;
 use App\Models\Asuransi;
+use App\Models\ProdukCabang;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class OrderanController extends Controller
 {
@@ -115,26 +117,54 @@ class OrderanController extends Controller
             $kembalian = max($customerPayingAkhir - $perluDibayar, 0); // ✅ Perbaikan
 
             if ($requestedOrderStatus == 'complete' && $originalOrderStatus != 'complete') {
+                $currentCabangId = session('cabang_id');
+
                 foreach ($order->items as $item) {
-                    $product = $item->itemable;
+                    $itemableType = $item->itemable_type; // alias morphMap, contoh: 'frame', 'softlens'
+                    $itemableId   = $item->itemable_id;
 
-                    if (!$product) {
-                        throw new \Exception("Produk terkait dengan item order (ID: {$item->id}) tidak ditemukan.");
+                    // 🔍 ambil model class dari morphMap
+                    $morphMap = Relation::morphMap();
+                    $modelClass = $morphMap[$itemableType] ?? null;
+
+                    if (!$modelClass) {
+                        throw new \Exception("Tipe produk {$itemableType} tidak dikenali untuk item ID {$item->id}.");
                     }
 
-                    if ($product->stok < $item->quantity) {
-                        throw new \Exception("Stok {$product->merk} ({$item->quantity} diminta, {$product->stok} tersedia) tidak mencukupi untuk item order ID {$item->id}.");
+                    // 🔍 ambil stok produk cabang yang sesuai
+                    $produkCabang = ProdukCabang::where('cabang_id', $currentCabangId)
+                        ->where('itemable_id', $itemableId)
+                        ->where('itemable_type', $itemableType)
+                        ->first();
+
+                    if (!$produkCabang) {
+                        throw new \Exception("Produk cabang tidak ditemukan untuk item #{$item->id} ({$itemableType}).");
                     }
 
-                    $product->stok -= $item->quantity;
-                    $product->save();
+                    if ($produkCabang->stok < $item->quantity) {
+                        $namaProduk = $produkCabang->itemable->merk ?? $produkCabang->itemable->nama ?? 'Produk';
+                        throw new \Exception("Stok {$namaProduk} tidak mencukupi. Diminta {$item->quantity}, tersedia {$produkCabang->stok}.");
+                    }
+
+                    // 🔻 Kurangi stok cabang
+                    $produkCabang->decrement('stok', $item->quantity);
+
+                    Log::info("[ORDER COMPLETE] Stok cabang dikurangi", [
+                        'cabang_id'   => $currentCabangId,
+                        'itemable_id' => $itemableId,
+                        'itemable_type' => $itemableType,
+                        'qty'         => $item->quantity,
+                        'stok_sisa'   => $produkCabang->stok,
+                    ]);
                 }
 
+                // 🧾 Set status order
                 $order->complete_date = now();
                 if ($order->payment_status == 'unpaid') {
                     $order->payment_status = 'paid';
                 }
             }
+
 
             $order->update([
                 'order_date' => $validatedData['order_date'],
@@ -196,89 +226,74 @@ class OrderanController extends Controller
 
         return $pdf->stream('nota-' . $order->id . '.pdf');
     }
-
     public function returOrderan($id)
     {
         $order = Orderan::with(['items.itemable'])->findOrFail($id);
 
-        // 1) Validasi cabang aktif vs order
         $currentCabangId = session('cabang_id');
         if (!$currentCabangId) {
             return back()->with('error', 'Cabang aktif tidak ditemukan di sesi.');
         }
 
-        if ((int)$order->cabang_id !== (int)$currentCabangId) {
+        if ((int) $order->cabang_id !== (int) $currentCabangId) {
             return back()->with('error', 'Order ini bukan milik cabang yang sedang aktif.');
         }
 
-        // 2) Hanya boleh retur kalau pending
         if ($order->order_status !== 'complete') {
-            return back()->with('warning', 'Hanya order status pending yang bisa diretur.');
+            return back()->with('warning', 'Hanya order status complete yang bisa diretur.');
         }
 
-        // 3) Anti double-retur (jika kamu tambah kolom, lihat Bagian 4)
         if (Schema::hasColumn('orderans', 'is_returned') && $order->is_returned) {
             return back()->with('warning', 'Order ini sudah diretur sebelumnya.');
         }
 
         try {
             DB::transaction(function () use ($order, $currentCabangId) {
+
                 foreach ($order->items as $item) {
-                    $modelClass = $item->itemable;
-                    $model = new $modelClass;
+                    $itemableType = $item->itemable_type; // contoh: 'frame', 'softlens', dll (alias morphMap)
+                    $itemableId   = $item->itemable_id;
 
-                    // pastikan tabel & kolom bisa diinspeksi
-                    $table = $model->getTable();
-                    $columns = Schema::getColumnListing($table);
+                    // 🔍 Cek relasi morphMap untuk dapatkan model class
+                    $morphMap = Relation::morphMap();
+                    $modelClass = $morphMap[$itemableType] ?? null;
 
-                    // Field pembanding yang sama seperti di kode transfermu
-                    $matchableFields = ['sku', 'merk', 'tipe', 'warna', 'desain', 'nama', 'jenis', 'sph', 'cyl', 'add'];
-
-                    // Bangun query produk di CABANG AKTIF
-                    $queryCabang = $modelClass::query();
-                    foreach ($matchableFields as $field) {
-                        if (in_array($field, $columns) && isset($item->itemable->$field)) {
-                            $queryCabang->where($field, $item->itemable->$field);
-                        }
+                    if (!$modelClass) {
+                        throw new \Exception("Tipe produk {$itemableType} tidak dikenali.");
                     }
-                    $queryCabang->where('cabang_id', $currentCabangId);
 
-                    $produkCabang = $queryCabang->first();
+                    // 🔍 Ambil ProdukCabang sesuai tipe dan cabang aktif
+                    $produkCabang = ProdukCabang::where('cabang_id', $currentCabangId)
+                        ->where('itemable_id', $itemableId)
+                        ->where('itemable_type', $itemableType)
+                        ->first();
 
                     if (!$produkCabang) {
-                        throw new \Exception("Produk {$modelClass} untuk item #{$item->id} tidak ditemukan di cabang aktif.");
-                    }
-                    if (!in_array('stok', $columns)) {
-                        throw new \Exception("Kolom 'stok' tidak ada pada tabel {$table}.");
+                        throw new \Exception("Produk cabang tidak ditemukan untuk item #{$item->id} ({$itemableType}).");
                     }
 
-                    $qty = (int)$item->quantity;
-                    $stokSebelum = (int)$produkCabang->stok;
-
-                    // Karena retur order → stok cabang dikembalikan (ditambah)
+                    // 🔁 Tambahkan stok kembali ke cabang
+                    $qty = (int) $item->quantity;
+                    $stokSebelum = (int) $produkCabang->stok;
                     $produkCabang->increment('stok', $qty);
 
-                    Log::info("=== RETUR ORDER #{$order->id} - {$modelClass} item #{$item->id} ===");
-                    Log::info("Cabang aktif: {$currentCabangId}");
-                    Log::info("Stok sebelum: {$stokSebelum}");
-                    Log::info("Stok ditambah: {$qty}");
-                    Log::info("Stok sesudah: {$produkCabang->stok}");
+                    Log::info("=== RETUR ORDER #{$order->id} ===");
+                    Log::info("Tipe Produk: {$itemableType}");
+                    Log::info("Cabang: {$currentCabangId}");
+                    Log::info("Stok: {$stokSebelum} ➕ {$qty} = {$produkCabang->stok}");
                 }
 
-                // Tandai agar tidak bisa diretur dua kali (jika kolom tersedia)
+                // 🚩 Tandai sudah diretur (jika kolom tersedia)
                 if (Schema::hasColumn('orderans', 'is_returned')) {
                     $order->update([
                         'is_returned' => true,
                         'returned_at' => now(),
                     ]);
                 }
-
-                // OPTIONAL: kalau retur = batal, kamu bisa set payment_status dsb.
-                // $order->update(['payment_status' => 'unpaid']);
             });
 
             return back()->with('success', 'Barang dari order ini berhasil diretur ke stok cabang aktif.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return back()->with('error', 'Retur gagal: ' . $e->getMessage());
         }
     }

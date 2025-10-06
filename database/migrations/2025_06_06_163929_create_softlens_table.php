@@ -21,7 +21,6 @@ return new class extends Migration
             $table->bigInteger('harga_beli');
             $table->bigInteger('laba');
             $table->unsignedInteger('stok');
-            $table->foreignId('cabang_id')->nullable()->constrained('cabangs')->onDelete('cascade');
             $table->timestamps();
         });
     }

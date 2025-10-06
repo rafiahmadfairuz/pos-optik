@@ -249,7 +249,7 @@
                                         @endif
 
                                         <td class="text-center">
-                                            {{ $product['stock'] }}
+                                            {{ $product['stok'] }}
                                         </td>
 
                                         <td class="text-center">

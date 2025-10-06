@@ -89,7 +89,7 @@
                                                     <td>{{ $order->id }}</td>
                                                     <td>
                                                         <a href="#" class="text-decoration-none">
-                                                            {{ $order->user->name ?? 'Tidak Diketahui' }}
+                                                            {{ $order->user->name ?? 'Tidak Diketahui / Barang Telah Dihapus' }}
                                                         </a>
                                                     </td>
                                                     <td>{{ \Carbon\Carbon::parse($order->order_date)->format('d-m-Y') }}

@@ -11,19 +11,42 @@ class AccessoriesFactory extends Factory
 
     public function definition(): array
     {
-        $hargaBeli = $this->faker->numberBetween(10000, 50000);
-        $hargaJual = $this->faker->numberBetween($hargaBeli + 5000, $hargaBeli + 80000);
+        $namaBarang = $this->faker->randomElement([
+            'Lens Cleaner Spray',
+            'Microfiber Cloth',
+            'Frame Case',
+            'Contact Lens Solution',
+            'Eyewear Strap'
+        ]);
+
+        $jenis = $this->faker->randomElement([
+            'Pembersih',
+            'Kain',
+            'Case',
+            'Cairan',
+            'Tali'
+        ]);
+
+        $merk = $this->faker->randomElement([
+            'Zeiss',
+            'Ray-Ban',
+            'Essilor',
+            'Miniso',
+            'Luxottica'
+        ]);
+
+        $hargaBeli = $this->faker->numberBetween(20000, 100000);
+        $hargaJual = $hargaBeli + $this->faker->numberBetween(10000, 80000);
         $laba = $hargaJual - $hargaBeli;
 
         return [
             'sku' => strtoupper('ACS-' . $this->faker->unique()->bothify('??##')),
-            'nama' => ucfirst($this->faker->word()),
-            'jenis' => ucfirst($this->faker->word()),
+            'nama' => $merk . ' ' . $namaBarang,
+            'jenis' => $jenis,
             'harga_beli' => $hargaBeli,
             'harga' => $hargaJual,
             'laba' => $laba,
-            'stok' => rand(1, 100),
-            'cabang_id' => \App\Models\Cabang::inRandomOrder()->first()->id,
+            'stok' => $this->faker->numberBetween(20, 100), 
         ];
     }
 }

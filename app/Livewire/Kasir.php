@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Resep;
 use Livewire\Component;
 use App\Models\OrderItems;
+use App\Models\ProdukCabang;
 use App\Models\Orderan as TbOrder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -90,46 +91,65 @@ class Kasir extends Component
             ]);
 
             foreach ($this->cartData as $item) {
+                // Simpan item order
                 OrderItems::create([
                     'order_id'      => $order->id,
                     'itemable_id'   => $item['id'],
-                    'itemable_type' => $item['type'],
+                    'itemable_type' => $item['type'], // alias morphMap
                     'quantity'      => $item['quantity'],
                     'price'         => $item['price'],
                     'subtotal'      => $item['price'] * $item['quantity'],
                     'laba'          => $item['laba'] ?? 0,
                 ]);
 
+                // Ambil mapping morphMap → Model class
                 $morphMap = Relation::morphMap();
                 $modelClass = $morphMap[$item['type']] ?? null;
 
                 if ($modelClass) {
-                    $product = $modelClass::find($item['id']);
+                    // Cari produk cabang berdasarkan itemable
+                    $produkCabang = ProdukCabang::where('itemable_type', $item['type'])
+                        ->where('itemable_id', $item['id'])
+                        ->where('cabang_id', session('cabang_id'))
+                        ->first();
 
-                    if ($product) {
+                    if ($produkCabang) {
+                        // Kalau order bukan pending, stok dikurangi
                         if (strtolower($this->orderData['order_status']) !== 'pending') {
-                            $product->stok -= $item['quantity'];
-                            $product->save();
+                            $stokSebelum = $produkCabang->stok;
+                            $produkCabang->stok -= $item['quantity'];
+                            if ($produkCabang->stok < 0) {
+                                throw new \Exception("Stok produk {$item['type']} ID {$item['id']} tidak mencukupi.");
+                            }
+                            $produkCabang->save();
 
-                            Log::info('Stok dikurangi', [
-                                'itemable_type'     => $item['type'],
-                                'itemable_id'       => $item['id'],
-                                'nama_model'        => $modelClass,
-                                'stok_sisa'         => $product->stok,
-                                'jumlah_dikurang'   => $item['quantity'],
+                            Log::info('✅ Stok cabang dikurangi', [
+                                'cabang_id'       => session('cabang_id'),
+                                'itemable_type'   => $item['type'],
+                                'itemable_id'     => $item['id'],
+                                'model'           => $modelClass,
+                                'stok_sebelum'    => $stokSebelum,
+                                'dikurang'        => $item['quantity'],
+                                'stok_sisa'       => $produkCabang->stok,
                             ]);
                         } else {
-                            Log::info('Stok tidak dikurangi karena order status pending', [
+                            Log::info('⏸️ Order pending, stok tidak dikurangi', [
                                 'itemable_type' => $item['type'],
                                 'itemable_id'   => $item['id'],
                             ]);
                         }
                     } else {
-                        Log::warning('Produk tidak ditemukan saat mau kurangi stok', [
+                        // Kalau produk cabang tidak ditemukan (data rusak / belum ditransfer)
+                        Log::warning('⚠️ Produk cabang tidak ditemukan saat kurangi stok', [
                             'itemable_type' => $item['type'],
                             'itemable_id'   => $item['id'],
+                            'cabang_id'     => session('cabang_id'),
                         ]);
                     }
+                } else {
+                    Log::error('❌ itemable_type tidak valid', [
+                        'itemable_type' => $item['type'],
+                    ]);
                 }
             }
 

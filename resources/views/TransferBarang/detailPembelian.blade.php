@@ -38,7 +38,7 @@
                                 @php
                                     $itemable = $item->itemable;
                                     $type = class_basename($item->itemable_type ?? '');
-                                    $merk = $itemable->merk ?? 'Merk Tidak Diketahui';
+                                    $merk = $itemable->merk ?? 'Merk Tidak Diketahui / Barang Telah Dihapus';
                                     $tipeProduk = $itemable->tipe ?? null;
                                 @endphp
                                 <tr>
