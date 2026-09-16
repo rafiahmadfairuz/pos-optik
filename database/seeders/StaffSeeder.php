@@ -33,14 +33,24 @@ class StaffSeeder extends Seeder
         $cabangs = Cabang::all();
 
         foreach ($cabangs as $cabang) {
-            Staff::factory(5)->create([
+            // Kalau ID-nya 0 (Gudang Pusat), jangan buat staff cabang retail di sini
+            if ($cabang->id == 0) {
+                continue;
+            }
+
+            // Staff Cabang
+            Staff::create([
+                'name' => 'Staff ' . $cabang->nama,
+                'email' => 'staff.' . $cabang->slug . '@gmail.com',
+                'password' => Hash::make('1234'),
                 'role' => 'cabang',
                 'cabang_id' => $cabang->id,
             ]);
 
+            // Gudang Cabang
             Staff::create([
-                'name' => 'Petugas Gudang Cabang ' . $cabang->nama,
-                'email' => 'gudang_' . $cabang->id . '@gmail.com',
+                'name' => 'Gudang ' . $cabang->nama,
+                'email' => 'gudang.' . $cabang->slug . '@gmail.com',
                 'password' => Hash::make('1234'),
                 'role' => 'gudang_cabang',
                 'cabang_id' => $cabang->id,

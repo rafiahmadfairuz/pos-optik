@@ -107,6 +107,7 @@
             <livewire:selected-customer />
             <livewire:customer-search />
         </div>
+        <livewire:resep-kacamata />
         <livewire:product-search />
         <livewire:selected-product />
         <livewire:transaction-detail />

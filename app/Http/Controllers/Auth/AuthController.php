@@ -38,6 +38,7 @@ class AuthController extends Controller
                     return redirect()->route('dashboard');
 
                 case 'gudang_utama':
+                    session(['cabang_id' => 0]);
                     return redirect()->route('transfer.barang');
 
                 default:

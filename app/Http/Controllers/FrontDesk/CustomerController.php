@@ -3,23 +3,21 @@
 namespace App\Http\Controllers\FrontDesk;
 
 use App\Models\User;
+use App\Models\Resep;
+use App\Models\Orderan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\Orderan;
 
 class CustomerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $search = $request->input('search');
 
-        $query =  User::where('cabang_id', session('cabang_id'));
+        $query = User::where('cabang_id', session('cabang_id'));
 
-          if ($search) {
+        if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%");
@@ -31,17 +29,11 @@ class CustomerController extends Controller
         return view("Informasi.customer", compact("customers"));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         try {
@@ -49,12 +41,10 @@ class CustomerController extends Controller
                 'name' => 'required|string|max:100',
                 'email' => 'nullable|email|max:100|unique:users,email',
                 'phone' => 'required|regex:/^[0-9+\-\s()]*$/|max:20',
-
                 'alamat' => 'nullable|string|max:255',
                 'umur' => 'nullable',
                 'gender' => 'nullable|in:male,female,other',
             ]);
-
 
             User::create([
                 ...$validated,
@@ -71,28 +61,30 @@ class CustomerController extends Controller
         }
     }
 
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        $customer = User::find($id);
-        $orderan = Orderan::where("user_id", $id)->get();
-        return view('Informasi.detailUser', compact('customer', 'orderan'));
+        $customer = User::findOrFail($id);
+
+        // Ambill riwayat orderan user
+        $orderan = Orderan::where("user_id", $id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // AMBIL RIWAYAT RESEP USER BERDASARKAN USER_ID
+        $reseps = Resep::where("user_id", $id)
+            ->with('staff')
+            ->orderByDesc('tanggal_pemeriksaan')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('Informasi.detailUser', compact('customer', 'orderan', 'reseps'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         try {
@@ -100,12 +92,10 @@ class CustomerController extends Controller
                 'name' => 'required|string|max:100',
                 'email' => 'nullable|email|max:100|unique:users,email,' . $id,
                 'phone' => 'required|regex:/^[0-9+\-\s()]*$/|max:20',
-
                 'alamat' => 'nullable|string|max:255',
                 'umur' => 'nullable',
                 'gender' => 'nullable|in:male,female,other',
             ]);
-
 
             $customer = User::findOrFail($id);
 
@@ -128,13 +118,10 @@ class CustomerController extends Controller
             return back()->with('error', 'Customer tidak ditemukan.');
         } catch (\Exception $e) {
             Log::error('Update customer gagal: ' . $e->getMessage());
-            return back()->with('error', 'Gagal memperbarui Customer.' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui Customer. ' . $e->getMessage());
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         try {

@@ -2,7 +2,7 @@
     <div class="card shadow-sm h-100">
         <div class="card-header fw-semibold d-flex justify-content-between align-items-center bg-white border-bottom">
             <div>
-                <i class="bi bi-search me-2"></i>Choose Customer
+                <i class="bi bi-search me-2"></i>Choose Customer 
             </div>
             <button type="button" class="btn btn-primary px-4 rounded-pill" id="btnAddCustomer">
                 Tambah Data

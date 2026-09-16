@@ -48,7 +48,7 @@ class FrameFactory extends Factory
             'harga_beli' => $hargaBeli,
             'harga' => $hargaJual,
             'laba' => $laba,
-            'stok' => $this->faker->numberBetween(10, 100), // stok awal gudang utama
+            // Baris 'stok' sudah dihapus di sini
         ];
     }
 }

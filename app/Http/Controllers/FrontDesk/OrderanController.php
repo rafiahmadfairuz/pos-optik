@@ -24,7 +24,7 @@ class OrderanController extends Controller
         $cabangId = session('cabang_id');
 
         $orderans = Orderan::where('cabang_id', $cabangId)
-            ->with('user') // jika ingin ambil data customer
+            ->with('user')
             ->orderByDesc('created_at')
             ->get();
 
@@ -46,37 +46,27 @@ class OrderanController extends Controller
 
     public function updateOrderan(Request $request, $id)
     {
-        $order = Orderan::find($id);
+        $order = Orderan::findOrFail($id);
         $isUserAdmin = (Auth::user()->role ?? '') == 'admin';
         $originalOrderStatus = $order->order_status;
         $requestedOrderStatus = $request->input('order_status');
 
+        // Cek Izin Edit Order Complete
         if ($originalOrderStatus == 'complete' && !$isUserAdmin) {
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk mengubah order yang sudah selesai.');
         }
 
-        $customerPayingCleaned = (float) str_replace(['.', ','], '', $request->input('customer_paying'));
-        $diskonCleaned = (float) str_replace(['.', ','], '', $request->input('diskon')); // ✅ Tambahan
+        // Bersihkan input angka nominal
+        $customerPayingCleaned = (float) preg_replace('/[^\d]/', '', (string) $request->input('customer_paying'));
+        $diskonCleaned = (float) preg_replace('/[^\d]/', '', (string) $request->input('diskon'));
+
         $request->merge([
             'customer_paying_cleaned' => $customerPayingCleaned,
-            'diskon_cleaned' => $diskonCleaned, // ✅ Tambahan
+            'diskon_cleaned' => $diskonCleaned,
         ]);
 
+        // Validasi HANYA untuk transaksi (Tidak ada lagi validasi resep disini)
         $validatedData = $request->validate([
-            'resep_right_sph_d' => 'nullable|numeric|between:-20,20|regex:/^\-?\d+(\.\d{1,2})?$/',
-            'resep_right_cyl_d' => 'nullable|numeric|between:-6,6|regex:/^\-?\d+(\.\d{1,2})?$/',
-            'resep_right_axis_d' => 'nullable|numeric|regex:/^\d{1,3}$/|between:0,180',
-            'resep_right_va_d' => 'nullable|numeric',
-            'resep_left_sph_d' => 'nullable|numeric|between:-20,20|regex:/^\-?\d+(\.\d{1,2})?$/',
-            'resep_left_cyl_d' => 'nullable|numeric|between:-6,6|regex:/^\-?\d+(\.\d{1,2})?$/',
-            'resep_left_axis_d' => 'nullable|numeric|regex:/^\d{1,3}$/|between:0,180',
-            'resep_left_va_d' => 'nullable|numeric',
-            'resep_add_right' => 'nullable|numeric|between:0.75,3.5|regex:/^\d+(\.\d{1,2})?$/',
-            'resep_add_left' => 'nullable|numeric|between:0.75,3.5|regex:/^\d+(\.\d{1,2})?$/',
-            'resep_pd_right' => 'nullable|numeric|between:25,40|regex:/^\d+(\.\d{1,2})?$/',
-            'resep_pd_left' => 'nullable|numeric|between:25,40|regex:/^\d+(\.\d{1,2})?$/',
-            'tanggal_pemeriksaan' => 'nullable',
-            'resep_notes' => 'nullable|string',
             'order_date' => 'required|date',
             'complete_date' => 'required|date',
             'staff_id' => 'required|exists:staff,id',
@@ -90,16 +80,17 @@ class OrderanController extends Controller
             'payment_method' => ['required', Rule::in(['cash', 'card'])],
             'payment_status' => ['required', Rule::in(['DP', 'unpaid', 'paid'])],
             'customer_paying_cleaned' => 'required|numeric|min:0',
-            'diskon_cleaned' => 'nullable|numeric|min:0', // ✅ Tambahan
-
+            'diskon_cleaned' => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
         try {
+            // Recalculate Total Items
             $calculatedTotal = $order->items->sum(function ($item) {
                 return $item->quantity * $item->price;
             });
 
+            // Get Asuransi Nominal
             $asuransiNominal = 0;
             if ($validatedData['payment_type'] == 'asuransi' && isset($validatedData['asuransi_id'])) {
                 $asuransi = Asuransi::find($validatedData['asuransi_id']);
@@ -108,22 +99,22 @@ class OrderanController extends Controller
                 }
             }
 
-            $diskon = $validatedData['diskon_cleaned'] ?? 0; // ✅ Tambahan
-            $perluDibayar = $calculatedTotal - $asuransiNominal - $diskon; // ✅ Update formula
+            $diskon = $validatedData['diskon_cleaned'] ?? 0;
+            $perluDibayar = max($calculatedTotal - $asuransiNominal - $diskon, 0);
 
-            // ✅ Tambahan akumulasi pembayaran
+            // Perhitungan Akumulasi Pembayaran / Kurang Bayar
             $customerPayingAkhir = $order->customer_paying + $validatedData['customer_paying_cleaned'];
-            $kurangBayar = max($perluDibayar - $customerPayingAkhir, 0); // ✅ Perbaikan
-            $kembalian = max($customerPayingAkhir - $perluDibayar, 0); // ✅ Perbaikan
+            $kurangBayar = max($perluDibayar - $customerPayingAkhir, 0);
+            $kembalian = max($customerPayingAkhir - $perluDibayar, 0);
 
+            // LOGIC PENGURANGAN STOK SAAT STATUS PENDING -> COMPLETE
             if ($requestedOrderStatus == 'complete' && $originalOrderStatus != 'complete') {
                 $currentCabangId = session('cabang_id');
 
                 foreach ($order->items as $item) {
-                    $itemableType = $item->itemable_type; // alias morphMap, contoh: 'frame', 'softlens'
+                    $itemableType = $item->itemable_type;
                     $itemableId   = $item->itemable_id;
 
-                    // 🔍 ambil model class dari morphMap
                     $morphMap = Relation::morphMap();
                     $modelClass = $morphMap[$itemableType] ?? null;
 
@@ -131,10 +122,10 @@ class OrderanController extends Controller
                         throw new \Exception("Tipe produk {$itemableType} tidak dikenali untuk item ID {$item->id}.");
                     }
 
-                    // 🔍 ambil stok produk cabang yang sesuai
                     $produkCabang = ProdukCabang::where('cabang_id', $currentCabangId)
                         ->where('itemable_id', $itemableId)
                         ->where('itemable_type', $itemableType)
+                        ->lockForUpdate()
                         ->first();
 
                     if (!$produkCabang) {
@@ -146,7 +137,7 @@ class OrderanController extends Controller
                         throw new \Exception("Stok {$namaProduk} tidak mencukupi. Diminta {$item->quantity}, tersedia {$produkCabang->stok}.");
                     }
 
-                    // 🔻 Kurangi stok cabang
+                    // Decrement stok
                     $produkCabang->decrement('stok', $item->quantity);
 
                     Log::info("[ORDER COMPLETE] Stok cabang dikurangi", [
@@ -158,54 +149,29 @@ class OrderanController extends Controller
                     ]);
                 }
 
-                // 🧾 Set status order
                 $order->complete_date = now();
                 if ($order->payment_status == 'unpaid') {
                     $order->payment_status = 'paid';
                 }
             }
 
-
+            // Update Data Orderan
             $order->update([
                 'order_date' => $validatedData['order_date'],
-                'complete_date' => $order->complete_date,
+                'complete_date' => $order->complete_date ?? $validatedData['complete_date'],
                 'staff_id' => $validatedData['staff_id'],
                 'payment_type' => $validatedData['payment_type'],
                 'asuransi_id' => $validatedData['asuransi_id'],
                 'order_status' => $validatedData['order_status'],
                 'payment_method' => $validatedData['payment_method'],
                 'payment_status' => $validatedData['payment_status'],
-                'customer_paying' => $customerPayingAkhir, // ✅ Akumulasi
-                'diskon' => $diskon, // ✅ Tambahan
-                'kurang_bayar' => $kurangBayar, // ✅ Tambahan
+                'customer_paying' => $customerPayingAkhir,
+                'diskon' => $diskon,
+                'kurang_bayar' => $kurangBayar,
                 'total' => $calculatedTotal,
                 'perlu_dibayar' => $perluDibayar,
                 'kembalian' => $kembalian,
             ]);
-
-            $resepData = [
-                'right_sph_d' => $validatedData['resep_right_sph_d'],
-                'right_cyl_d' => $validatedData['resep_right_cyl_d'],
-                'right_axis_d' => $validatedData['resep_right_axis_d'],
-                'right_va_d' => $validatedData['resep_right_va_d'],
-                'left_sph_d' => $validatedData['resep_left_sph_d'],
-                'left_cyl_d' => $validatedData['resep_left_cyl_d'],
-                'left_axis_d' => $validatedData['resep_left_axis_d'],
-                'left_va_d' => $validatedData['resep_left_va_d'],
-                'add_right' => $validatedData['resep_add_right'],
-                'add_left' => $validatedData['resep_add_left'],
-                'pd_right' => $validatedData['resep_pd_right'],
-                'pd_left' => $validatedData['resep_pd_left'],
-                'tanggal_pemeriksaan' => $validatedData['tanggal_pemeriksaan'],
-                'notes' => $validatedData['resep_notes'],
-
-            ];
-
-            if ($order->resep) {
-                $order->resep->update($resepData);
-            } else {
-                $order->resep()->create($resepData);
-            }
 
             DB::commit();
             return redirect()->back()->with('success', 'Order berhasil diperbarui!');
@@ -214,7 +180,6 @@ class OrderanController extends Controller
             return redirect()->back()->with('error', 'Gagal memperbarui order: ' . $e->getMessage());
         }
     }
-
 
     public function cetakNota($id)
     {
@@ -226,6 +191,7 @@ class OrderanController extends Controller
 
         return $pdf->stream('nota-' . $order->id . '.pdf');
     }
+
     public function returOrderan($id)
     {
         $order = Orderan::with(['items.itemable'])->findOrFail($id);
@@ -251,10 +217,9 @@ class OrderanController extends Controller
             DB::transaction(function () use ($order, $currentCabangId) {
 
                 foreach ($order->items as $item) {
-                    $itemableType = $item->itemable_type; // contoh: 'frame', 'softlens', dll (alias morphMap)
+                    $itemableType = $item->itemable_type;
                     $itemableId   = $item->itemable_id;
 
-                    // 🔍 Cek relasi morphMap untuk dapatkan model class
                     $morphMap = Relation::morphMap();
                     $modelClass = $morphMap[$itemableType] ?? null;
 
@@ -262,17 +227,16 @@ class OrderanController extends Controller
                         throw new \Exception("Tipe produk {$itemableType} tidak dikenali.");
                     }
 
-                    // 🔍 Ambil ProdukCabang sesuai tipe dan cabang aktif
                     $produkCabang = ProdukCabang::where('cabang_id', $currentCabangId)
                         ->where('itemable_id', $itemableId)
                         ->where('itemable_type', $itemableType)
+                        ->lockForUpdate()
                         ->first();
 
                     if (!$produkCabang) {
                         throw new \Exception("Produk cabang tidak ditemukan untuk item #{$item->id} ({$itemableType}).");
                     }
 
-                    // 🔁 Tambahkan stok kembali ke cabang
                     $qty = (int) $item->quantity;
                     $stokSebelum = (int) $produkCabang->stok;
                     $produkCabang->increment('stok', $qty);
@@ -283,7 +247,6 @@ class OrderanController extends Controller
                     Log::info("Stok: {$stokSebelum} ➕ {$qty} = {$produkCabang->stok}");
                 }
 
-                // 🚩 Tandai sudah diretur (jika kolom tersedia)
                 if (Schema::hasColumn('orderans', 'is_returned')) {
                     $order->update([
                         'is_returned' => true,

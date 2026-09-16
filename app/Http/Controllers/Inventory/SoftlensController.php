@@ -16,54 +16,39 @@ class SoftlensController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
         $search = $request->input('search');
+        $cabangId = Auth::user()->role === 'gudang_utama' ? 0 : session('cabang_id');
 
-        if ($user->role === 'gudang_utama') {
-            // Gudang utama -> ambil stok master
-            $query = Softlen::query();
+        $query = ProdukCabang::where('cabang_id', $cabangId)
+            ->where('itemable_type', 'softlens')
+            ->with('itemable');
 
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('merk', 'like', "%{$search}%")
-                        ->orWhere('tipe', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%")
-                        ->orWhere('warna', 'like', "%{$search}%");
-                });
-            }
-
-            $softlens = $query->get();
-        } else {
-            // Cabang -> ambil stok dari produk_cabangs
-            $cabangId = session('cabang_id');
-
-            $query = ProdukCabang::where('cabang_id', $cabangId)
-                ->where('itemable_type', 'softlens')
-                ->with('itemable');
-
-            if ($search) {
-                $query->whereHasMorph('itemable', [\App\Models\Softlen::class], function ($q) use ($search) {
-                    $q->where('merk', 'like', "%{$search}%")
-                        ->orWhere('warna', 'like', "%{$search}%")
-                        ->orWhere('tipe', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%");
-                });
-            }
-
-            $softlens = $query->get()->map(function ($stok) {
-                return (object) [
-                    'id' => $stok->itemable->id,
-                    'sku' => $stok->itemable->sku,
-                    'merk' => $stok->itemable->merk,
-                    'tipe' => $stok->itemable->tipe,
-                    'warna' => $stok->itemable->warna,
-                    'harga' => $stok->itemable->harga,
-                    'harga_beli' => $stok->itemable->harga_beli,
-                    'laba' => $stok->itemable->laba,
-                    'stok' => $stok->stok, // stok cabang
-                ];
+        if ($search) {
+            $query->whereHasMorph('itemable', [\App\Models\Softlen::class], function ($q) use ($search) {
+                $q->where('merk', 'like', "%{$search}%")
+                    ->orWhere('warna', 'like', "%{$search}%")
+                    ->orWhere('tipe', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
             });
         }
+
+        $softlens = $query->get()->map(function ($stok) {
+            if (!$stok->itemable) {
+                return null;
+            }
+
+            return (object) [
+                'id' => $stok->itemable->id,
+                'sku' => $stok->itemable->sku,
+                'merk' => $stok->itemable->merk,
+                'tipe' => $stok->itemable->tipe,
+                'warna' => $stok->itemable->warna,
+                'harga' => $stok->itemable->harga,
+                'harga_beli' => $stok->itemable->harga_beli,
+                'laba' => $stok->itemable->laba,
+                'stok' => $stok->stok,
+            ];
+        })->filter();
 
         return view('Inventory.softlens', compact('softlens'));
     }
@@ -85,12 +70,27 @@ class SoftlensController extends Controller
                 'warna' => 'required|string|max:50',
                 'harga_beli' => 'required|numeric|min:0',
                 'harga' => 'required|numeric|min:0',
-                'stok' => 'required|integer|min:0',
             ]);
 
             $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
-            Softlen::create($validated);
+            $softlens = Softlen::create($validated);
+
+            $cabangIds = [0, 1, 2, 3];
+            $dataCabang = [];
+
+            foreach ($cabangIds as $cabangId) {
+                $dataCabang[] = [
+                    'itemable_type' => 'softlens',
+                    'itemable_id' => $softlens->id,
+                    'cabang_id' => $cabangId,
+                    'stok' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            ProdukCabang::insert($dataCabang);
 
             return redirect()->route('softlens.index')->with('success', 'Softlens berhasil ditambahkan.');
         } catch (\Exception $e) {
@@ -107,8 +107,7 @@ class SoftlensController extends Controller
         try {
             $softlens = Softlen::findOrFail($id);
 
-            if (Auth::user()->role === 'gudang_utama') {
-                // Update master
+            if (Auth::user()->role === 'gudang_utama' || Auth::user()->role === 'admin') {
                 $validated = $request->validate([
                     'sku' => 'required|string|max:50|unique:softlens,sku,' . $id,
                     'merk' => 'required|string|max:100',
@@ -116,15 +115,18 @@ class SoftlensController extends Controller
                     'warna' => 'required|string|max:50',
                     'harga_beli' => 'required|numeric|min:0',
                     'harga' => 'required|numeric|min:0',
-                    'stok' => 'required|integer|min:0',
                 ]);
 
                 $softlens->update([
-                    ...$validated,
+                    'sku' => $validated['sku'],
+                    'merk' => $validated['merk'],
+                    'tipe' => $validated['tipe'],
+                    'warna' => $validated['warna'],
+                    'harga_beli' => $validated['harga_beli'],
+                    'harga' => $validated['harga'],
                     'laba' => $validated['harga'] - $validated['harga_beli'],
                 ]);
             } else {
-                // Update stok cabang
                 $validated = $request->validate([
                     'stok' => 'required|integer|min:0',
                 ]);
@@ -137,7 +139,7 @@ class SoftlensController extends Controller
                     'cabang_id' => $cabangId,
                 ]);
 
-                $stokCabang->qty = $validated['stok'];
+                $stokCabang->stok = $validated['stok'];
                 $stokCabang->save();
             }
 
@@ -154,13 +156,12 @@ class SoftlensController extends Controller
     public function destroy(string $id)
     {
         try {
-            if (Auth::user()->role !== 'gudang_utama') {
+           if (!in_array(Auth::user()->role, ['gudang_utama', 'admin'])) {
                 return back()->with('error', 'Hanya gudang utama yang bisa menghapus produk.');
             }
 
             $softlens = Softlen::findOrFail($id);
 
-            // Hapus stok cabang
             ProdukCabang::where('itemable_id', $id)
                 ->where('itemable_type', 'softlens')
                 ->delete();

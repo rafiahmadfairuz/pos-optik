@@ -30,19 +30,19 @@ class CustomerSearch extends Component
     }
 
 
-    public function render()
-    {
-        $customers = User::query()
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('name', 'like', "%{$this->search}%")
-                        ->orWhere('email', 'like', "%{$this->search}%")
-                        ->orWhere('phone', 'like', "%{$this->search}%");
-                });
-            })
-            ->paginate(3);
+public function render()
+{
+    $customers = User::query()
+        ->where('cabang_id', session('cabang_id'))
+        ->when($this->search, function ($query) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', "%{$this->search}%")
+                    ->orWhere('email', 'like', "%{$this->search}%")
+                    ->orWhere('phone', 'like', "%{$this->search}%");
+            });
+        })
+        ->paginate(5);
 
-
-        return view('livewire.customer-search', compact('customers'));
-    }
+    return view('livewire.customer-search', compact('customers'));
+}
 }

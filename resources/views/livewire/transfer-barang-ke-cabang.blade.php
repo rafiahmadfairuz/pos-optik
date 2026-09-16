@@ -6,15 +6,15 @@
             <div class="col-lg-5 col-md-12">
                 <div class="card shadow-sm h-100 border-0 rounded-3">
                     <div class="card-header bg-white fw-semibold border-bottom d-flex align-items-center">
-                        <i class="bi bi-person-circle fs-3  me-2"></i>
-                        Informasi Cabang
+                        <i class="bi bi-person-circle fs-3 me-2"></i>
+                        Informasi Cabang Tujuan
                     </div>
                     <div class="card-body py-4" style="min-height: 160px;">
                         @if ($cabang)
                             <div class="d-flex align-items-center mb-3 text-truncate" title="{{ $cabang['nama'] }}">
                                 <i class="bi bi-person-fill fs-4 text-primary me-3"></i>
                                 <div>
-                                    <div class="text-muted small">Name</div>
+                                    <div class="text-muted small">Nama Cabang</div>
                                     <strong class="fs-5">{{ $cabang['nama'] }}</strong>
                                 </div>
                             </div>
@@ -34,20 +34,17 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-lg-7 col-md-12">
                 <div class="card shadow-sm h-100">
-                    <div
-                        class="card-header fw-semibold d-flex justify-content-between align-items-center bg-white border-bottom">
+                    <div class="card-header fw-semibold d-flex justify-content-between align-items-center bg-white border-bottom">
                         <div>
                             <i class="bi bi-search me-2"></i>Pilih Cabang Yang Dituju
                         </div>
                     </div>
 
                     <div class="card-body p-3 position-relative">
-
-
-                        <div wire:loading.class="opacity-50" wire:target="selectCabang"
-                            class="table-responsive card-scroll">
+                        <div wire:loading.class="opacity-50" wire:target="selectCabang" class="table-responsive card-scroll">
                             <table class="table table-sm align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
@@ -57,30 +54,29 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($cabangs as $cabang)
+                                    @forelse ($cabangs as $c)
                                         <tr>
-                                            <td>{{ $cabang->nama }}</td>
-                                            <td>{{ $cabang->alamat }}</td>
+                                            <td>{{ $c->nama }}</td>
+                                            <td>{{ $c->alamat }}</td>
                                             <td>
-                                                <button wire:click="selectCabang({{ $cabang->id }})" class="btn"
-                                                    wire:loading.attr="disabled">
+                                                <button wire:click="selectCabang({{ $c->id }})" class="btn btn-sm btn-outline-primary" wire:loading.attr="disabled">
                                                     +
                                                 </button>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center">Cabang Tidak Ditemukan</td>
+                                            <td colspan="3" class="text-center">Cabang Tidak Ditemukan</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header fw-bold text-decoration-underline">Choose Product</div>
@@ -102,12 +98,12 @@
                         <table class="table table-sm table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th class="">Nama Produk</th>
+                                    <th>Nama Produk</th>
                                     <th class="text-center">Harga Jual</th>
-                                    @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                    @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                         <th class="text-center">Laba</th>
                                     @endif
-                                    <th class="text-center">Stok</th>
+                                    <th class="text-center">Stok Sisa</th>
                                     <th class="text-center">Desain</th>
                                     <th class="text-center">Tipe</th>
                                     <th class="text-center">Jenis</th>
@@ -118,10 +114,8 @@
                             <tbody>
                                 @forelse ($products as $product)
                                     <tr>
-                                        <td class="">
+                                        <td>
                                             {{ $product['name'] }}
-
-                                            {{-- Info tambahan untuk lensa --}}
                                             @if (in_array($product['type'], ['lensa_finish', 'lensa_khusus']))
                                                 <br>
                                                 <small class="text-muted">
@@ -137,14 +131,14 @@
                                             Rp. {{ number_format($product['price'], 0, ',', '.') }}
                                         </td>
 
-                                        @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                        @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                             <td class="text-center">
                                                 Rp. {{ number_format($product['laba'], 0, ',', '.') }}
                                             </td>
                                         @endif
 
                                         <td class="text-center">
-                                            {{ $product['stok'] }}
+                                            {{ $product['stock'] }}
                                         </td>
 
                                         <td class="text-center">
@@ -154,8 +148,9 @@
                                         <td class="text-center">
                                             {{ $product['tipe'] ?? 'N/A' }}
                                         </td>
+
                                         <td class="text-center">
-                                            {{ $product['type'] ?? 'N/A' }}
+                                            {{ $product['jenis'] ?? 'N/A' }}
                                         </td>
 
                                         <td class="text-center">
@@ -171,19 +166,17 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">Tidak ada produk ditemukan.</td>
+                                        <td colspan="9" class="text-center">Tidak ada produk ditemukan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
-
                     </div>
 
                     <div class="mt-2 d-flex justify-content-center">
                         @if ($products->hasPages())
                             <nav>
                                 <ul class="pagination pagination-sm mb-0">
-                                    {{-- Previous Page Link --}}
                                     @if ($products->onFirstPage())
                                         <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
                                     @else
@@ -192,18 +185,16 @@
                                                 class="page-link">&laquo;</a></li>
                                     @endif
 
-                                    {{-- Pagination Elements --}}
                                     @foreach ($products->links()->elements[0] as $page => $url)
                                         @if ($page == $products->currentPage())
-                                            <li class="page-item active"><span
-                                                    class="page-link">{{ $page }}</span></li>
+                                            <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
                                         @else
                                             <li class="page-item"><a href="#"
                                                     wire:click.prevent="gotoPage({{ $page }})"
                                                     class="page-link">{{ $page }}</a></li>
                                         @endif
                                     @endforeach
-                                    {{-- Next Page Link --}}
+
                                     @if ($products->hasMorePages())
                                         <li class="page-item"><a href="#"
                                                 wire:click.prevent="gotoPage({{ $products->currentPage() + 1 }})"
@@ -217,9 +208,9 @@
                     </div>
 
                 </div>
-
             </div>
         </div>
+
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header fw-bold text-decoration-underline">Produk Yang Dikirim</div>
@@ -243,12 +234,9 @@
                                         <td>{{ $item['name'] }}</td>
                                         <td>Rp. {{ number_format($item['price'] ?? 0, 0, ',', '.') }}</td>
                                         <td>{{ $item['quantity'] }}</td>
-                                        <td>Rp.
-                                            {{ number_format(($item['price'] ?? 0) * $item['quantity'], 0, ',', '.') }}
-                                        </td>
+                                        <td>Rp. {{ number_format(($item['price'] ?? 0) * $item['quantity'], 0, ',', '.') }}</td>
                                         <td>
-                                            <button class="btn btn-sm "
-                                                wire:click="decreaseQuantity({{ $index }})">-</button>
+                                            <button class="btn btn-sm btn-outline-danger" wire:click="decreaseQuantity({{ $index }})">-</button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -261,8 +249,8 @@
             </div>
         </div>
     </div>
-    <button type="button" class="btn btn-primary px-4" wire:click="transfer">
+
+    <button type="button" class="btn btn-primary px-4 mt-3" wire:click="transfer">
         <i class="bi bi-check-circle me-1"></i> Kirim Barang
     </button>
-
 </div>

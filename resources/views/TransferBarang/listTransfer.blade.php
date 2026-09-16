@@ -25,7 +25,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link border-0" href="#" data-status="tidak">
-                            Tidak Retur <span class="text-muted">{{ $transfers->where('retur', false)->count() }}</span>
+                            Pengiriman Reguler <span class="text-muted">{{ $transfers->where('retur', false)->count() }}</span>
                         </a>
                     </li>
                 </ul>
@@ -35,7 +35,8 @@
                         <thead class="table-light">
                             <tr>
                                 <th>ID</th>
-                                <th>Cabang</th>
+                                <th>Asal Cabang</th>
+                                <th>Tujuan Cabang</th>
                                 <th>Tanggal</th>
                                 <th>Kode</th>
                                 <th>Status</th>
@@ -47,13 +48,20 @@
                                 <tr data-status="{{ $transfer->retur ? 'retur' : 'tidak' }}">
                                     <td>{{ $transfer->id }}</td>
                                     <td>
-                                        <strong>{{ $transfer->cabang->nama ?? 'Unknown' }}</strong>
+                                        <strong>
+                                            {{ $transfer->from_cabang_id == 0 ? 'Gudang Utama' : ($transfer->fromCabang->nama ?? 'Unknown') }}
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <strong>
+                                            {{ $transfer->to_cabang_id == 0 ? 'Gudang Utama' : ($transfer->toCabang->nama ?? 'Unknown') }}
+                                        </strong>
                                     </td>
                                     <td>{{ \Carbon\Carbon::parse($transfer->tanggal)->format('Y-m-d') }}</td>
                                     <td>{{ $transfer->kode }}</td>
                                     <td>
                                         <span class="badge {{ $transfer->retur ? 'bg-danger' : 'bg-success' }}">
-                                            {{ $transfer->retur ? 'Retur' : 'Tidak Retur' }}
+                                            {{ $transfer->retur ? 'Retur' : 'Pengiriman' }}
                                         </span>
                                     </td>
                                     <td class="text-center">

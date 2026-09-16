@@ -2,15 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Frame;
 use App\Models\Orderan;
-use App\Models\Softlen;
 use App\Models\OrderItems;
-use App\Models\Accessories;
-use App\Models\LensaFinish;
-use App\Models\LensaKhusus;
+use App\Models\ProdukCabang;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class OrderItemSeeder extends Seeder
 {
@@ -19,32 +14,37 @@ class OrderItemSeeder extends Seeder
      */
     public function run(): void
     {
-        $groups = [
-            'frame'         => Frame::all(),
-            'lensa_finish'  => LensaFinish::all(),
-            'lensa_khusus'  => LensaKhusus::all(),
-            'accessory'     => Accessories::all(),
-            'softlens'      => Softlen::all(),
-        ];
-
         foreach (Orderan::all() as $order) {
+
             $totalLaba = 0;
 
+            // Setiap orderan dibuatkan 1 sampai 5 item belanjaan
             foreach (range(1, rand(1, 5)) as $_) {
-                $type = array_rand($groups);
-                $collection = $groups[$type];
 
-                if ($collection->isEmpty()) {
-                    continue; // Lewati kalau kosong
+                // Ambil produk cabang yang stoknya masih tersedia
+                $produkCabang = ProdukCabang::where('cabang_id', $order->cabang_id)
+                    ->where('stok', '>', 0)
+                    ->inRandomOrder()
+                    ->first();
+
+                // Jika tidak ada produk, lanjut ke item berikutnya
+                if (!$produkCabang) {
+                    continue;
                 }
 
-                $product = $collection->random();
+                // Ambil data produk melalui relasi morph
+                $product = $produkCabang->itemable;
+
+                if (!$product) {
+                    continue;
+                }
 
                 $quantity = rand(1, 3);
                 $price = $product->harga ?? 100000;
                 $subtotal = $quantity * $price;
 
-                $labaPerItem = ($product->harga ?? 0) - ($product->harga_beli ?? 0);
+                $hargaBeli = $product->harga_beli ?? 0;
+                $labaPerItem = $price - $hargaBeli;
                 $laba = $labaPerItem * $quantity;
 
                 $totalLaba += $laba;
@@ -52,13 +52,17 @@ class OrderItemSeeder extends Seeder
                 OrderItems::create([
                     'order_id'      => $order->id,
                     'itemable_id'   => $product->id,
-                    'itemable_type' => $type,
+                    'itemable_type' => $produkCabang->itemable_type,
                     'quantity'      => $quantity,
                     'price'         => $price,
                     'subtotal'      => $subtotal,
                 ]);
+
+                // Jika ingin stok berkurang saat seeding, aktifkan baris ini
+                // $produkCabang->decrement('stok', $quantity);
             }
 
+            // Update total laba order
             $order->update([
                 'laba_total' => $totalLaba,
             ]);

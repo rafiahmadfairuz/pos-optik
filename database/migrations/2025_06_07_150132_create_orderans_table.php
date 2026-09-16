@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade');
+            $table->foreignId('resep_id')->nullable()->constrained('reseps')->nullOnDelete();;
             $table->date('order_date');
             $table->date('complete_date')->nullable();
             $table->foreignId('staff_id')->constrained('staff')->onDelete('cascade');

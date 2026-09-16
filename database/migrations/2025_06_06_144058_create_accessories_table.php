@@ -19,7 +19,6 @@ return new class extends Migration
             $table->bigInteger('harga');
             $table->bigInteger('harga_beli');
             $table->bigInteger('laba');
-            $table->unsignedInteger('stok');
             $table->timestamps();
         });
     }

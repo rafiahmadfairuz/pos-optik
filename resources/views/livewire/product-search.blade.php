@@ -19,9 +19,9 @@
                 <table class="table table-sm table-hover mb-0">
                     <thead>
                         <tr>
-                            <th class="">Nama Produk</th>
+                            <th>Nama Produk</th>
                             <th class="text-center">Harga Jual</th>
-                            @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                            @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                 <th class="text-center">Laba</th>
                             @endif
                             <th class="text-center">Stok</th>
@@ -35,10 +35,8 @@
                     <tbody>
                         @forelse ($products as $product)
                             <tr>
-                                <td class="">
+                                <td>
                                     {{ $product['name'] }}
-
-                                    {{-- Info tambahan untuk lensa --}}
                                     @if (in_array($product['type'], ['lensa_finish', 'lensa_khusus']))
                                         <br>
                                         <small class="text-muted">
@@ -54,7 +52,7 @@
                                     Rp. {{ number_format($product['price'], 0, ',', '.') }}
                                 </td>
 
-                                @if (in_array(Auth::user()->role, ['admin', 'gudang']))
+                                @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                     <td class="text-center">
                                         Rp. {{ number_format($product['laba'], 0, ',', '.') }}
                                     </td>
@@ -71,8 +69,9 @@
                                 <td class="text-center">
                                     {{ $product['tipe'] ?? 'N/A' }}
                                 </td>
+
                                 <td class="text-center">
-                                    {{ $product['type'] ?? 'N/A' }}
+                                    {{ $product['jenis'] ?? 'N/A' }}
                                 </td>
 
                                 <td class="text-center">
@@ -88,21 +87,17 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center">Tidak ada produk ditemukan.</td>
+                                <td colspan="9" class="text-center">Tidak ada produk ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
-
             </div>
 
-
-            <!-- pagination tetap sama -->
             <div class="mt-2 d-flex justify-content-center">
                 @if ($products->hasPages())
                     <nav>
                         <ul class="pagination pagination-sm mb-0">
-                            {{-- Previous Page Link --}}
                             @if ($products->onFirstPage())
                                 <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
                             @else
@@ -111,11 +106,9 @@
                                         class="page-link">&laquo;</a></li>
                             @endif
 
-                            {{-- Pagination Elements --}}
                             @foreach ($products->links()->elements[0] as $page => $url)
                                 @if ($page == $products->currentPage())
-                                    <li class="page-item active"><span class="page-link">{{ $page }}</span>
-                                    </li>
+                                    <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
                                 @else
                                     <li class="page-item"><a href="#"
                                             wire:click.prevent="gotoPage({{ $page }})"
@@ -123,7 +116,6 @@
                                 @endif
                             @endforeach
 
-                            {{-- Next Page Link --}}
                             @if ($products->hasMorePages())
                                 <li class="page-item"><a href="#"
                                         wire:click.prevent="gotoPage({{ $products->currentPage() + 1 }})"
@@ -137,6 +129,5 @@
             </div>
 
         </div>
-
     </div>
 </div>

@@ -46,4 +46,9 @@ class User extends Authenticatable
     {
         return \Carbon\Carbon::parse($value)->age;
     }
+
+    public function resep()
+    {
+        return $this->hasMany(Resep::class, 'user_id');
+    }
 }

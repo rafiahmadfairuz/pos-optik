@@ -16,59 +16,44 @@ class LensaKhususController extends Controller
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
         $search = $request->input('search');
+        $cabangId = in_array(Auth::user()->role, ['gudang_utama', 'admin']) ? 0 : session('cabang_id');
 
-        if ($user->role === 'gudang_utama') {
-            // Gudang utama -> ambil stok master
-            $query = LensaKhusus::query();
+        $query = ProdukCabang::where('cabang_id', $cabangId)
+            ->where('itemable_type', 'lensa_khusus')
+            ->with('itemable');
 
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('merk', 'like', "%{$search}%")
-                        ->orWhere('tipe', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%")
-                        ->orWhere('desain', 'like', "%{$search}%");
-                });
-            }
-
-            $lensaKhusus = $query->get();
-        } else {
-            // Cabang -> ambil stok dari produk_cabangs
-            $cabangId = session('cabang_id');
-
-            $query = ProdukCabang::where('cabang_id', $cabangId)
-                ->where('itemable_type', 'lensa_khusus')
-                ->with('itemable');
-
-            if ($search) {
-                $query->whereHasMorph('itemable', [\App\Models\LensaKhusus::class], function ($q) use ($search) {
-                    $q->where('merk', 'like', "%{$search}%")
-                        ->orWhere('desain', 'like', "%{$search}%")
-                        ->orWhere('tipe', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%");
-                });
-            }
-
-            $lensaKhusus = $query->get()->map(function ($stok) {
-                return (object) [
-                    'id' => $stok->itemable->id,
-                    'sku' => $stok->itemable->sku,
-                    'merk' => $stok->itemable->merk,
-                    'desain' => $stok->itemable->desain,
-                    'tipe' => $stok->itemable->tipe,
-                    'sph' => $stok->itemable->sph,
-                    'cyl' => $stok->itemable->cyl,
-                    'add' => $stok->itemable->add,
-                    'harga' => $stok->itemable->harga,
-                    'harga_beli' => $stok->itemable->harga_beli,
-                    'laba' => $stok->itemable->laba,
-                    'estimasi_selesai_hari' => $stok->itemable->estimasi_selesai_hari,
-                    'status_pesanan' => $stok->itemable->status_pesanan,
-                    'stok' => $stok->stok, // stok cabang
-                ];
+        if ($search) {
+            $query->whereHasMorph('itemable', [\App\Models\LensaKhusus::class], function ($q) use ($search) {
+                $q->where('merk', 'like', "%{$search}%")
+                    ->orWhere('desain', 'like', "%{$search}%")
+                    ->orWhere('tipe', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
             });
         }
+
+        $lensaKhusus = $query->get()->map(function ($stok) {
+            if (!$stok->itemable) {
+                return null;
+            }
+
+            return (object) [
+                'id' => $stok->itemable->id,
+                'sku' => $stok->itemable->sku,
+                'merk' => $stok->itemable->merk,
+                'desain' => $stok->itemable->desain,
+                'tipe' => $stok->itemable->tipe,
+                'sph' => $stok->itemable->sph,
+                'cyl' => $stok->itemable->cyl,
+                'add' => $stok->itemable->add,
+                'harga' => $stok->itemable->harga,
+                'harga_beli' => $stok->itemable->harga_beli,
+                'laba' => $stok->itemable->laba,
+                'estimasi_selesai_hari' => $stok->itemable->estimasi_selesai_hari,
+                'status_pesanan' => $stok->itemable->status_pesanan,
+                'stok' => $stok->stok,
+            ];
+        })->filter();
 
         return view('Inventory.lensaKhusus', compact('lensaKhusus'));
     }
@@ -79,8 +64,8 @@ class LensaKhususController extends Controller
     public function store(Request $request)
     {
         try {
-            if (Auth::user()->role !== 'gudang_utama') {
-                return back()->with('error', 'Hanya gudang utama yang bisa menambahkan produk baru.');
+            if (!in_array(Auth::user()->role, ['gudang_utama', 'admin'])) {
+                return back()->with('error', 'Hanya gudang utama dan admin yang bisa menambahkan produk baru.');
             }
 
             $validated = $request->validate([
@@ -91,7 +76,6 @@ class LensaKhususController extends Controller
                 'sph' => 'required|numeric',
                 'cyl' => 'required|numeric',
                 'add' => 'nullable|numeric',
-                'stok' => 'required|integer|min:0',
                 'harga_beli' => 'required|numeric|min:0',
                 'harga' => 'required|numeric|min:0',
                 'estimasi_selesai_hari' => 'nullable|integer|min:1',
@@ -100,7 +84,23 @@ class LensaKhususController extends Controller
 
             $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
-            LensaKhusus::create($validated);
+            $lensa = LensaKhusus::create($validated);
+
+            $cabangIds = [0, 1, 2, 3];
+            $dataCabang = [];
+
+            foreach ($cabangIds as $cabangId) {
+                $dataCabang[] = [
+                    'itemable_type' => 'lensa_khusus',
+                    'itemable_id' => $lensa->id,
+                    'cabang_id' => $cabangId,
+                    'stok' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            ProdukCabang::insert($dataCabang);
 
             return redirect()->route('lensaKhusus.index')->with('success', 'Lensa Khusus berhasil ditambahkan.');
         } catch (\Exception $e) {
@@ -117,8 +117,7 @@ class LensaKhususController extends Controller
         try {
             $lensa = LensaKhusus::findOrFail($id);
 
-            if (Auth::user()->role === 'gudang_utama') {
-                // Update master
+            if (in_array(Auth::user()->role, ['gudang_utama', 'admin'])) {
                 $validated = $request->validate([
                     'sku' => 'required|string|max:50|unique:lensa_khususes,sku,' . $id,
                     'merk' => 'required|string|max:100',
@@ -127,7 +126,6 @@ class LensaKhususController extends Controller
                     'sph' => 'required|numeric',
                     'cyl' => 'required|numeric',
                     'add' => 'nullable|numeric',
-                    'stok' => 'required|integer|min:0',
                     'harga_beli' => 'required|numeric|min:0',
                     'harga' => 'required|numeric|min:0',
                     'estimasi_selesai_hari' => 'nullable|integer|min:1',
@@ -135,11 +133,20 @@ class LensaKhususController extends Controller
                 ]);
 
                 $lensa->update([
-                    ...$validated,
+                    'sku' => $validated['sku'],
+                    'merk' => $validated['merk'],
+                    'desain' => $validated['desain'],
+                    'tipe' => $validated['tipe'],
+                    'sph' => $validated['sph'],
+                    'cyl' => $validated['cyl'],
+                    'add' => $validated['add'] ?? null,
+                    'harga_beli' => $validated['harga_beli'],
+                    'harga' => $validated['harga'],
                     'laba' => $validated['harga'] - $validated['harga_beli'],
+                    'estimasi_selesai_hari' => $validated['estimasi_selesai_hari'] ?? null,
+                    'status_pesanan' => $validated['status_pesanan'],
                 ]);
             } else {
-                // Update stok cabang
                 $validated = $request->validate([
                     'stok' => 'required|integer|min:0',
                 ]);
@@ -152,7 +159,7 @@ class LensaKhususController extends Controller
                     'cabang_id' => $cabangId,
                 ]);
 
-                $stokCabang->qty = $validated['stok'];
+                $stokCabang->stok = $validated['stok'];
                 $stokCabang->save();
             }
 
@@ -169,13 +176,12 @@ class LensaKhususController extends Controller
     public function destroy(string $id)
     {
         try {
-            if (Auth::user()->role !== 'gudang_utama') {
-                return back()->with('error', 'Hanya gudang utama yang bisa menghapus produk.');
+            if (!in_array(Auth::user()->role, ['gudang_utama', 'admin'])) {
+                return back()->with('error', 'Hanya gudang utama dan admin yang bisa menghapus produk.');
             }
 
             $lensa = LensaKhusus::findOrFail($id);
 
-            // Hapus stok cabang
             ProdukCabang::where('itemable_id', $id)
                 ->where('itemable_type', 'lensa_khusus')
                 ->delete();

@@ -46,7 +46,7 @@ class AccessoriesFactory extends Factory
             'harga_beli' => $hargaBeli,
             'harga' => $hargaJual,
             'laba' => $laba,
-            'stok' => $this->faker->numberBetween(20, 100), 
+            // Kolom 'stok' dihapus dari sini karena dikelola di tabel produk_cabangs
         ];
     }
 }

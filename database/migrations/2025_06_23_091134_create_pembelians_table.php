@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('pembelians', function (Blueprint $table) {
             $table->id();
+            // Gunakan foreignId dengan constrained karena ID 0 sudah ada di tabel cabangs
+            $table->foreignId('cabang_id')->default(0)->constrained('cabangs')->onDelete('cascade');
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('cascade');
             $table->date('tanggal')->default(now());
             $table->string('kode')->unique();

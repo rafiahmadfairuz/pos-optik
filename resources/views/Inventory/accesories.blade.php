@@ -95,7 +95,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-md-6">
+                                {{-- <div class="col-md-6">
                                     <label for="accessoriesStok" class="form-label">Stok</label>
                                     <input type="number" class="form-control @error('stok') is-invalid @enderror"
                                         id="accessoriesStok" name="stok" value="{{ old('stok') }}">
@@ -106,7 +106,7 @@
                                                 class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
-                                </div>
+                                </div> --}}
                             </div>
 
                             <div class="mt-4 d-flex justify-content-end gap-2">
@@ -276,7 +276,7 @@
                     accessoriesJenis.value = tr.dataset.jenis;
                     if (accessoriesHargaBeli) accessoriesHargaBeli.value = tr.dataset.harga_beli;
                     accessoriesHarga.value = tr.dataset.harga;
-                    accessoriesStok.value = tr.dataset.stok;
+                    // accessoriesStok.value = tr.dataset.stok;
 
                     formContainer.classList.remove('d-none');
                     accessoriesName.focus();

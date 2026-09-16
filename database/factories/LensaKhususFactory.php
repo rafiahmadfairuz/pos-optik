@@ -49,7 +49,7 @@ class LensaKhususFactory extends Factory
             'harga_beli' => $hargaBeli,
             'harga' => $hargaJual,
             'laba' => $laba,
-            'stok' => $this->faker->numberBetween(2, 20), // stok gudang utama
+            // Baris 'stok' sudah dihapus di sini
             'estimasi_selesai_hari' => $this->faker->numberBetween(2, 14),
             'status_pesanan' => $this->faker->randomElement(['menunggu', 'proses', 'selesai']),
         ];

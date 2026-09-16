@@ -16,7 +16,6 @@ return new class extends Migration
             $table->morphs('itemable');
             $table->foreignId('cabang_id')->references('id')->on('cabangs')->onDelete('cascade');
             $table->integer('stok');
-            // $table->bigInteger('harga_jual')->nullable();
             $table->timestamps();
         });
     }

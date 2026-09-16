@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('cabangs', function (Blueprint $table) {
-            $table->id();
+            // Jangan pakai $table->id() karena auto-increment mulai dari 1
+            $table->unsignedBigInteger('id')->primary();
             $table->string("nama");
             $table->string("slug")->unique();
             $table->string("alamat");

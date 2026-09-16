@@ -11,14 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transfers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('cabang_id')->constrained('cabangs')->onDelete('cascade'); 
-            $table->date('tanggal')->default(now());
-            $table->string('kode')->unique();
-            $table->boolean('retur')->default(false);
-            $table->timestamps();
-        });
+      Schema::create('transfers', function (Blueprint $table) {
+    $table->id();
+    $table->unsignedBigInteger('from_cabang_id');
+    $table->unsignedBigInteger('to_cabang_id');
+    $table->date('tanggal')->default(now());
+    $table->string('kode')->unique();
+
+    // UBAH DARI BOOLEAN RETUR MENJADI STRING STATUS
+    // Nilai status: 'completed', 'returned', 'transferred_out'
+    $table->string('status')->default('completed');
+
+    $table->timestamps();
+
+    $table->foreign('from_cabang_id')->references('id')->on('cabangs')->onDelete('cascade');
+    $table->foreign('to_cabang_id')->references('id')->on('cabangs')->onDelete('cascade');
+});
     }
 
     /**

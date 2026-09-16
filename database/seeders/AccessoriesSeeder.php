@@ -7,7 +7,6 @@ use App\Models\Accessories;
 use App\Models\ProdukCabang;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class AccessoriesSeeder extends Seeder
 {
@@ -16,27 +15,28 @@ class AccessoriesSeeder extends Seeder
      */
     public function run(): void
     {
-        $accessories = Accessories::factory(30)->create();
+        $accessories = Accessories::factory(5)->create();
+
+        $morphType = array_search(Accessories::class, Relation::morphMap()) ?: Accessories::class;
 
         foreach ($accessories as $acc) {
-            $stokGudang = $acc->stok;
-            $totalCabang = 0;
-
             foreach (Cabang::all() as $cabang) {
 
-                $qty = rand(0, 10);
-                $totalCabang += $qty;
+                // Kalau cabang pusat (ID 0), stok digedein buat gudang utama
+                if ($cabang->id == 0) {
+                    $qty = rand(10, 50);
+                } else {
+                    // Cabang lain random, biar ada yang stoknya 0 sesuai mau client
+                    $qty = rand(0, 10);
+                }
 
                 ProdukCabang::create([
                     'itemable_id' => $acc->id,
-                    'itemable_type' => array_search(Accessories::class, Relation::morphMap()),
+                    'itemable_type' => $morphType,
                     'cabang_id' => $cabang->id,
                     'stok' => $qty,
                 ]);
             }
-            $acc->update([
-                'stok' => max(0, $stokGudang - $totalCabang),
-            ]);
         }
     }
 }

@@ -7,7 +7,6 @@ use App\Models\Softlen;
 use App\Models\ProdukCabang;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class SoftlenSeeder extends Seeder
 {
@@ -16,27 +15,28 @@ class SoftlenSeeder extends Seeder
      */
     public function run(): void
     {
-        $softlens = Softlen::factory(30)->create();
+        $softlens = Softlen::factory(5)->create();
+
+        $morphType = array_search(Softlen::class, Relation::morphMap()) ?: Softlen::class;
 
         foreach ($softlens as $sl) {
-            $stokGudang = $sl->stok;
-            $totalCabang = 0;
-
             foreach (Cabang::all() as $cabang) {
-                $qty = rand(0, 15);
-                $totalCabang += $qty;
+
+                // Kalau cabang pusat (ID 0), stok digedein buat gudang utama
+                if ($cabang->id == 0) {
+                    $qty = rand(10, 50);
+                } else {
+                    // Cabang lain random, biar ada yang stoknya 0 sesuai mau client
+                    $qty = rand(0, 10);
+                }
 
                 ProdukCabang::create([
                     'itemable_id' => $sl->id,
-                    'itemable_type' => array_search(Softlen::class, Relation::morphMap()),
+                    'itemable_type' => $morphType,
                     'cabang_id' => $cabang->id,
                     'stok' => $qty,
                 ]);
             }
-
-            $sl->update([
-                'stok' => max(0, $stokGudang - $totalCabang),
-            ]);
         }
     }
 }

@@ -16,6 +16,7 @@ class PembelianFactory extends Factory
     public function definition(): array
     {
         return [
+            'cabang_id' => 0, // Pastikan pembelian supplier masuk ke Gudang Pusat (ID 0)
             'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
             'tanggal' => now(),
             'kode' => 'PB-' . now()->format('Ymd') . '-' . str_pad($this->faker->unique()->numberBetween(1, 9999), 4, '0', STR_PAD_LEFT),

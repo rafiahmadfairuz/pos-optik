@@ -3,12 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Staff;
 use App\Models\Cabang;
+use App\Models\Resep;
 use App\Models\Orderan;
 use App\Models\Asuransi;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class OrderanSeeder extends Seeder
 {
@@ -17,13 +16,46 @@ class OrderanSeeder extends Seeder
      */
     public function run(): void
     {
-        foreach (range(1, 70) as $i) {
-            Orderan::factory()->create([
-                'user_id' => User::inRandomOrder()->first()->id,
-                'cabang_id' => Cabang::inRandomOrder()->first()->id,
-                'staff_id' => Staff::inRandomOrder()->first()->id,
-                'asuransi_id' => Asuransi::inRandomOrder()->first()->id,
-            ]);
+        // Asuransi bersifat global
+        $asuransiList = Asuransi::all();
+
+        // Loop setiap cabang
+        foreach (Cabang::all() as $cabang) {
+
+            // Ambil user pada cabang tersebut
+            $usersCabang = User::where('cabang_id', $cabang->id)->get();
+
+            // Jika tidak ada user, skip
+            if ($usersCabang->isEmpty()) {
+                continue;
+            }
+
+            // Buat 5 orderan
+            for ($i = 1; $i <= 5; $i++) {
+
+                // Pilih user secara acak
+                $user = $usersCabang->random();
+
+                // Ambil salah satu resep milik user tersebut
+                $resep = Resep::where('user_id', $user->id)
+                    ->inRandomOrder()
+                    ->first();
+
+                // Jika user belum punya resep, lewati
+                if (!$resep) {
+                    continue;
+                }
+
+                Orderan::factory()->create([
+                    'cabang_id'   => $cabang->id,
+                    'user_id'     => $user->id,
+                    'resep_id'    => $resep->id,
+                    'staff_id'    => $resep->staff_id,
+                    'asuransi_id' => $asuransiList->isNotEmpty()
+                        ? $asuransiList->random()->id
+                        : null,
+                ]);
+            }
         }
     }
 }

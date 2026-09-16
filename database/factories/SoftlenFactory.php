@@ -47,7 +47,7 @@ class SoftlenFactory extends Factory
             'harga_beli' => $hargaBeli,
             'harga' => $hargaJual,
             'laba' => $laba,
-            'stok' => $this->faker->numberBetween(10, 100), 
+            // Baris 'stok' sudah dihapus di sini
         ];
     }
 }

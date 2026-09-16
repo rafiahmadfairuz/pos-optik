@@ -18,6 +18,10 @@ class Pembelian extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
+    public function cabang()
+    {
+        return $this->belongsTo(Cabang::class);
+    }
     public function items()
     {
         return $this->hasMany(PembelianItem::class);

@@ -1,5 +1,5 @@
 <?php
-
+namespace Database\Seeders;
 use App\Models\ProdukCabang;
 use App\Models\Supplier;
 use Illuminate\Database\Seeder;
@@ -33,9 +33,9 @@ class DatabaseSeeder extends Seeder
             LensaKhususSeeder::class,
             AccessoriesSeeder::class,
             SoftlenSeeder::class,
+            ResepSeeder::class,
             OrderanSeeder::class,
             OrderItemSeeder::class,
-            ResepSeeder::class,
             SupplierSeeder::class,
             PembelianSeeder::class,
             TransferSeeder::class

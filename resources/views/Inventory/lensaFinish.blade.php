@@ -140,7 +140,7 @@
                                 </div>
 
 
-                                <div class="col-md-3">
+                                {{-- <div class="col-md-3">
                                     <label for="stok" class="form-label">Stok</label>
                                     <input type="number" class="form-control @error('stok') is-invalid @enderror"
                                         id="stok" name="stok" value="{{ old('stok') }}">
@@ -151,7 +151,7 @@
                                                 class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
-                                </div>
+                                </div> --}}
 
                                 @if (in_array(Auth::user()->role, ['admin', 'gudang_utama']))
                                     <div class="col-md-3">
@@ -351,7 +351,7 @@
                     form.sph.value = tr.dataset.sph;
                     form.cyl.value = tr.dataset.cyl;
                     form.add.value = tr.dataset.add;
-                    form.stok.value = tr.dataset.stok;
+                    // form.stok.value = tr.dataset.stok;
                     form.harga_beli.value = tr.dataset.harga_beli;
 
                     form.harga.value = tr.dataset.harga;

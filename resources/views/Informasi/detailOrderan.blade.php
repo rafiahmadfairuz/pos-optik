@@ -12,12 +12,18 @@
             top: 0;
             background: #fff;
         }
+
+        .bg-readonly {
+            background-color: #e9ecef !important;
+        }
     </style>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     @php
-        $isDisabled = $order->order_status == 'complete' && (Auth::user()->role ?? '') != 'admin';
+        // Form dikunci jika orderan sudah Complete (non-admin) ATAU jika orderan sudah di-retur
+        $isDisabled = ($order->order_status == 'complete' && (Auth::user()->role ?? '') != 'admin') || $order->is_returned;
+        $hasResep = !is_null($order->resep_id) && $order->resep;
     @endphp
 
     <div class="container-fluid py-3">
@@ -25,14 +31,14 @@
             <i class="bi bi-card-list me-2"></i>
             Detail Orderan
             @if ($order->is_returned)
-                <span class="text-danger">ORDERAN TELAH DIRETUR</span>
+                <span class="badge bg-danger fs-6 ms-2">TELAH DIRETUR</span>
             @endif
         </h2>
 
-
+        <!-- DATA USER -->
         <div class="page-header">
             <div class="page-title">
-                <h1 class="fw-bold">Data User</h1>
+                <h4 class="fw-bold text-secondary">Data User</h4>
             </div>
         </div>
 
@@ -43,7 +49,7 @@
                         <i class="bi bi-person-fill text-primary fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">Nama</div>
-                            <div class="fw-bold">{{ $order->user->name }}</div>
+                            <div class="fw-bold">{{ $order->user->name ?? '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -54,7 +60,7 @@
                         <i class="bi bi-envelope-fill text-success fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">Email</div>
-                            <div class="fw-bold">{{ $order->user->email }}</div>
+                            <div class="fw-bold">{{ $order->user->email ?? '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -65,7 +71,7 @@
                         <i class="bi bi-telephone-fill text-danger fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">No Telp</div>
-                            <div class="fw-bold">{{ $order->user->phone }}</div>
+                            <div class="fw-bold">{{ $order->user->phone ?? '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -78,7 +84,7 @@
                         <i class="bi bi-geo-alt-fill text-warning fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">Alamat</div>
-                            <div class="fw-bold">{{ $order->user->alamat }}</div>
+                            <div class="fw-bold">{{ $order->user->alamat ?? '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -91,7 +97,7 @@
                         <i class="bi bi-calendar-fill text-info fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">Umur</div>
-                            <div class="fw-bold">{{ $order->user->umur }} tahun</div>
+                            <div class="fw-bold">{{ $order->user->umur ? $order->user->umur . ' tahun' : '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -104,26 +110,25 @@
                         <i class="bi bi-gender-ambiguous text-secondary fs-3 me-3"></i>
                         <div>
                             <div class="fw-semibold text-muted small">Gender</div>
-                            <div class="fw-bold">{{ ucfirst($order->user->gender) }}</div>
+                            <div class="fw-bold">{{ ucfirst($order->user->gender ?? '-') }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-
         <div class="row g-3">
-            {{-- Formulir utama untuk semua input yang dapat diupdate --}}
             <form action="{{ route('orderan.update', $order->id) }}" method="POST" class="col-12 row g-3">
                 @csrf
                 @method('PUT')
 
+                <!-- KERANJANG BELANJA -->
                 <div class="col-12">
                     <div class="card shadow-sm border-0">
                         <div class="card-header fw-bold text-decoration-underline d-flex align-items-center gap-2">
                             <i class="bi bi-cart4"></i> Keranjang Belanja
                         </div>
-                        <table class="table table-hover align-middle p-1">
+                        <table class="table table-hover align-middle p-1 mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Item</th>
@@ -133,239 +138,154 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($order->items as $item)
+                                @forelse ($order->items as $item)
                                     <tr>
                                         <td>
                                             @php
-                                                $type = class_basename($item->itemable_type ?? ''); // Safely get class_basename
-                                                $merk = $item->itemable->merk ?? 'Merk Tidak Diketahui / Barang Telah Dihapus';
+                                                $type = class_basename($item->itemable_type ?? '');
+                                                $merk = $item->itemable->merk ?? ($item->itemable->nama ?? 'Barang Telah Dihapus');
                                                 $tipeProduk = $item->itemable->type ?? null;
+                                                $sku = $item->itemable->sku ?? null;
                                             @endphp
 
-                                            {{ $merk }}
+                                            <strong>{{ $merk }}</strong> {{ $sku }}
                                             @if ($tipeProduk)
-                                                <small class="text-muted">({{ $type }} -
-                                                    {{ $tipeProduk }})</small>
+                                                <small class="text-muted">({{ $type }} - {{ $tipeProduk }})</small>
                                             @else
                                                 <small class="text-muted">({{ $type }})</small>
                                             @endif
                                         </td>
                                         <td>{{ $item->quantity ?? 0 }}</td>
                                         <td>Rp {{ number_format($item->price ?? 0, 0, ',', '.') }}</td>
-                                        <td>Rp
-                                            {{ number_format(($item->price ?? 0) * ($item->quantity ?? 0), 0, ',', '.') }}
-                                        </td>
+                                        <td>Rp {{ number_format(($item->price ?? 0) * ($item->quantity ?? 0), 0, ',', '.') }}</td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Tidak ada item dalam orderan ini.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                 </div>
 
+                <!-- RESEP KACAMATA -->
                 <div class="col-md-8">
                     <div class="card shadow-sm border-0 mb-3">
-                        <div class="card-header fw-bold text-decoration-underline d-flex align-items-center gap-2">
-                            <i class="bi bi-journal-text"></i> Resep Kacamata
+                        <div class="card-header fw-bold text-decoration-underline d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-journal-text me-1"></i> Resep Kacamata
+                            </div>
+                            @if ($hasResep)
+                                <a href="{{ route('resep.edit', $order->resep_id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil me-1"></i> Edit Resep
+                                </a>
+                            @endif
                         </div>
                         <div class="card-body">
-                            <div class="row g-2">
-                                <div class="col-md-12">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered text-center align-middle">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th></th>
-                                                    <th colspan="4" class="">Sisi Kiri</th>
-                                                    <th colspan="4" class="">Sisi Kanan</th>
-                                                </tr>
-                                                <tr>
-                                                    <th></th>
-                                                    <th>SPH</th>
-                                                    <th>CYL</th>
-                                                    <th>AXIS</th>
-                                                    <th>VA</th>
-                                                    <th>SPH</th>
-                                                    <th>CYL</th>
-                                                    <th>AXIS</th>
-                                                    <th>VA</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>D</td>
-                                                    <!-- LEFT SIDE -->
-                                                    <td>
-                                                        <input type="number" step="0.25" min="-20"
-                                                            max="20" name="resep_left_sph_d"
-                                                            class="form-control @error('resep_left_sph_d') is-invalid @enderror"
-                                                            placeholder="SPH Contoh: -2.00"
-                                                            value="{{ old('resep_left_sph_d', $order->resep?->left_sph_d) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_left_sph_d')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
+                            @if (!$hasResep)
+                                <div class="alert alert-secondary text-center py-4 my-2 rounded border" role="alert">
+                                    <i class="bi bi-info-circle-fill text-secondary fs-3 d-block mb-2"></i>
+                                    <h6 class="fw-bold mb-1">Tidak Menggunakan Resep Kacamata</h6>
+                                    <small class="text-muted">Transaksi ini dilakukan tanpa lampiran resep kacamata (Pembelian umum/Non-resep).</small>
+                                </div>
+                            @else
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold"><i class="bi bi-calendar-event me-1"></i>Tanggal Pemeriksaan</label>
+                                        <input type="date" class="form-control bg-readonly"
+                                            value="{{ $order->resep->tanggal_pemeriksaan ?? '' }}" readonly disabled>
+                                    </div>
 
-                                                    <td>
-                                                        <input type="number" step="0.25" min="-6"
-                                                            max="6" name="resep_left_cyl_d"
-                                                            class="form-control @error('resep_left_cyl_d') is-invalid @enderror"
-                                                            placeholder="CYL Contoh: -1.25"
-                                                            value="{{ old('resep_left_cyl_d', $order->resep?->left_cyl_d) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_left_cyl_d')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold"><i class="bi bi-person-badge me-1"></i>Pemeriksa / Optometris</label>
+                                        <input type="text" class="form-control bg-readonly"
+                                            value="{{ $order->resep->staff->name ?? $order->staff->name ?? 'Tidak Ditentukan' }}" readonly disabled>
+                                    </div>
 
-                                                    <td>
-                                                        <input type="number" step="1" min="0"
-                                                            max="180" name="resep_left_axis_d"
-                                                            class="form-control @error('resep_left_axis_d') is-invalid @enderror"
-                                                            placeholder="Axis Contoh: 90"
-                                                            value="{{ old('resep_left_axis_d', $order->resep?->left_axis_d) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_left_axis_d')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
+                                    <div class="col-md-12">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered text-center align-middle table-sm mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th></th>
+                                                        <th style="width: 12%;">SPH</th>
+                                                        <th style="width: 12%;">CYL</th>
+                                                        <th style="width: 12%;">AXIS</th>
+                                                        <th style="width: 12%;">ADD</th>
+                                                        <th style="width: 12%;">PRISMA</th>
+                                                        <th style="width: 12%;">BASE</th>
+                                                        <th>VA</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="fw-bold text-start ps-2">OD</td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->od_sph ?? '0.00' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->od_cyl ?? '0.00' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->od_axis ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->od_add ?? '0.00' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->od_prisma ?? '0.00' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->od_base ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->od_va ?? '-' }}" readonly disabled></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-bold text-start ps-2">OS</td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->os_sph ?? '0.00' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->os_cyl ?? '0.00' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->os_axis ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->os_add ?? '0.00' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->os_prisma ?? '0.00' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->os_base ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->os_va ?? '-' }}" readonly disabled></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
 
-                                                    <td>
-                                                        <input type="text" name="resep_left_va_d"
-                                                            class="form-control @error('resep_left_va_d') is-invalid @enderror"
-                                                            placeholder="VA Contoh: 6/6 atau 20/20"
-                                                            value="{{ old('resep_left_va_d', $order->resep?->left_va_d) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_left_va_d')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">CATATAN RESEP</label>
+                                        <textarea rows="2" class="form-control bg-readonly" readonly disabled>{{ $order->resep->notes ?? '-' }}</textarea>
+                                    </div>
 
-                                                    <!-- RIGHT SIDE -->
-                                                    <td>
-                                                        <input type="number" step="0.25" min="-20"
-                                                            max="20" name="resep_right_sph_d"
-                                                            class="form-control @error('resep_right_sph_d') is-invalid @enderror"
-                                                            placeholder="SPH Contoh: -2.00"
-                                                            value="{{ old('resep_right_sph_d', $order->resep?->right_sph_d) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_right_sph_d')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
-
-                                                    <td>
-                                                        <input type="number" step="0.25" min="-6"
-                                                            max="6" name="resep_right_cyl_d"
-                                                            class="form-control @error('resep_right_cyl_d') is-invalid @enderror"
-                                                            placeholder="CYL Contoh: -1.25"
-                                                            value="{{ old('resep_right_cyl_d', $order->resep?->right_cyl_d) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_right_cyl_d')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
-
-                                                    <td>
-                                                        <input type="number" step="1" min="0"
-                                                            max="180" name="resep_right_axis_d"
-                                                            class="form-control @error('resep_right_axis_d') is-invalid @enderror"
-                                                            placeholder="Axis Contoh: 90"
-                                                            value="{{ old('resep_right_axis_d', $order->resep?->right_axis_d) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_right_axis_d')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
-
-                                                    <td>
-                                                        <input type="text" name="resep_right_va_d"
-                                                            class="form-control @error('resep_right_va_d') is-invalid @enderror"
-                                                            placeholder="VA Contoh: 6/6 atau 20/20"
-                                                            value="{{ old('resep_right_va_d', $order->resep?->right_va_d) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_right_va_d')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
-                                                </tr>
-
-                                                <!-- ADD -->
-                                                <tr>
-                                                    <td>ADD</td>
-                                                    <td colspan="4">
-                                                        <input type="number" step="0.25" min="0.75"
-                                                            max="3.5" name="resep_add_left"
-                                                            class="form-control @error('resep_add_left') is-invalid @enderror"
-                                                            placeholder="ADD Contoh: +1.00"
-                                                            value="{{ old('resep_add_left', $order->resep?->add_left) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_add_left')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
-
-                                                    <td colspan="4">
-                                                        <input type="number" step="0.25" min="0.75"
-                                                            max="3.5" name="resep_add_right"
-                                                            class="form-control @error('resep_add_right') is-invalid @enderror"
-                                                            placeholder="ADD Contoh: +1.00"
-                                                            value="{{ old('resep_add_right', $order->resep?->add_right) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_add_right')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
-                                                </tr>
-
-                                                <!-- PD -->
-                                                <tr>
-                                                    <td>PD</td>
-                                                    <td colspan="4">
-                                                        <input type="number" step="0.5" min="25"
-                                                            max="40" name="resep_pd_left"
-                                                            class="form-control @error('resep_pd_left') is-invalid @enderror"
-                                                            placeholder="PD Left Contoh: 32"
-                                                            value="{{ old('resep_pd_left', $order->resep?->pd_left) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_pd_left')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
-
-                                                    <td colspan="4">
-                                                        <input type="number" step="0.5" min="25"
-                                                            max="40" name="resep_pd_right"
-                                                            class="form-control @error('resep_pd_right') is-invalid @enderror"
-                                                            placeholder="PD Right Contoh: 32"
-                                                            value="{{ old('resep_pd_right', $order->resep?->pd_right) }}"
-                                                            {{ $isDisabled ? 'disabled' : '' }}>
-                                                        @error('resep_pd_right')
-                                                            <span class="text-danger">{{ $message }}</span>
-                                                        @enderror
-                                                    </td>
-                                                </tr>
-
-                                            </tbody>
-                                        </table>
+                                    <div class="col-md-12 pt-2">
+                                        <h6 class="fw-bold text-decoration-underline">DATA PRECAL</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered text-center align-middle table-sm mt-2 mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>PDR</th>
+                                                        <th>PDL</th>
+                                                        <th>PV</th>
+                                                        <th>A</th>
+                                                        <th>B</th>
+                                                        <th>D</th>
+                                                        <th>DIAG</th>
+                                                        <th style="width: 20%;">FRAME</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->pdr ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->pdl ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->pv ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->frame_a ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->frame_b ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->frame_d ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->frame_diag ?? '-' }}" readonly disabled></td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center bg-readonly" value="{{ $order->resep->frame ?? '-' }}" readonly disabled></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div class="col-md-12">
-                                    <label class="form-label"><i class="bi bi-pencil-square me-1"></i>Tanggal
-                                        Pemeriksaan</label>
-                                    <input type="date" name="tanggal_pemeriksaan" class="form-control"
-                                        value={{ $order->resep?->tanggal_pemeriksaan }}>
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label"><i class="bi bi-pencil-square me-1"></i>Catatan
-                                        Tambahan</label>
-                                    <textarea name="resep_notes" class="form-control" {{ $isDisabled ? 'disabled' : '' }}>{{ $order->resep?->notes ?? '' }}</textarea>
-                                </div>
-                            </div>
+                            @endif
                         </div>
                     </div>
 
+                    <!-- DETAIL TRANSAKSI FORM -->
                     <div class="card mb-4 shadow-sm border-0">
                         <div class="card-header fw-bold text-decoration-underline">Detail Transaksi</div>
                         <div class="card-body">
@@ -377,7 +297,7 @@
                                         class="form-control @error('order_date') is-invalid @enderror"
                                         {{ $isDisabled ? 'disabled' : '' }}>
                                     @error('order_date')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
 
@@ -388,7 +308,7 @@
                                         class="form-control @error('complete_date') is-invalid @enderror"
                                         {{ $isDisabled ? 'disabled' : '' }}>
                                     @error('complete_date')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
 
@@ -398,7 +318,7 @@
                                         class="form-select @error('staff_id') is-invalid @enderror"
                                         {{ $isDisabled ? 'disabled' : '' }}>
                                         <option value="">-- Pilih --</option>
-                                        @foreach ($optometristList as $staff)
+                                        @foreach ($optometristList ?? [] as $staff)
                                             <option value="{{ $staff->id }}"
                                                 {{ old('staff_id', $order->staff_id) == $staff->id ? 'selected' : '' }}>
                                                 {{ $staff->name }}
@@ -406,7 +326,7 @@
                                         @endforeach
                                     </select>
                                     @error('staff_id')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
 
@@ -424,7 +344,7 @@
                                             Asuransi</option>
                                     </select>
                                     @error('payment_type')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
 
@@ -435,7 +355,7 @@
                                         class="form-select @error('asuransi_id') is-invalid @enderror"
                                         {{ $isDisabled ? 'disabled' : '' }}>
                                         <option value="">-- Pilih --</option>
-                                        @foreach ($asuransiList as $asuransiItem)
+                                        @foreach ($asuransiList ?? [] as $asuransiItem)
                                             <option value="{{ $asuransiItem->id }}"
                                                 {{ old('asuransi_id', $order->asuransi_id) == $asuransiItem->id ? 'selected' : '' }}>
                                                 {{ $asuransiItem->nama }}
@@ -443,7 +363,7 @@
                                         @endforeach
                                     </select>
                                     @error('asuransi_id')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
 
@@ -461,7 +381,7 @@
                                             Complete</option>
                                     </select>
                                     @error('order_status')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
 
@@ -479,7 +399,7 @@
                                             Kartu</option>
                                     </select>
                                     @error('payment_method')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
 
@@ -500,9 +420,10 @@
                                             Belum Dibayar</option>
                                     </select>
                                     @error('payment_status')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
+
                                 <div class="col-md-4">
                                     <label class="form-label">Diskon</label>
                                     <input type="text" name="diskon"
@@ -511,7 +432,7 @@
                                         class="form-control @error('diskon') is-invalid @enderror"
                                         {{ $isDisabled ? 'disabled' : '' }}>
                                     @error('diskon')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
 
@@ -523,131 +444,106 @@
                                         class="form-control @error('customer_paying') is-invalid @enderror"
                                         {{ $isDisabled ? 'disabled' : '' }}>
                                     @error('customer_paying')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                {{-- Ringkasan Tagihan (tetap di luar formulir karena hanya tampilan) --}}
-                <div class="card mt-3 col-lg-4 col-md-6 col-sm-12 shadow rounded-4 position-relative overflow-hidden">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="fw-bold text-decoration-underline">
-                            <i class="bi bi-receipt-cutoff me-2"></i>Ringkasan Tagihan
-                        </span>
-                        <small class="text-muted">{{ $order->order_date ?? 'N/A' }}</small>
-                    </div>
 
-                    <div class="card-body fs-5">
-                        {{-- Total --}}
-                        <p>
-                            <i class="bi bi-cash-stack me-2"></i>
-                            Total:
-                            <strong class="float-end">Rp.
-                                {{ number_format((int) ($order->total ?? 0), 0, ',', '.') }}
-                            </strong>
-                        </p>
-
-                        {{-- Diskon --}}
-                        <p>
-                            <i class="bi bi-tag me-2"></i>
-                            Diskon:
-                            <strong class="float-end">Rp.
-                                {{ number_format((int) ($order->diskon ?? 0), 0, ',', '.') }}
-                            </strong>
-                        </p>
-
-                        {{-- Asuransi --}}
-                        <p>
-                            <i class="bi bi-shield-check me-2"></i>
-                            Asuransi:
-                            <strong class="float-end">Rp.
-                                {{ number_format((int) ($order->asuransi?->nominal ?? 0), 0, ',', '.') }}
-                            </strong>
-                        </p>
-
-                        <hr>
-
-                        {{-- Total Final --}}
-                        <p>
-                            <i class="bi bi-calculator me-2"></i>
-                            Total Final:
-                            <strong class="float-end">Rp.
-                                {{ number_format((int) ($order->perlu_dibayar ?? 0), 0, ',', '.') }}
-                            </strong>
-                        </p>
-
-                        {{-- Dibayar --}}
-                        <p>
-                            <i class="bi bi-wallet2 me-2"></i>
-                            Dibayar:
-                            <strong class="float-end">Rp.
-                                {{ number_format((int) ($order->customer_paying ?? 0), 0, ',', '.') }}
-                            </strong>
-                        </p>
-
-                        <hr>
-
-                        {{-- Kurang Bayar --}}
-                        <p>
-                            <i class="bi bi-dash-circle me-2"></i>
-                            Kurang Bayar:
-                            <strong class="float-end">Rp.
-                                {{ number_format((int) ($order->kurang_bayar ?? 0), 0, ',', '.') }}
-                            </strong>
-                        </p>
-
-                        {{-- Kembalian --}}
-                        <p>
-                            <i class="bi bi-arrow-repeat me-2"></i>
-                            Kembalian:
-                            <strong class="float-end">Rp.
-                                {{ number_format((int) ($order->kembalian ?? 0), 0, ',', '.') }}
-                            </strong>
-                        </p>
-
-                        {{-- Tombol Cetak Nota --}}
-                        <div class="d-flex justify-content-center mt-4">
-                            <a href="{{ route('cetak.nota', $order->id) }}" target="_blank"
-                                class="btn btn-success rounded-pill shadow-sm">
-                                <i class="bi bi-printer me-1"></i> Cetak Nota
-                            </a>
+                <!-- RINGKASAN TAGIHAN -->
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="card shadow rounded-4 position-relative overflow-hidden mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-decoration-underline">
+                                <i class="bi bi-receipt-cutoff me-2"></i>Ringkasan Tagihan
+                            </span>
+                            <small class="text-muted">{{ $order->order_date ?? 'N/A' }}</small>
                         </div>
-                    </div>
 
-                    {{-- Badge "LUNAS" --}}
-                    @if ($order->payment_status === 'paid')
-                        <div class="position-absolute bottom-0 start-0 w-100 text-center py-3 bg-success text-white fw-bold fs-4 rounded-bottom-4 shadow-sm"
-                            style="letter-spacing: 2px;">
-                            <i class="bi bi-patch-check-fill me-2"></i>LUNAS
+                        <div class="card-body fs-5">
+                            <p>
+                                <i class="bi bi-cash-stack me-2"></i> Total:
+                                <strong class="float-end">Rp. {{ number_format((int) ($order->total ?? 0), 0, ',', '.') }}</strong>
+                            </p>
+                            <p>
+                                <i class="bi bi-tag me-2"></i> Diskon:
+                                <strong class="float-end">Rp. {{ number_format((int) ($order->diskon ?? 0), 0, ',', '.') }}</strong>
+                            </p>
+                            <p>
+                                <i class="bi bi-shield-check me-2"></i> Asuransi:
+                                <strong class="float-end">Rp. {{ number_format((int) ($order->asuransi?->nominal ?? 0), 0, ',', '.') }}</strong>
+                            </p>
+
+                            <hr>
+
+                            <p>
+                                <i class="bi bi-calculator me-2"></i> Total Final:
+                                <strong class="float-end">Rp. {{ number_format((int) ($order->perlu_dibayar ?? 0), 0, ',', '.') }}</strong>
+                            </p>
+                            <p>
+                                <i class="bi bi-wallet2 me-2"></i> Dibayar:
+                                <strong class="float-end">Rp. {{ number_format((int) ($order->customer_paying ?? 0), 0, ',', '.') }}</strong>
+                            </p>
+
+                            <hr>
+
+                            <p>
+                                <i class="bi bi-dash-circle me-2"></i> Kurang Bayar:
+                                <strong class="float-end">Rp. {{ number_format((int) ($order->kurang_bayar ?? 0), 0, ',', '.') }}</strong>
+                            </p>
+                            <p>
+                                <i class="bi bi-arrow-repeat me-2"></i> Kembalian:
+                                <strong class="float-end">Rp. {{ number_format((int) ($order->kembalian ?? 0), 0, ',', '.') }}</strong>
+                            </p>
+
+                            <div class="d-flex justify-content-center mt-4 mb-2">
+                                <a href="{{ route('cetak.nota', $order->id) }}" target="_blank"
+                                    class="btn btn-success rounded-pill shadow-sm">
+                                    <i class="bi bi-printer me-1"></i> Cetak Nota
+                                </a>
+                            </div>
                         </div>
-                    @endif
+
+                        @if ($order->payment_status === 'paid')
+                            <div class="position-absolute bottom-0 start-0 w-100 text-center py-3 bg-success text-white fw-bold fs-4 rounded-bottom-4 shadow-sm"
+                                style="letter-spacing: 2px;">
+                                <i class="bi bi-patch-check-fill me-2"></i>LUNAS
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
+                <!-- ACTION BUTTONS PERBAIKAN -->
+                <div class="col-12 d-flex justify-content-start gap-3 mt-3">
+                    @if ($order->is_returned)
+                        <div class="alert alert-warning w-100 d-flex align-items-center mb-0 shadow-sm" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+                            <div>
+                                <strong>Orderan Telah Diretur!</strong> Tidak ada perubahan data atau retur ulang yang dapat dilakukan.
+                            </div>
+                        </div>
+                    @else
+                        @if ($order->order_status == 'pending' || (Auth::user()->role ?? '') == 'admin')
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-circle me-1"></i>
+                                {{ $order->order_status == 'pending' ? 'Selesai Transaksi' : 'Simpan Perubahan' }}
+                            </button>
+                        @endif
 
-
-
-                {{-- Tombol submit tunggal di akhir formulir --}}
-                <div class="col-md-4 gap-3 d-flex justify-content-start  align-items-start mt-3">
-                    @if (($order->order_status ?? 'pending') == 'pending' || (Auth::user()->role ?? '') == 'admin')
-                        <button type="submit" class="btn btn-primary px-4" {{ $isDisabled ? 'disabled' : '' }}>
-                            <i class="bi bi-check-circle me-1"></i>
-                            {{ ($order->order_status ?? 'pending') == 'pending' ? 'Selesai' : 'Simpan Perubahan' }}
-                        </button>
+                        @if ($order->order_status == 'complete')
+                            <a href="{{ route('retur.orderan', $order->id) }}"
+                               class="btn btn-danger"
+                               onclick="return confirm('Apakah Anda yakin ingin meretur seluruh barang pada orderan ini?')">
+                                <i class="bi bi-box-arrow-left me-1"></i> Retur Barang
+                            </a>
+                        @endif
                     @endif
-                    @if (($order->order_status ?? 'complete') == 'complete')
-                        <a href="{{ route('retur.orderan', $order->id) }}" class="btn btn-danger"
-                            {{ $isDisabled ? 'disabled' : '' }}>
-                            Retur Barang
-                        </a>
-                    @endif
-
                 </div>
             </form>
         </div>
     </div>
-
 
     <script>
         function formatRupiah(el) {
@@ -664,14 +560,8 @@
 
             function toggleAsuransiDetail() {
                 if (!paymentSelect || !asuransiDetailContainer) return;
-
                 const isAsuransiSelected = paymentSelect.value === 'asuransi';
-
-                if (isAsuransiSelected) {
-                    asuransiDetailContainer.style.display = '';
-                } else {
-                    asuransiDetailContainer.style.display = 'none';
-                }
+                asuransiDetailContainer.style.display = isAsuransiSelected ? '' : 'none';
             }
 
             toggleAsuransiDetail();
@@ -679,13 +569,6 @@
             if (paymentSelect) {
                 paymentSelect.addEventListener('change', toggleAsuransiDetail);
             }
-
-            @if ($isDisabled)
-                const inputs = document.querySelectorAll('input, select, textarea');
-                inputs.forEach(input => {
-                    input.disabled = true;
-                });
-            @endif
         });
     </script>
 </x-app>

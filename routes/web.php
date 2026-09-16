@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Company\AdminController;
 use App\Http\Controllers\Company\StaffController;
@@ -8,6 +7,7 @@ use App\Http\Controllers\FrontDesk\AsuransiController;
 use App\Http\Controllers\FrontDesk\CustomerController;
 use App\Http\Controllers\FrontDesk\KasirController;
 use App\Http\Controllers\FrontDesk\OrderanController;
+use App\Http\Controllers\FrontDesk\ResepController;
 use App\Http\Controllers\GudangUtamaController;
 use App\Http\Controllers\Inventory\AccessoriesController;
 use App\Http\Controllers\Inventory\FrameController;
@@ -18,8 +18,7 @@ use App\Http\Controllers\Navigation\DashboardController;
 use App\Http\Controllers\Navigation\ReportController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\SupplierController;
-use App\Livewire\Kasir;
-use App\Models\Orderan;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [AuthController::class, "showLogin"])->name('login');
 Route::post('/login', [AuthController::class, "processLogin"])->name("login.process");
@@ -50,9 +49,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/transferBarang', [GudangUtamaController::class, 'transferBarangKeCabang'])->name('transfer.barang');
     Route::get('/listTransferBarang', [GudangUtamaController::class, 'listTransferBarangKeCabang'])->name('list.transfer.barang');
     Route::get('/listTransferBarang/{id}', [GudangUtamaController::class, 'detailListTransferBarangKeCabang'])->name('detail.transfer.barang');
-    Route::patch('/listTransferBarang/{id}/retur', [GudangUtamaController::class, 'retur'])->name('transfer.retur');
-    Route::patch('/listTransferBarang/{id}/transferKeCabangLain', [GudangUtamaController::class, 'transferKeCabangLain'])->name('transfer.ke.cabang');
+    Route::post('/listTransferBarang/{id}/retur', [GudangUtamaController::class, 'retur'])->name('transfer.retur');
+    Route::post('/listTransferBarang/{id}/transferKeCabangLain', [GudangUtamaController::class, 'transferKeCabangLain'])->name('transfer.ke.cabang');
     Route::get('/beliBarang', [GudangUtamaController::class, 'beliBarang'])->name('beli.barang');
+
+    Route::get('/resep/{id}/edit', [ResepController::class, 'edit'])->name('resep.edit');
+    Route::put('/resep/{id}', [ResepController::class, 'update'])->name('resep.update');
 
     Route::resource('/staff', StaffController::class)->except(['create', 'show', 'edit'])->middleware("admin");
     Route::post('/logout', [AuthController::class, "logout"])->name('logout');

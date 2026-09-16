@@ -22,10 +22,9 @@
     <div class="main-wrapper">
         <x-header :showToggle="false"></x-header>
 
-        <div class=" vh-100 d-flex justify-content-center align-items-center">
+        <div class="vh-100 d-flex justify-content-center align-items-center">
             <div class="content">
                 <div class="container py-5 d-flex flex-column align-items-center">
-                    <!-- Logo -->
                     <div class="mb-4 text-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor"
                             class="bi bi-building" viewBox="0 0 16 16">
@@ -36,10 +35,7 @@
 
                     <div class="row w-100 justify-content-center g-4">
 
-
-
-                        {{-- Loop cabang --}}
-                        @foreach ($cabangs as $cabang)
+                        @foreach ($cabangs->where('id', '!=', 0) as $cabang)
                             <div class="col-12 col-sm-6 col-lg-3">
                                 <a href="{{ url('/pilihCabang/' . $cabang->id) }}" class="text-decoration-none">
                                     <div class="card border-0 shadow-lg rounded-4 text-center p-4 branch-card h-100"
@@ -47,31 +43,33 @@
                                         <div class="mb-3">
                                             <i class="bi bi-shop-window" style="font-size: 3rem; color: #0d6efd;"></i>
                                         </div>
-                                        <h5 class="fw-semibold text-dark">Cabang {{ $cabang->nama }}</h5>
-                                        <p class="text-muted mb-0">Lihat data dan laporan cabang {{ $cabang->nama }}.
-                                        </p>
+                                        <h5 class="fw-semibold text-dark">{{ $cabang->nama }}</h5>
+                                        <p class="text-muted mb-0">Lihat data dan laporan {{ $cabang->nama }}.</p>
                                     </div>
                                 </a>
                             </div>
                         @endforeach
 
-                        {{-- Gudang Utama --}}
-                        <div class="col-12 col-sm-6 col-lg-3">
-                            <a href="{{ url('/pilihCabang/gudang_utama') }}" class="text-decoration-none">
-                                <div class="card border-0 shadow-lg rounded-4 text-center p-4 branch-card h-100"
-                                    role="button">
-                                    <div class="mb-3">
-                                        <i class="bi bi-box-seam" style="font-size: 3rem; color: #dc3545;"></i>
-                                    </div>
-                                    <h5 class="fw-semibold text-dark">Gudang Utama</h5>
-                                    <p class="text-muted mb-0">Lihat data dan laporan Gudang Utama.</p>
-                                </div>
-                            </a>
-                        </div>
+                        @php
+                            $gudangPusat = $cabangs->firstWhere('id', 0);
+                        @endphp
 
+                        @if($gudangPusat)
+                            <div class="col-12 col-sm-6 col-lg-3">
+                                <a href="{{ url('/pilihCabang/' . $gudangPusat->id) }}" class="text-decoration-none">
+                                    <div class="card border-0 shadow-lg rounded-4 text-center p-4 branch-card h-100"
+                                        role="button">
+                                        <div class="mb-3">
+                                            <i class="bi bi-box-seam" style="font-size: 3rem; color: #dc3545;"></i>
+                                        </div>
+                                        <h5 class="fw-semibold text-dark">Gudang Utama</h5>
+                                        <p class="text-muted mb-0">Lihat data dan laporan Gudang Utama.</p>
+                                    </div>
+                                </a>
+                            </div>
+                        @endif
 
                     </div>
-
 
                 </div>
 
@@ -88,8 +86,6 @@
                     }
                 </style>
 
-
-
             </div>
         </div>
     </div>
@@ -98,8 +94,6 @@
     <script src="{{ asset('assets/js/script.js') }}"></script>
     <script src="{{ asset('assets/js/feather.min.js') }}"></script>
     <script src="{{ asset('assets/js/jquery.slimscroll.min.js') }}"></script>
-    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/js/script.js') }}"></script>
 </body>
 
 </html>

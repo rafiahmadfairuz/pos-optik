@@ -32,11 +32,12 @@ class Orderan extends Model
     {
         return $this->belongsTo(Staff::class);
     }
-
-
-
     public function resep()
     {
-        return $this->hasOne(Resep::class, 'orderan_id');
+        return $this->belongsTo(Resep::class);
     }
+
+
+
+
 }

@@ -14,60 +14,49 @@ class AccessoriesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+  public function index(Request $request)
     {
-        $user = Auth::user();
         $search = $request->input('search');
+        $cabangId = Auth::user()->role === 'gudang_utama' ? 0 : session('cabang_id');
 
-        if ($user->role === 'gudang_utama') {
-            $query = Accessories::query();
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('nama', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%")
-                        ->orWhere('jenis', 'like', "%{$search}%");
-                });
-            }
-            $accessories = $query->get();
-        } else {
+        $query = ProdukCabang::where('cabang_id', $cabangId)
+            ->where('itemable_type', 'accessory')
+            ->with('itemable');
 
-            $cabangId = session('cabang_id');
-              $query = ProdukCabang::where('cabang_id', $cabangId)
-                ->where('itemable_type', 'accessory')
-                ->with('itemable');
-
-            if ($search) {
-                $query->whereHasMorph('itemable', [\App\Models\Accessories::class], function ($q) use ($search) {
-                    $q->where('nama', 'like', "%{$search}%")
-                        ->orWhere('jenis', 'like', "%{$search}%")
-                        ->orWhere('sku', 'like', "%{$search}%");
-                });
-            }
-
-            $accessories = $query->get()->map(function ($stok) {
-                return (object) [
-                    'id' => $stok->itemable->id,
-                    'sku' => $stok->itemable->sku,
-                    'nama' => $stok->itemable->nama,
-                    'jenis' => $stok->itemable->jenis,
-                    'harga' => $stok->itemable->harga,
-                    'harga_beli' => $stok->itemable->harga_beli,
-                    'laba' => $stok->itemable->laba,
-                    'stok' => $stok->stok,
-                ];
+        if ($search) {
+            $query->whereHasMorph('itemable', [\App\Models\Accessories::class], function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('jenis', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
             });
         }
 
+        $accessories = $query->get()->map(function ($stok) {
+            if (!$stok->itemable) {
+                return null;
+            }
+
+            return (object) [
+                'id' => $stok->itemable->id,
+                'sku' => $stok->itemable->sku,
+                'nama' => $stok->itemable->nama,
+                'jenis' => $stok->itemable->jenis,
+                'harga' => $stok->itemable->harga,
+                'harga_beli' => $stok->itemable->harga_beli,
+                'laba' => $stok->itemable->laba,
+                'stok' => $stok->stok,
+            ];
+        })->filter();
+
         return view('Inventory.accesories', compact('accessories'));
     }
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         try {
-            if (Auth::user()->role !== 'gudang_utama') {
+            if (!in_array(Auth::user()->role, ['gudang_utama', 'admin'])) {
                 return back()->with('error', 'Hanya gudang utama yang bisa menambahkan produk baru.');
             }
 
@@ -77,12 +66,27 @@ class AccessoriesController extends Controller
                 'jenis' => 'required|string|max:50',
                 'harga_beli' => 'required|numeric|min:0',
                 'harga' => 'required|numeric|min:0',
-                'stok' => 'required|integer|min:0',
             ]);
 
             $validated['laba'] = $validated['harga'] - $validated['harga_beli'];
 
-            Accessories::create($validated);
+            $accessory = Accessories::create($validated);
+
+            $cabangIds = [0, 1, 2, 3];
+            $dataCabang = [];
+
+            foreach ($cabangIds as $cabangId) {
+                $dataCabang[] = [
+                    'itemable_type' => 'accessory',
+                    'itemable_id' => $accessory->id,
+                    'cabang_id' => $cabangId,
+                    'stok' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            ProdukCabang::insert($dataCabang);
 
             return back()->with('success', 'Aksesori berhasil ditambahkan.');
         } catch (\Exception $e) {
@@ -99,15 +103,13 @@ class AccessoriesController extends Controller
         try {
             $accessory = Accessories::findOrFail($id);
 
-            if (Auth::user()->role === 'gudang_utama') {
-                // Gudang utama update master
+            if (Auth::user()->role === 'gudang_utama' || Auth::user()->role === 'admin') {
                 $validated = $request->validate([
                     'sku' => 'required|string|max:50|unique:accessories,sku,' . $id,
                     'nama' => 'required|string|max:100',
                     'jenis' => 'required|string|max:50',
                     'harga_beli' => 'required|numeric|min:0',
                     'harga' => 'required|numeric|min:0',
-                    'stok' => 'required|integer|min:0',
                 ]);
 
                 $accessory->update([
@@ -115,7 +117,6 @@ class AccessoriesController extends Controller
                     'laba' => $validated['harga'] - $validated['harga_beli'],
                 ]);
             } else {
-                // Cabang hanya boleh update stok di produk_cabangs
                 $validated = $request->validate([
                     'stok' => 'required|integer|min:0',
                 ]);
@@ -124,11 +125,11 @@ class AccessoriesController extends Controller
 
                 $stokCabang = ProdukCabang::firstOrNew([
                     'itemable_id' => $accessory->id,
-                    'itemable_type' => Accessories::class,
+                    'itemable_type' => 'accessory',
                     'cabang_id' => $cabangId,
                 ]);
 
-                $stokCabang->qty = $validated['stok'];
+                $stokCabang->stok = $validated['stok'];
                 $stokCabang->save();
             }
 
@@ -145,13 +146,12 @@ class AccessoriesController extends Controller
     public function destroy(string $id)
     {
         try {
-            if (Auth::user()->role !== 'gudang_utama') {
+            if (!in_array(Auth::user()->role, ['gudang_utama', 'admin'])) {
                 return back()->with('error', 'Hanya gudang utama yang bisa menghapus produk.');
             }
 
             $accessory = Accessories::findOrFail($id);
 
-            // Hapus stok cabang terkait
             ProdukCabang::where('itemable_id', $id)
                 ->where('itemable_type', 'accessory')
                 ->delete();

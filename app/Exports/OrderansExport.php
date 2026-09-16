@@ -17,6 +17,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEvents
 {
@@ -27,6 +28,8 @@ class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEv
     public function __construct(array $filters = [])
     {
         $this->filters = $filters;
+        $this->orderanData = collect();
+        $this->inventoryData = [];
     }
 
     public function collection(): Collection
@@ -34,6 +37,7 @@ class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEv
         // === 1️⃣ ORDERAN DATA ===
         $orderans = Orderan::with(['items.itemable', 'user', 'staff', 'asuransi'])
             ->where('order_status', 'complete')
+            ->where('is_returned', 0) // FIX: Abaikan transaksi yang telah diretur
             ->where('cabang_id', session('cabang_id'))
             ->when($this->filters['date_from'] ?? null, fn($q) =>
                 $q->whereDate('order_date', '>=', $this->filters['date_from']))
@@ -44,28 +48,29 @@ class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEv
         $this->orderanData = $orderans->map(function ($order) {
             $items = $order->items->map(function ($item) {
                 $type = class_basename($item->itemable_type);
-                $name = $item->itemable->merk ?? $item->itemable->nama ?? '-';
+                $itemObj = $item->itemable;
+                $name = $itemObj->merk ?? $itemObj->nama ?? '-';
                 return "{$type} ({$name}) x{$item->quantity}";
             })->implode(', ');
 
             return [
-                'ID' => $order->id,
-                'Tanggal Order' => $order->order_date,
-                'Tanggal Selesai' => $order->complete_date ?? '-',
-                'Total' => $order->total,
-                'Laba Total' => $order->laba_total ?? '-',
-                'Status Order' => $order->order_status,
-                'Jenis Pembayaran' => $order->payment_type,
+                'ID'                => $order->id,
+                'Tanggal Order'     => $order->order_date,
+                'Tanggal Selesai'   => $order->complete_date ?? '-',
+                'Total'             => $order->total,
+                'Laba Total'        => $order->laba_total ?? 0,
+                'Status Order'      => $order->order_status,
+                'Jenis Pembayaran'  => $order->payment_type,
                 'Metode Pembayaran' => $order->payment_method,
-                'Status Bayar' => $order->payment_status,
-                'Customer Bayar' => $order->customer_paying,
-                'Perlu Dibayar' => $order->perlu_dibayar,
-                'Kembalian' => $order->kembalian ?? '-',
-                'Asuransi' => $order->asuransi->nama ?? '-',
-                'Staff' => $order->staff->nama ?? '-',
-                'Kasir/User' => $order->user->name ?? '-',
-                'Item Dibeli' => $items,
-                'Created At' => $order->created_at->format('Y-m-d H:i:s'),
+                'Status Bayar'      => $order->payment_status,
+                'Customer Bayar'    => $order->customer_paying,
+                'Perlu Dibayar'     => $order->perlu_dibayar,
+                'Kembalian'         => $order->kembalian ?? 0,
+                'Asuransi'          => $order->asuransi->nama ?? '-',
+                'Staff'             => $order->staff->nama ?? $order->staff->name ?? '-',
+                'Kasir/User'        => $order->user->name ?? '-',
+                'Item Dibeli'       => $items,
+                'Created At'        => $order->created_at ? $order->created_at->format('Y-m-d H:i:s') : '-',
             ];
         });
 
@@ -83,51 +88,67 @@ class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEv
         $isGudangUtama = Auth::user()->role === 'gudang_utama';
         $cabangId = session('cabang_id');
 
+        // FIX: Menyesuaikan alias & class model agar mendukung fleksibilitas Morph Map
         $categories = [
-            'frame' => ['label' => 'Frame', 'class' => Frame::class],
-            'lensa_finish' => ['label' => 'Lensa Finish', 'class' => LensaFinish::class],
-            'lensa_khusus' => ['label' => 'Lensa Khusus', 'class' => LensaKhusus::class],
-            'accessory' => ['label' => 'Accessories', 'class' => Accessories::class],
-            'softlens' => ['label' => 'Softlens', 'class' => Softlen::class],
+            'Frame' => [
+                'class' => Frame::class,
+                'types' => ['frame', Frame::class]
+            ],
+            'Lensa Finish' => [
+                'class' => LensaFinish::class,
+                'types' => ['lensa_finish', LensaFinish::class]
+            ],
+            'Lensa Khusus' => [
+                'class' => LensaKhusus::class,
+                'types' => ['lensa_khusus', LensaKhusus::class]
+            ],
+            'Accessories' => [
+                'class' => Accessories::class,
+                'types' => ['accessory', 'accessories', Accessories::class]
+            ],
+            'Softlens' => [
+                'class' => Softlen::class,
+                'types' => ['softlens', Softlen::class]
+            ],
         ];
 
         $result = [];
 
-        foreach ($categories as $alias => $info) {
-            $name = $info['label'];
+        foreach ($categories as $label => $info) {
             $model = $info['class'];
+            $types = $info['types'];
 
             if ($isGudangUtama) {
                 $data = $model::all()->map(fn($item) => [
-                    'Kategori' => $name,
-                    'SKU' => $item->sku ?? '-',
-                    'Nama' => $item->merk ?? $item->nama ?? '-',
-                    'Tipe' => $item->tipe ?? '-',
-                    'Warna' => $item->warna ?? '-',
-                    'Stok' => $item->stok,
-                    'Harga Jual' => $item->harga,
-                    'Harga Beli' => $item->harga_beli,
-                    'Laba' => $item->laba,
+                    'Kategori'   => $label,
+                    'SKU'        => $item->sku ?? '-',
+                    'Nama'       => $item->merk ?? $item->nama ?? '-',
+                    'Tipe'       => $item->tipe ?? '-',
+                    'Warna'      => $item->warna ?? '-',
+                    'Stok'       => $item->stok ?? 0,
+                    'Harga Jual' => $item->harga ?? 0,
+                    'Harga Beli' => $item->harga_beli ?? 0,
+                    'Laba'       => $item->laba ?? 0,
                 ]);
             } else {
                 $data = ProdukCabang::where('cabang_id', $cabangId)
-                    ->where('itemable_type', $alias)
+                    ->whereIn('itemable_type', $types) // FIX: whereIn mendukung alias & full class path
                     ->with('itemable')
                     ->get()
                     ->map(fn($row) => [
-                        'Kategori' => $name,
-                        'SKU' => $row->itemable->sku ?? '-',
-                        'Nama' => $row->itemable->merk ?? $row->itemable->nama ?? '-',
-                        'Tipe' => $row->itemable->tipe ?? '-',
-                        'Warna' => $row->itemable->warna ?? '-',
-                        'Stok' => $row->stok ? $row->stok : "0",
-                        'Harga Jual' => $row->itemable->harga,
-                        'Harga Beli' => $row->itemable->harga_beli,
-                        'Laba' => $row->itemable->laba,
+                        'Kategori'   => $label,
+                        'SKU'        => $row->itemable->sku ?? '-',
+                        'Nama'       => $row->itemable->merk ?? $row->itemable->nama ?? '-',
+                        'Tipe'       => $row->itemable->tipe ?? '-',
+                        'Warna'      => $row->itemable->warna ?? '-',
+                        'Stok'       => $row->stok ?? 0,
+                        'Harga Jual' => $row->itemable->harga ?? 0,
+                        'Harga Beli' => $row->itemable->harga_beli ?? 0,
+                        'Laba'       => $row->itemable->laba ?? 0,
                     ]);
             }
 
-            $result[$name] = $data->values();
+            $result[$label] = $data->values();
         }
 
         return $result;
@@ -177,20 +198,29 @@ class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEv
                 }
 
                 $orderanLastRow = $currentRow - 1;
+
+                // Formatting Rupiah Orderan jika ada data
+                if ($orderanLastRow >= ($orderanHeaderRow + 1)) {
+                    foreach (['D', 'E', 'J', 'K', 'L'] as $col) {
+                        $sheet->getStyle("{$col}" . ($orderanHeaderRow + 1) . ":{$col}{$orderanLastRow}")
+                            ->getNumberFormat()->setFormatCode('"Rp" #,##0');
+                    }
+                }
+
                 $currentRow += 2;
 
                 // === HEADER INVENTORY ===
                 $sheet->setCellValue("A{$currentRow}", 'DATA INVENTORY CABANG ' . session('nama_cabang'));
-                $sheet->mergeCells("A{$currentRow}:I{$currentRow}"); // 9 kolom (A-I)
+                $sheet->mergeCells("A{$currentRow}:I{$currentRow}");
                 $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true)->setSize(16);
                 $currentRow += 2;
 
                 $inventoryColors = [
-                    'Frame' => '4F81BD',
+                    'Frame'        => '4F81BD',
                     'Lensa Finish' => '9BBB59',
                     'Lensa Khusus' => 'F79646',
-                    'Accessories' => '8064A2',
-                    'Softlens' => 'C0504D',
+                    'Accessories'  => '8064A2',
+                    'Softlens'     => 'C0504D',
                 ];
 
                 foreach ($this->inventoryData as $kategori => $data) {
@@ -205,7 +235,7 @@ class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEv
                     $sheet->getStyle("A{$currentRow}:I{$currentRow}")->getFont()->setBold(true)
                         ->getColor()->setRGB('FFFFFF');
                     $sheet->getStyle("A{$currentRow}:I{$currentRow}")->getFill()->setFillType('solid')
-                        ->getStartColor()->setRGB($inventoryColors[$kategori]);
+                        ->getStartColor()->setRGB($inventoryColors[$kategori] ?? '4F81BD');
                     $currentRow++;
 
                     foreach ($data as $row) {
@@ -216,16 +246,19 @@ class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEv
                     $lastDataRow = $currentRow - 1;
                     $startRow = $headerRow + 1;
 
-                    foreach (['G', 'H', 'I'] as $col) {
-                        $sheet->getStyle("{$col}{$startRow}:{$col}{$lastDataRow}")
-                            ->getNumberFormat()
-                            ->setFormatCode('"Rp" #,##0');
+                    // FIX: Hanya berikan format rupiah jika data ada (mencegah crash range PhpSpreadsheet)
+                    if ($lastDataRow >= $startRow) {
+                        foreach (['G', 'H', 'I'] as $col) {
+                            $sheet->getStyle("{$col}{$startRow}:{$col}{$lastDataRow}")
+                                ->getNumberFormat()
+                                ->setFormatCode('"Rp" #,##0');
+                        }
                     }
 
                     $currentRow++;
                 }
 
-                // === STYLE ===
+                // === GLOBAL BORDER & AUTO SIZE ===
                 $highestColumn = 'Q';
                 $lastRow = $sheet->getHighestRow();
 
@@ -240,11 +273,6 @@ class OrderansExport implements FromCollection, WithHeadings, WithStyles, WithEv
 
                 foreach (range('A', $highestColumn) as $col) {
                     $sheet->getColumnDimension($col)->setAutoSize(true);
-                }
-
-                foreach (['D', 'E', 'I', 'J', 'K'] as $col) {
-                    $sheet->getStyle("{$col}" . ($orderanHeaderRow + 1) . ":{$col}{$orderanLastRow}")
-                        ->getNumberFormat()->setFormatCode('"Rp" #,##0');
                 }
             },
         ];

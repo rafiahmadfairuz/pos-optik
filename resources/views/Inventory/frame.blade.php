@@ -108,7 +108,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-md-3">
+                                {{-- <div class="col-md-3">
                                     <label for="stok" class="form-label">Stok</label>
                                     <input type="number" class="form-control @error('stok') is-invalid @enderror"
                                         id="stok" name="stok" value="{{ old('stok') }}">
@@ -119,7 +119,7 @@
                                                 class="bi bi-exclamation-circle-fill me-2"></i><span>{{ $message }}</span>
                                         </div>
                                     @enderror
-                                </div>
+                                </div> --}}
                             </div>
 
                             <div class="mt-4 d-flex justify-content-end gap-2">
@@ -289,7 +289,7 @@
                     form.warna.value = tr.dataset.warna;
                     form.harga_beli.value = tr.dataset.harga_beli;
                     form.harga.value = tr.dataset.harga;
-                    form.stok.value = tr.dataset.stok;
+                    // form.stok.value = tr.dataset.stok;
 
                     formContainer.classList.remove('d-none');
                     form.merk.focus();

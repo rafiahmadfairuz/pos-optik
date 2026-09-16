@@ -49,7 +49,7 @@ class LensaFinishFactory extends Factory
             'harga_beli' => $hargaBeli,
             'harga' => $hargaJual,
             'laba' => $laba,
-            'stok' => $this->faker->numberBetween(5, 50), // stok gudang utama
+            // Baris 'stok' sudah dihapus di sini
         ];
     }
 }

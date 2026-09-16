@@ -117,14 +117,14 @@
                                 </div>
 
 
-                                <div class="col-md-3">
+                                {{-- <div class="col-md-3">
                                     <label class="form-label">Stok</label>
                                     <input type="number" class="form-control @error('stok') is-invalid @enderror"
                                         id="stok" name="stok" value="{{ old('stok') }}">
                                     @error('stok')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
+                                </div> --}}
 
 
 
@@ -311,7 +311,7 @@
             const form = document.getElementById('lensaForm');
             const idInput = document.getElementById('lensaId');
             const cabangInput = document.getElementById('cabang_id');
-            const deleteForm = document.getElementById('deleteLensaKhususForm');
+            const deleteForm = document.getElementById('deleteLensaForm');
 
             function setFormMethod(form, method) {
                 let methodInput = form.querySelector('input[name="_method"]');
@@ -359,7 +359,7 @@
                     form.add.value = tr.dataset.add;
                     form.harga.value = tr.dataset.harga;
                     form.harga_beli.value = tr.dataset.harga_beli;
-                    form.stok.value = tr.dataset.stok;
+                    // form.stok.value = tr.dataset.stok;
                     form.estimasi_selesai_hari.value = tr.dataset.estimasi_selesai_hari;
                     form.status_pesanan.value = tr.dataset.status_pesanan;
                     formContainer.classList.remove('d-none');
@@ -372,7 +372,9 @@
                 btn.addEventListener('click', () => {
                     const tr = btn.closest('tr');
                     const id = tr.dataset.id;
+                    console.log('Delete button clicked for ID:', id);
                     deleteForm.action = `/lensaKhusus/${id}`;
+                    console.log(deleteForm.action);
                     setFormMethod(deleteForm, 'DELETE');
                     deleteForm.method = 'POST';
                 });
